@@ -13,25 +13,46 @@ JOBS_FILE = DATA / "jobs.csv"
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+:root{
+  --bg:#070d18;--surface:#0c1526;--surface2:#111e33;--line:#203451;
+  --ink:#f4f7ff;--muted:#a8b8d0;--blue:#1764ff;--cyan:#35b8ff;
+}
 html,body,[class*="css"]{font-family:Inter,system-ui,sans-serif}
-.stApp{background:#f6f8fc;color:#101828}
+.stApp{background:radial-gradient(circle at 85% 0%,#10234a 0%,transparent 32%),var(--bg);color:var(--ink)}
+[data-testid="stAppViewContainer"],[data-testid="stHeader"]{background:transparent}
 .main .block-container{max-width:1240px;padding-top:1rem;padding-bottom:3rem}
-[data-testid="stSidebar"]{background:#101b2d}
-[data-testid="stSidebar"] *{color:#f7f9ff}
+[data-testid="stSidebar"]{background:linear-gradient(180deg,#080f1d,#0e1a2e);border-right:1px solid var(--line)}
+[data-testid="stSidebar"] *{color:#f4f7ff}
 [data-testid="stSidebarNav"]{display:none}
-.hero{padding:42px;border-radius:24px;border:1px solid #dfe7fb;background:radial-gradient(circle at 85% 15%,#dce6ff,transparent 30%),linear-gradient(115deg,#fff,#edf2ff);margin:12px 0 24px}
-.kicker{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;color:#2454f5}
-.hero h1{font-size:clamp(36px,5vw,58px);line-height:1.04;letter-spacing:-2px;margin:13px 0;color:#101828}
-.hero h1 span{color:#2454f5}
-.hero p{font-size:16px;line-height:1.75;color:#52637e;max-width:690px}
-.panel{background:#fff;border:1px solid #e5eaf2;border-radius:17px;padding:22px;margin-bottom:16px}
-.step{background:#fff;border:1px solid #e5eaf2;border-radius:14px;padding:18px;min-height:125px}
-.stepnum{font-size:12px;color:#2454f5;font-weight:900;letter-spacing:1px}
-.jobcard{background:#fff;border:1px solid #e5eaf2;border-radius:14px;padding:17px;margin:10px 0}
-.smallmuted{color:#62718a;font-size:13px}
-div[data-testid="stMetric"]{background:white;border:1px solid #e5eaf2;border-radius:14px;padding:16px}
-.stButton>button{border-radius:10px!important;font-weight:750!important;min-height:43px}
-.stButton>button[kind="primary"]{background:#2454f5!important;border-color:#2454f5!important}
+.stMarkdown,.stText,[data-testid="stCaptionContainer"],label,p,li{color:var(--muted)}
+h1,h2,h3,h4,h5,h6,[data-testid="stMarkdownContainer"] strong{color:var(--ink)!important}
+.hero{padding:42px;border-radius:24px;border:1px solid #203c68;background:radial-gradient(circle at 90% 5%,#102d70 0%,transparent 32%),linear-gradient(115deg,#0a1221,#0d1930);margin:12px 0 24px;box-shadow:0 16px 50px #0003}
+.kicker{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;color:var(--cyan)}
+.hero h1{font-size:clamp(36px,5vw,58px);line-height:1.04;letter-spacing:-2px;margin:13px 0;color:#f7faff}
+.hero h1 span{color:#278bff}
+.hero p{font-size:16px;line-height:1.75;color:#b5c6df;max-width:690px}
+.panel{background:linear-gradient(145deg,#0b1424,#0b1527);border:1px solid var(--line);border-radius:17px;padding:22px;margin-bottom:16px}
+.step{background:linear-gradient(145deg,#0c172a,#0a1221);border:1px solid var(--line);border-radius:14px;padding:18px;min-height:125px}
+.stepnum{font-size:12px;color:#278bff;font-weight:900;letter-spacing:1px}
+.jobcard{background:#0c1729;border:1px solid var(--line);border-radius:14px;padding:17px;margin:10px 0}
+.smallmuted{color:#a8b8d0;font-size:13px}
+div[data-testid="stMetric"]{background:#0c1729;border:1px solid var(--line);border-radius:14px;padding:16px}
+div[data-testid="stMetric"] label,div[data-testid="stMetricValue"],div[data-testid="stMetricDelta"]{color:var(--ink)!important}
+.stButton>button,[data-testid="stFormSubmitButton"] button{border-radius:10px!important;font-weight:750!important;min-height:43px;background:#17263d!important;color:#f4f7ff!important;border:1px solid #2a4264!important}
+.stButton>button:hover,[data-testid="stFormSubmitButton"] button:hover{border-color:#278bff!important;color:#fff!important}
+.stButton>button[kind="primary"],[data-testid="stFormSubmitButton"] button[kind="primary"]{background:linear-gradient(90deg,#0757f5,#176dff)!important;border-color:#176dff!important;color:#fff!important}
+input,textarea,[data-baseweb="input"],[data-baseweb="textarea"]{background:#111827!important;color:#f7faff!important;border-color:#2a3c58!important}
+[data-baseweb="input"] input{color:#f7faff!important;-webkit-text-fill-color:#f7faff!important}
+[data-baseweb="select"]>div{background:#111827!important;color:#f7faff!important;border-color:#2a3c58!important}
+[data-testid="stFileUploader"] section{background:#0c1729!important;border:1px dashed #2b4b78!important}
+[data-testid="stFileUploader"] *{color:#d8e5fa!important}
+[data-baseweb="tab-list"]{gap:8px;background:#0a1424;border-bottom:1px solid var(--line)}
+[data-baseweb="tab"]{color:#a8b8d0!important}
+[data-baseweb="tab"][aria-selected="true"]{color:#53baff!important;border-bottom-color:#278bff!important}
+[data-testid="stAlert"]{background:#101f35!important;color:#dceaff!important;border:1px solid #29476c!important}
+[data-testid="stAlert"] p{color:#dceaff!important}
+hr{border-color:var(--line)!important}
+a{color:#55baff!important}
 @media(max-width:700px){.hero{padding:24px}.hero h1{letter-spacing:-1px}}
 </style>
 """, unsafe_allow_html=True)
