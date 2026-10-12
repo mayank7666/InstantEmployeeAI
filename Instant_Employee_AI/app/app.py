@@ -122,7 +122,7 @@ if view == "home":
             st.session_state.view = "candidate_auth"; st.rerun()
     with right:
         st.markdown("<div class='panel'><div class='kicker'>FOR COMPANY EMPLOYEES</div><h3>Company workspace</h3><p class='smallmuted'>Authorized employees use their assigned ID and password to open the internal dashboard.</p></div>", unsafe_allow_html=True)
-        if st.button("Employee Login  →", use_container_width=True):
+        if st.button("Employee Login  →", type="primary", use_container_width=True):
             st.session_state.view = "employee"; st.rerun()
     st.markdown("### How it works")
     columns = st.columns(4)
