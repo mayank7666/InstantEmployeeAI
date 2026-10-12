@@ -1,4 +1,4 @@
-
+from pypdf import PdfReader
 import sys
 import html
 from pathlib import Path
