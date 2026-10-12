@@ -1,129 +1,254 @@
 from pathlib import Path
 import html
+import re
 import pandas as pd
 import streamlit as st
+from pypdf import PdfReader
 
 st.set_page_config(page_title="Instant Employee | AI Talent Platform", page_icon="✦", layout="wide")
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 JOBS_FILE = DATA / "jobs.csv"
-SHORTLIST_FILE = DATA / "shortlist.csv"
-
-def read_csv(path):
-    try:
-        return pd.read_csv(path).fillna("") if path.exists() else pd.DataFrame()
-    except (pd.errors.EmptyDataError, pd.errors.ParserError, UnicodeDecodeError):
-        return pd.DataFrame()
-
-def col(df, names):
-    for name in df.columns:
-        if str(name).strip().lower() in names:
-            return name
-    return None
-
-def safe(value):
-    return html.escape(str(value or "Not specified").strip())
-
-jobs = read_csv(JOBS_FILE)
-shortlist = read_csv(SHORTLIST_FILE)
-title_col = col(jobs, {"job title", "title", "job_title"})
-status_col = col(jobs, {"status", "job status", "job_status"})
-skills_col = col(jobs, {"required skills", "required_skills", "skills"})
-department_col = col(jobs, {"department"})
-description_col = col(jobs, {"description", "job description", "job_description"})
-mode_col = col(jobs, {"work mode", "work_mode"})
-min_col = col(jobs, {"minimum budget", "min budget", "minimum_budget"})
-max_col = col(jobs, {"maximum budget", "max budget", "maximum_budget"})
-active_jobs = int(jobs[status_col].astype(str).str.lower().isin(["active", "open", "published"]).sum()) if status_col and not jobs.empty else len(jobs)
-shortlisted = shortlist["Candidate Name"].astype(str).str.strip().replace("", pd.NA).dropna().str.casefold().nunique() if "Candidate Name" in shortlist.columns else 0
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-:root{--blue:#2454f5;--ink:#101828;--muted:#62718a;--line:#e5eaf2}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 html,body,[class*="css"]{font-family:Inter,system-ui,sans-serif}
 .stApp{background:#f6f8fc;color:#101828}
-.main .block-container{max-width:1450px;padding-top:1rem;padding-bottom:2rem}
-[data-testid="stSidebar"]{background:linear-gradient(180deg,#101b2d,#16263e)}
+.main .block-container{max-width:1240px;padding-top:1rem;padding-bottom:3rem}
+[data-testid="stSidebar"]{background:#101b2d}
 [data-testid="stSidebar"] *{color:#f7f9ff}
 [data-testid="stSidebarNav"]{display:none}
-.hero{padding:32px 34px;border-radius:22px;border:1px solid #dfe7fb;background:linear-gradient(115deg,#f7f9ff,#eaf0ff);margin-bottom:22px}
-.kicker{font-size:12px;letter-spacing:1.7px;text-transform:uppercase;font-weight:800;color:#2855e8}
-.hero h1{font-size:clamp(32px,4vw,48px);line-height:1.08;letter-spacing:-1.8px;margin:12px 0;color:#101828}
-.hero h1 span{color:#2454f5}.hero p{font-size:15px;line-height:1.7;color:#52637e;max-width:700px}
-.hero-art{background:radial-gradient(circle at 70% 20%,#d6e1ff,transparent 40%),linear-gradient(145deg,#dce7ff,#f5f7ff);border:1px solid #dce5fa;border-radius:20px;text-align:center;padding:30px 12px;font-size:68px}
-div[data-testid="stMetric"]{background:white;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 4px 15px #263e7008}
-div[data-testid="stMetric"] label{color:#62718a!important}div[data-testid="stMetricValue"]{color:#101828;font-weight:800}
-.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
-.jobcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px;margin:10px 0}
-.jobcard h4{margin:0 0 6px;color:#152541}.jobcard p{margin:4px 0;color:#62718a;font-size:13px}
-.pill{display:inline-block;background:#dcfce7;color:#166534;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700}
-.stButton>button,.stPageLink a{border-radius:9px!important;font-weight:700!important}
+.hero{padding:42px;border-radius:24px;border:1px solid #dfe7fb;background:radial-gradient(circle at 85% 15%,#dce6ff,transparent 30%),linear-gradient(115deg,#fff,#edf2ff);margin:12px 0 24px}
+.kicker{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;color:#2454f5}
+.hero h1{font-size:clamp(36px,5vw,58px);line-height:1.04;letter-spacing:-2px;margin:13px 0;color:#101828}
+.hero h1 span{color:#2454f5}
+.hero p{font-size:16px;line-height:1.75;color:#52637e;max-width:690px}
+.panel{background:#fff;border:1px solid #e5eaf2;border-radius:17px;padding:22px;margin-bottom:16px}
+.step{background:#fff;border:1px solid #e5eaf2;border-radius:14px;padding:18px;min-height:125px}
+.stepnum{font-size:12px;color:#2454f5;font-weight:900;letter-spacing:1px}
+.jobcard{background:#fff;border:1px solid #e5eaf2;border-radius:14px;padding:17px;margin:10px 0}
+.smallmuted{color:#62718a;font-size:13px}
+div[data-testid="stMetric"]{background:white;border:1px solid #e5eaf2;border-radius:14px;padding:16px}
+.stButton>button{border-radius:10px!important;font-weight:750!important;min-height:43px}
 .stButton>button[kind="primary"]{background:#2454f5!important;border-color:#2454f5!important}
-@media(max-width:800px){.hero{padding:22px}.hero h1{letter-spacing:-1px}}
+@media(max-width:700px){.hero{padding:24px}.hero h1{letter-spacing:-1px}}
 </style>
 """, unsafe_allow_html=True)
 
+def load_jobs():
+    try:
+        frame = pd.read_csv(JOBS_FILE).fillna("") if JOBS_FILE.exists() else pd.DataFrame()
+        if "Status" in frame.columns:
+            frame = frame[frame["Status"].astype(str).str.lower().isin(["active", "open", "published", ""])]
+        return frame
+    except Exception:
+        return pd.DataFrame()
+
+def extract_pdf_text(uploaded_file):
+    reader = PdfReader(uploaded_file)
+    return "\n".join((page.extract_text() or "") for page in reader.pages).strip()
+
+def get_skills(text):
+    from src.matching_engine import extract_skills
+    return extract_skills(text)
+
+def get_match_score(job_text, resume_text):
+    from src.matching_engine import calculate_similarity, extract_skills
+    lexical = calculate_similarity(job_text, [resume_text])[0] * 100
+    required = extract_skills(job_text)
+    candidate = set(extract_skills(resume_text))
+    matched = [s for s in required if s in candidate]
+    missing = [s for s in required if s not in candidate]
+    coverage = len(matched) / len(required) * 100 if required else lexical
+    score = (0.5 * lexical + 0.5 * coverage) if required else lexical
+    return round(score, 1), round(lexical, 1), matched, missing
+
+jobs = load_jobs()
+if "view" not in st.session_state:
+    st.session_state.view = "home"
+
 with st.sidebar:
-    st.markdown("<div style='font-size:24px;font-weight:800;padding:10px 0'>✦ Instant Employee</div><div style='color:#9caec9;font-size:12px;margin-bottom:18px'>AI Talent Platform</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:23px;font-weight:900;padding:8px 0'>✦ Instant Employee</div><div style='color:#aab8cf;font-size:12px'>AI Talent Platform</div>", unsafe_allow_html=True)
     st.divider()
-    st.page_link("app.py", label="⌂  Dashboard", use_container_width=True)
-    st.page_link("pages/2_Job_Posting.py", label="＋  Post a Job", use_container_width=True)
-    st.page_link("pages/3_Match_Candidates.py", label="⌕  Find Talent", use_container_width=True)
+    st.caption("CANDIDATE")
+    if st.button("⌂  Home", use_container_width=True):
+        st.session_state.view = "home"; st.rerun()
+    if st.button("⇧  Upload Resume", use_container_width=True):
+        st.session_state.view = "candidate"; st.rerun()
     st.divider()
-    st.caption("Company workspace")
+    st.caption("COMPANY ACCESS")
+    if st.button("▣  Employee Login", use_container_width=True):
+        st.session_state.view = "employee"; st.rerun()
+    if st.session_state.get("candidate_logged_in"):
+        st.caption("Signed in: " + st.session_state.get("candidate_name", "Candidate"))
+        if st.button("Log out", use_container_width=True):
+            for key in ["candidate_logged_in","candidate_name","candidate_email","resume_text","resume_filename","match_results"]:
+                st.session_state.pop(key, None)
+            st.session_state.view = "home"; st.rerun()
 
-left, right = st.columns([1.4, .75], gap="large", vertical_alignment="center")
-with left:
-    st.markdown("""
-    <div class="hero"><div class="kicker">AI-powered talent matching</div>
-    <h1>Hire Vetted Virtual IT &amp; Tech Employees <span>with AI</span></h1>
-    <p>An extension of your team, not just a freelance marketplace. Find the right talent faster with AI-powered matching.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px"><span class="pill">Skills-first matching</span><span class="pill">Remote-ready talent</span><span class="pill">Company workspace</span></div></div>
-    """, unsafe_allow_html=True)
-    a,b = st.columns(2)
-    with a: st.page_link("pages/2_Job_Posting.py", label="＋  I'm a Company · Post a Job", use_container_width=True)
-    with b: st.page_link("pages/3_Match_Candidates.py", label="⌕  Find Talent with AI", use_container_width=True)
-with right:
-    st.markdown("<div class='hero-art'>👩🏻‍💻<div style='font-size:15px;font-weight:800;color:#152541;margin-top:8px'>AI Matched Candidates</div><div style='font-size:12px;color:#62718a;margin-top:4px'>Skills · Experience · Role fit</div></div>", unsafe_allow_html=True)
+view = st.session_state.view
 
-st.markdown("### Company Dashboard")
-st.caption("Manage job postings and review recruitment activity from one place.")
-m1,m2,m3,m4 = st.columns(4)
-m1.metric("Active Jobs", active_jobs)
-m2.metric("Shortlisted Talents", int(shortlisted))
-m3.metric("Job Postings", len(jobs))
-m4.metric("AI Matching", "Ready to test" if len(jobs) else "Add a job first")
+if view == "home":
+    st.markdown("<div style='font-size:23px;font-weight:900'>✦ Instant Employee</div>", unsafe_allow_html=True)
+    st.markdown("""<div class="hero"><div class="kicker">AI-powered career matching</div>
+    <h1>Your skills deserve<br>the <span>right opportunity.</span></h1>
+    <p>Discover roles that fit your skills. Create your candidate account, upload your resume, and let our AI-assisted matching engine compare your experience with available jobs.</p></div>""", unsafe_allow_html=True)
+    left, right = st.columns(2, gap="large")
+    with left:
+        st.markdown("<div class='panel'><div class='kicker'>FOR JOB SEEKERS</div><h3>Find a role that fits you</h3><p class='smallmuted'>Create your candidate account, upload a PDF resume and review your job-match results.</p></div>", unsafe_allow_html=True)
+        if st.button("Candidate Login / Sign Up  →", type="primary", use_container_width=True):
+            st.session_state.view = "candidate_auth"; st.rerun()
+    with right:
+        st.markdown("<div class='panel'><div class='kicker'>FOR COMPANY EMPLOYEES</div><h3>Company workspace</h3><p class='smallmuted'>Authorized employees use their assigned ID and password to open the internal dashboard.</p></div>", unsafe_allow_html=True)
+        if st.button("Employee Login  →", use_container_width=True):
+            st.session_state.view = "employee"; st.rerun()
+    st.markdown("### How it works")
+    columns = st.columns(4)
+    steps = [("01","Create account","Sign in as a candidate."),("02","Upload resume","Upload a readable PDF."),("03","AI analysis","Extract skills and compare job requirements."),("04","View matches","Review scores and skill gaps.")]
+    for box, (number,title,desc) in zip(columns, steps):
+        with box:
+            st.markdown(f"<div class='step'><div class='stepnum'>{number}</div><h4>{title}</h4><div class='smallmuted'>{desc}</div></div>", unsafe_allow_html=True)
+    st.caption(f"{len(jobs)} job posting(s) currently available · Candidate portal and company workspace are separate.")
 
-main, side = st.columns([1.5,.85], gap="large")
-with main:
-    st.markdown("<div class='panel'><h3 style='margin:0'>Recent Jobs</h3><p style='color:#62718a;margin:4px 0 12px'>Latest jobs saved in your project data</p></div>", unsafe_allow_html=True)
-    if jobs.empty or not title_col:
-        st.info("No jobs found yet. Use Post a Job to create your first vacancy.")
+elif view == "candidate_auth":
+    st.markdown("## Candidate account")
+    st.caption("This first prototype stores candidate accounts for the current browser session only.")
+    login, signup = st.tabs(["Login", "Create account"])
+    with login:
+        with st.form("candidate_login"):
+            email = st.text_input("Email address", key="candidate_login_email")
+            password = st.text_input("Password", type="password", key="candidate_login_password")
+            submit = st.form_submit_button("Login", type="primary", use_container_width=True)
+        if submit:
+            account = st.session_state.get("candidate_accounts", {}).get(email.strip().lower())
+            if account and account["password"] == password:
+                st.session_state.candidate_logged_in = True
+                st.session_state.candidate_name = account["name"]
+                st.session_state.candidate_email = email.strip().lower()
+                st.session_state.view = "candidate"; st.rerun()
+            else:
+                st.error("Account not found or password is incorrect. Create an account if you are new.")
+    with signup:
+        with st.form("candidate_signup"):
+            name = st.text_input("Full name")
+            email = st.text_input("Email address", key="candidate_signup_email")
+            password = st.text_input("Create password", type="password", key="candidate_signup_password")
+            confirm = st.text_input("Confirm password", type="password")
+            submit = st.form_submit_button("Create candidate account", type="primary", use_container_width=True)
+        if submit:
+            if not name.strip() or not email.strip() or not password:
+                st.error("Please fill in every field.")
+            elif not re.match(r"^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", email.strip()):
+                st.error("Enter a valid email address.")
+            elif len(password) < 6:
+                st.error("Password must contain at least 6 characters.")
+            elif password != confirm:
+                st.error("Passwords do not match.")
+            else:
+                accounts = st.session_state.setdefault("candidate_accounts", {})
+                key = email.strip().lower()
+                if key in accounts:
+                    st.error("This email already has an account. Please log in.")
+                else:
+                    accounts[key] = {"name": name.strip(), "password": password}
+                    st.session_state.candidate_logged_in = True
+                    st.session_state.candidate_name = name.strip()
+                    st.session_state.candidate_email = key
+                    st.session_state.view = "candidate"; st.rerun()
+    if st.button("← Back to home"):
+        st.session_state.view = "home"; st.rerun()
+
+elif view == "candidate":
+    if not st.session_state.get("candidate_logged_in"):
+        st.warning("Please log in or create a candidate account first.")
+        if st.button("Go to Candidate Login"):
+            st.session_state.view = "candidate_auth"; st.rerun()
     else:
-        for _, row in jobs.tail(5).iloc[::-1].iterrows():
-            title = safe(row.get(title_col, "Untitled position"))
-            dept = safe(row.get(department_col, "Not specified")) if department_col else "Not specified"
-            skills = safe(row.get(skills_col, "Not specified")) if skills_col else "Not specified"
-            desc = safe(row.get(description_col, "Description not available")) if description_col else "Description not available"
-            mode = safe(row.get(mode_col, "Not specified")) if mode_col else "Not specified"
-            status = safe(row.get(status_col, "Active")) if status_col else "Active"
-            budget = "Not specified"
-            if min_col or max_col:
-                low = safe(row.get(min_col, "Not specified")) if min_col else "Not specified"
-                high = safe(row.get(max_col, "Not specified")) if max_col else "Not specified"
-                budget = f"₹{low} – ₹{high}"
-            st.markdown(f"<div class='jobcard'><h4>{title} <span class='pill'>{status}</span></h4><p><b>Department:</b> {dept} &nbsp;·&nbsp; <b>Work mode:</b> {mode}</p><p><b>Skills:</b> {skills}</p><p><b>Monthly budget:</b> {budget}</p><p>{desc}</p></div>", unsafe_allow_html=True)
-with side:
-    st.markdown("<div class='panel'><h3 style='margin-top:0'>✦ AI Matching Insights</h3><p style='color:#62718a;line-height:1.7'>Compare resumes against job requirements and review candidate match results.</p></div>", unsafe_allow_html=True)
-    st.page_link("pages/3_Match_Candidates.py", label="View Candidate Matches →", use_container_width=True)
-    st.markdown("<div class='panel'><h3 style='margin-top:0'>Quick Actions</h3><p style='color:#62718a'>Create a role, then find candidates whose skills align with your requirements.</p></div>", unsafe_allow_html=True)
-    st.page_link("pages/2_Job_Posting.py", label="＋ Create a Job", use_container_width=True)
-    if not shortlist.empty and "Candidate Name" in shortlist.columns:
-        st.subheader("Recent Shortlists")
-        for _, item in shortlist.tail(5).iloc[::-1].iterrows():
-            st.write("**" + str(item.get("Candidate Name", "Candidate")) + "**")
-            if "Match Score" in shortlist.columns: st.caption("Match score: " + str(item.get("Match Score", "N/A")) + "%")
+        st.markdown(f"## Resume workspace")
+        st.caption(f"Welcome, {html.escape(st.session_state.get('candidate_name','Candidate'))}. Upload your resume to see matching jobs.")
+        resume_file = st.file_uploader("Upload your resume (PDF)", type=["pdf"], key="candidate_resume")
+        if resume_file is not None and st.button("Analyze resume & find matching jobs", type="primary", use_container_width=True):
+            try:
+                resume_text = extract_pdf_text(resume_file)
+                if not resume_text:
+                    st.error("No readable text was found. Please upload a text-based PDF.")
+                else:
+                    st.session_state.resume_text = resume_text
+                    st.session_state.resume_filename = resume_file.name
+                    results = []
+                    if jobs.empty:
+                        st.warning("No jobs are available yet. Please check again after the company posts jobs.")
+                    else:
+                        def find_col(names):
+                            return next((c for c in jobs.columns if c.strip().lower() in names), None)
+                        title_col = find_col({"job title","title","job_title"})
+                        desc_col = find_col({"description","job description","job_description"})
+                        skills_col = find_col({"required skills","required_skills","skills"})
+                        dept_col = find_col({"department"})
+                        mode_col = find_col({"work mode","work_mode"})
+                        low_col = find_col({"minimum budget","min budget","minimum_budget"})
+                        high_col = find_col({"maximum budget","max budget","maximum_budget"})
+                        for _, job in jobs.iterrows():
+                            title = str(job.get(title_col, "Open role")) if title_col else "Open role"
+                            description = str(job.get(desc_col, "")) if desc_col else ""
+                            required = str(job.get(skills_col, "")) if skills_col else ""
+                            score, lexical, matched, missing = get_match_score(f"{title}. {description}. Required skills: {required}", resume_text)
+                            results.append({"title":title,"description":description,"department":str(job.get(dept_col,"Not specified")) if dept_col else "Not specified","mode":str(job.get(mode_col,"Not specified")) if mode_col else "Not specified","low":str(job.get(low_col,"")) if low_col else "","high":str(job.get(high_col,"")) if high_col else "","score":score,"lexical":lexical,"matched":matched,"missing":missing})
+                        results.sort(key=lambda item:item["score"], reverse=True)
+                        st.session_state.match_results = results
+                        st.success(f"Resume analyzed. Found {len(results)} job match(es).")
+            except Exception as error:
+                st.error(f"Could not read this resume: {error}")
+        if st.session_state.get("resume_text"):
+            st.markdown("### Resume analysis")
+            st.caption("File: " + st.session_state.get("resume_filename","Resume"))
+            found = get_skills(st.session_state.resume_text)
+            st.metric("Recognized skills", len(found))
+            st.write(", ".join(found) if found else "No recognized skills from the current skill catalog were detected.")
+            results = st.session_state.get("match_results", [])
+            if results:
+                st.markdown("### Your job matches")
+                st.caption("Scores are AI-assisted estimates based on text similarity and recognized skill coverage, not a hiring decision.")
+                for item in results:
+                    with st.container(border=True):
+                        a,b = st.columns([3,1])
+                        with a:
+                            st.markdown("#### " + item["title"])
+                            st.caption(item["department"] + " · " + item["mode"])
+                            st.write(item["description"] or "Job description not provided.")
+                            if item["matched"]: st.write("**Matching skills:** " + ", ".join(item["matched"]))
+                            if item["missing"]: st.write("**Skills to build:** " + ", ".join(item["missing"]))
+                        with b:
+                            st.metric("Match score", f"{item['score']}%")
+                            st.caption(f"Text similarity: {item['lexical']}%")
+                            if item["low"] or item["high"]: st.caption(f"Budget: ₹{item['low'] or '—'} – ₹{item['high'] or '—'}")
+        if st.button("← Back to home"):
+            st.session_state.view = "home"; st.rerun()
+
+elif view == "employee":
+    st.markdown("## Company employee login")
+    st.caption("Use the employee ID and password assigned by the company. Successful login opens the existing company dashboard.")
+    with st.form("employee_login"):
+        employee_id = st.text_input("Employee ID")
+        password = st.text_input("Password", type="password")
+        submit = st.form_submit_button("Login to company dashboard", type="primary", use_container_width=True)
+    if submit:
+        try:
+            valid_id = str(st.secrets["employee_login"]["username"])
+            valid_password = str(st.secrets["employee_login"]["password"])
+        except Exception:
+            valid_id, valid_password = "", ""
+        if not valid_id or not valid_password:
+            st.error("Employee credentials are not configured. Add employee_login.username and employee_login.password in Streamlit Cloud → App settings → Secrets.")
+        elif employee_id.strip() == valid_id and password == valid_password:
+            st.session_state.employee_authenticated = True
+            st.switch_page("pages/4_Employee_Dashboard.py")
+        else:
+            st.error("Incorrect employee ID or password.")
+    st.info("Candidate accounts cannot open the company dashboard.")
+    if st.button("← Back to home"):
+        st.session_state.view = "home"; st.rerun()
 
 st.divider()
-st.caption("Instant Employee · AI-powered talent platform · Company dashboard")
+st.caption("Instant Employee AI · Candidate portal and company workspace")
