@@ -283,8 +283,9 @@ elif view == "job_details":
         st.write(f"₹{low or '—'} – ₹{high or '—'}" if low or high else "Budget discussed during hiring")
         if st.button("Apply for this job  →", type="primary", use_container_width=True):
             st.session_state.apply_job_index = selected_index
+            st.session_state.pop("application_submitted", None)
             if st.session_state.get("candidate_logged_in"):
-                st.session_state.view = "candidate"
+                st.session_state.view = "apply_resume"
             else:
                 st.session_state.view = "candidate_auth"
             st.rerun()
