@@ -222,7 +222,7 @@ def apply(job_id: int, data: ApplicationIn, user: User=Depends(require_role("tal
 @app.get("/applications/me")
 def my_applications(user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
     rows=db.query(Application).filter(Application.talent_id==user.id).order_by(Application.created_at.desc()).all()
-    return [{"id":a.id,"job_id":a.job_id,"job_title":a.job.title,"company_id":a.job.company_id,"applied_at":a.created_at.isoformat(),"status":a.status,"resume_filename":a.resume_filename} for a in rows]
+    return [{"id":a.id,"job_id":a.job_id,"job_title":a.job.title,"company_id":a.job.company_id,"company_name":a.job.company.email,"applied_at":a.created_at.isoformat(),"status":a.status,"resume_filename":a.resume_filename} for a in rows]
 @app.post("/applications/external", status_code=201)
 def apply_to_csv_job(data: ExternalApplicationIn, user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
     """Save an application for a job currently stored in the Streamlit jobs.csv file."""
