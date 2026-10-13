@@ -101,7 +101,8 @@ if "picture_data" not in {col["name"] for col in inspect(engine).get_columns("pr
 if "company_id" not in {col["name"] for col in inspect(engine).get_columns("users")}:
     with engine.begin() as connection:
         connection.execute(sql_text("ALTER TABLE users ADD COLUMN company_id INTEGER"))
-\napp = FastAPI(title="Instant Employee API", version="0.1.0", description="MVP API for talent profiles, jobs, and applications.")
+
+app = FastAPI(title="Instant Employee API", version="0.1.0", description="MVP API for talent profiles, jobs, and applications.")
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "*").split(","), allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 class SignupIn(BaseModel):
