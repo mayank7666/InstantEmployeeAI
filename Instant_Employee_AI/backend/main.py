@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine, inspect, text as sql_text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, create_engine, inspect, text as sql_text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker, Session
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./instant_employee.db")
@@ -80,6 +80,7 @@ class Application(Base):
 class ExternalApplication(Base):
     """Persist applications for jobs still managed in the legacy jobs.csv workflow."""
     __tablename__ = "external_applications"
+    __table_args__ = (UniqueConstraint("job_key", "talent_id", name="uq_external_application_job_talent"),)
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     job_key: Mapped[str] = mapped_column(String(120), index=True)
     job_title: Mapped[str] = mapped_column(String(200))
