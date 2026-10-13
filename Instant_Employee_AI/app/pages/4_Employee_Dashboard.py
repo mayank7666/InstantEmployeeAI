@@ -58,24 +58,35 @@ def company_session(token):
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-:root{--blue:#2454f5;--ink:#101828;--muted:#62718a;--line:#e5eaf2}
+:root{--blue:#2454f5;--ink:#17233b;--muted:#52637e;--line:#dce5f2}
 html,body,[class*="css"]{font-family:Inter,system-ui,sans-serif}
-.stApp{background:#f6f8fc;color:#101828}
+.stApp{background:linear-gradient(135deg,#f8faff,#eef4ff);color:#17233b}
 .main .block-container{max-width:1450px;padding-top:1rem;padding-bottom:2rem}
-[data-testid="stSidebar"]{background:linear-gradient(180deg,#101b2d,#16263e)}
-[data-testid="stSidebar"] *{color:#f7f9ff}
+[data-testid="stAppViewContainer"],[data-testid="stHeader"]{background:transparent}
+[data-testid="stSidebar"]{background:linear-gradient(180deg,#ffffff,#edf3ff);border-right:1px solid #dce5f2}
+[data-testid="stSidebar"] *{color:#17233b!important}
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"]{color:#52637e!important}
 [data-testid="stSidebarNav"]{display:none}
 .hero{padding:30px 32px;border-radius:22px;border:1px solid #dfe7fb;background:linear-gradient(115deg,#f7f9ff,#eaf0ff);margin-bottom:22px}
 .kicker{font-size:12px;letter-spacing:1.7px;text-transform:uppercase;font-weight:800;color:#2855e8}
 .hero h1{font-size:clamp(32px,4vw,48px);line-height:1.08;letter-spacing:-1.8px;margin:12px 0;color:#101828}
 .hero h1 span{color:#2454f5}.hero p{font-size:15px;line-height:1.7;color:#52637e;max-width:700px}
 div[data-testid="stMetric"]{background:white;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 4px 15px #263e7008}
-div[data-testid="stMetric"] label{color:#62718a!important}div[data-testid="stMetricValue"]{color:#101828;font-weight:800}
+div[data-testid="stMetric"] label{color:#52637e!important}div[data-testid="stMetricValue"]{color:#17233b!important;font-weight:800}
 .panel,.jobcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
-.jobcard h4{margin:0 0 6px;color:#152541}.jobcard p{margin:4px 0;color:#62718a;font-size:13px}
+.jobcard h4{margin:0 0 6px;color:#17233b}.jobcard p{margin:4px 0;color:#52637e;font-size:13px}
 .pill{display:inline-block;background:#dcfce7;color:#166534;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700}
-.stButton>button{border-radius:9px!important;font-weight:700!important}
-.stButton>button[kind="primary"]{background:#2454f5!important;border-color:#2454f5!important}
+label,[data-testid="stMarkdownContainer"] p,[data-testid="stCaptionContainer"],.stMarkdown{color:#34445e}
+input,textarea,[data-baseweb="input"],[data-baseweb="textarea"]{background:#fff!important;color:#17233b!important;border-color:#cbd7e8!important}
+[data-baseweb="input"] input{color:#17233b!important;-webkit-text-fill-color:#17233b!important}
+[data-baseweb="select"]>div{background:#fff!important;color:#17233b!important;border-color:#cbd7e8!important}
+[data-testid="stFileUploader"] section{background:#fff!important;border:1px dashed #b9c9df!important}
+[data-testid="stFileUploader"] *{color:#34445e!important}
+[data-baseweb="tab-list"]{background:#f0f5ff;border-bottom:1px solid var(--line)}
+[data-baseweb="tab"]{color:#52637e!important}
+[data-baseweb="tab"][aria-selected="true"]{color:#2454f5!important;border-bottom-color:#2454f5!important}
+.stButton>button{border-radius:9px!important;font-weight:700!important;background:#fff!important;color:#17233b!important;border-color:#cbd7e8!important}
+.stButton>button[kind="primary"]{background:#2454f5!important;border-color:#2454f5!important;color:#fff!important}
 </style>
 """, unsafe_allow_html=True)
 
@@ -96,8 +107,8 @@ with st.sidebar:
             st.rerun()
 
 if not st.session_state.get("company_logged_in"):
-    st.markdown("<div class='hero'><div class='kicker'>Secure company workspace</div><h1>Company <span>Dashboard</span></h1><p>Sign in to manage your own job postings and review applications submitted to your vacancies.</p></div>", unsafe_allow_html=True)
-    login_tab, signup_tab = st.tabs(["Company / Employee Login", "Create Company Account"])
+    st.markdown("<div class='hero'><div class='kicker'>Private company workspace</div><h1>Company <span>Dashboard</span></h1><p>Secure login for the company administrator and company-created employee accounts.</p></div>", unsafe_allow_html=True)
+    login_tab, setup_tab = st.tabs(["Company / Employee Login", "Initial Admin Setup"])
     with login_tab:
         with st.form("company_login_form"):
             email = st.text_input("Company email")
@@ -117,22 +128,24 @@ if not st.session_state.get("company_logged_in"):
                     else:
                         st.success("Company login successful.")
                         st.rerun()
-    with signup_tab:
-        with st.form("company_signup_form"):
-            company_name = st.text_input("Company / recruiter name")
-            email = st.text_input("Company email", key="company_signup_email")
-            password = st.text_input("Create password (minimum 8 characters)", type="password", key="company_signup_password")
-            confirm = st.text_input("Confirm password", type="password")
-            submitted = st.form_submit_button("Create Company Account", type="primary", use_container_width=True)
+    with setup_tab:
+        st.info("Yeh sirf pehle company admin ko setup karne ke liye hai. Render API par ADMIN_SETUP_KEY configure kiye bina account create nahi hoga. Baad mein employee IDs admin dashboard se banenge.")
+        with st.form("company_bootstrap_form"):
+            company_name = st.text_input("Company / admin name", key="bootstrap_company_name")
+            admin_email = st.text_input("Admin email", key="bootstrap_admin_email")
+            admin_password = st.text_input("Admin password (minimum 8 characters)", type="password", key="bootstrap_admin_password")
+            confirm_password = st.text_input("Confirm admin password", type="password", key="bootstrap_confirm_password")
+            setup_key = st.text_input("Private setup key", type="password", key="bootstrap_setup_key", help="Must match ADMIN_SETUP_KEY configured privately in Render.")
+            submitted = st.form_submit_button("Set Up First Admin", type="primary", use_container_width=True)
         if submitted:
-            if not company_name.strip() or not email.strip() or not password:
+            if not company_name.strip() or not admin_email.strip() or not admin_password or not setup_key:
                 st.error("Saare fields fill karein.")
-            elif len(password) < 8:
+            elif len(admin_password) < 8:
                 st.error("Password kam se kam 8 characters ka hona chahiye.")
-            elif password != confirm:
+            elif admin_password != confirm_password:
                 st.error("Passwords match nahi karte.")
             else:
-                result, error = api_request("POST", "/auth/signup", json={"email": email.strip().lower(), "password": password, "role": "company", "full_name": company_name.strip()})
+                result, error = api_request("POST", "/auth/company/bootstrap", json={"email": admin_email.strip().lower(), "password": admin_password, "full_name": company_name.strip(), "setup_key": setup_key})
                 if error:
                     st.error(error)
                 else:
@@ -140,9 +153,9 @@ if not st.session_state.get("company_logged_in"):
                     if error:
                         st.error(error)
                     else:
-                        st.success("Company account create ho gaya.")
+                        st.success("First company admin successfully set up.")
                         st.rerun()
-    st.info("Company login aur candidate login alag hain. Company workspace ke liye company-role account use karein.")
+    st.info("Public signup sirf candidate/talent accounts ke liye hai. Company admin signup private setup key se protected hai.")
     st.stop()
 
 token = st.session_state.company_api_token
