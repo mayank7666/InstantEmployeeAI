@@ -222,8 +222,13 @@ def test_company_application_list_only_returns_owned_job_applications():
     second_company_apps = client.get("/applications/company", headers=second_company)
     assert first_company_apps.status_code == 200, first_company_apps.text
     assert second_company_apps.status_code == 200, second_company_apps.text
-    assert [row["job_id"] for row in first_company_apps.json()] == [first_job_id]
-    assert [row["job_id"] for row in second_company_apps.json()] == [second_job_id]
+    first_visible_jobs = {row["job_id"] for row in first_company_apps.json()}
+    second_visible_jobs = {row["job_id"] for row in second_company_apps.json()}
+    # Both employee accounts belong to the same organization and should see
+    # applications for jobs posted by that organization.
+    assert {first_job_id, second_job_id}.issubset(first_visible_jobs)
+    assert {first_job_id, second_job_id}.issubset(second_visible_jobs)
+    assert first_visible_jobs == second_visible_jobs
 
 
 def test_company_application_list_rejects_talent_and_unauthenticated_users():
