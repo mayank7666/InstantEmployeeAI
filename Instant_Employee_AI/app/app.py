@@ -501,8 +501,28 @@ elif view == "candidate_dashboard":
             }
 
         st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Your profile details are saved to the backend.")
+        # Display the saved photo as a familiar circular DP/avatar.
         if profile.get("picture_data"):
-            st.image(profile["picture_data"], caption="Profile picture", width=160)
+            avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
+            with avatar_col:
+                st.markdown(
+                    "<img src='" + profile["picture_data"] + "' "
+                    "style='width:112px;height:112px;border-radius:50%;object-fit:cover;"
+                    "border:3px solid #278bff;box-shadow:0 4px 18px #0005;' "
+                    "alt='Profile photo' />",
+                    unsafe_allow_html=True,
+                )
+            with avatar_info_col:
+                st.markdown("### " + html.escape(profile.get("full_name") or "Your profile"))
+                st.caption("Profile photo · Round display picture")
+        else:
+            st.markdown(
+                "<div style='width:112px;height:112px;border-radius:50%;"
+                "background:#14243b;border:2px dashed #278bff;display:flex;"
+                "align-items:center;justify-content:center;font-size:42px;color:#8dbdff;'>"
+                "👤</div><p style='color:#a8b8d0;font-size:13px'>Add a profile photo</p>",
+                unsafe_allow_html=True,
+            )
         st.metric("Profile completion", str(profile.get("completion_percent", 0)) + "%")
         st.progress(max(0, min(100, int(profile.get("completion_percent", 0)))) / 100)
 
@@ -517,7 +537,7 @@ elif view == "candidate_dashboard":
             availability_index = availability_options.index(current_availability) if current_availability in availability_options else 0
             profile_availability = st.selectbox("Availability", availability_options, index=availability_index)
             profile_portfolio = st.text_input("Portfolio URL", value=profile.get("portfolio_url", "") or "", placeholder="https://...")
-            profile_picture = st.file_uploader("Upload profile picture (JPG or PNG, max 2 MB)", type=["jpg", "jpeg", "png"], key="candidate_profile_picture", help="Choose a clear photo for your candidate profile.")
+            profile_picture = st.file_uploader("Change profile photo (JPG or PNG, max 2 MB)", type=["jpg", "jpeg", "png"], key="candidate_profile_picture", help="Choose a clear face photo. It will appear as a round DP after you save your profile.")
             save_profile = st.form_submit_button("Save profile", type="primary", use_container_width=True)
 
         if save_profile:
