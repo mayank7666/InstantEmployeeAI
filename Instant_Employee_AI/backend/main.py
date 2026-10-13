@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine, inspect, text as sql_text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker, Session
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./instant_employee.db")
@@ -40,6 +40,7 @@ class Profile(Base):
     availability: Mapped[str] = mapped_column(String(80), default="Available")
     portfolio_url: Mapped[str] = mapped_column(String(500), default="")
     resume_filename: Mapped[str] = mapped_column(String(255), default="")
+    picture_data: Mapped[str] = mapped_column(Text, default="")
     user: Mapped["User"] = relationship(back_populates="profile")
 class Job(Base):
     __tablename__ = "jobs"
@@ -68,6 +69,10 @@ class Application(Base):
     job: Mapped["Job"] = relationship(back_populates="applications")
     talent: Mapped["User"] = relationship(back_populates="applications")
 Base.metadata.create_all(bind=engine)
+# Lightweight migration for existing deployments.
+if "picture_data" not in {col["name"] for col in inspect(engine).get_columns("profiles")}:
+    with engine.begin() as connection:
+        connection.execute(sql_text("ALTER TABLE profiles ADD COLUMN picture_data TEXT NOT NULL DEFAULT ''"))
 
 app = FastAPI(title="Instant Employee API", version="0.1.0", description="MVP API for talent profiles, jobs, and applications.")
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "*").split(","), allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -88,6 +93,7 @@ class ProfileIn(BaseModel):
     availability: str = "Available"
     portfolio_url: str = ""
     resume_filename: str = ""
+    picture_data: str = Field(default="", max_length=2800000)
 class JobIn(BaseModel):
     title: str = Field(min_length=2, max_length=200)
     department: str = "Other"
@@ -130,7 +136,7 @@ def require_role(role: str):
         return user
     return role_checker
 def profile_to_dict(p: Profile):
-    return {"full_name":p.full_name,"headline":p.headline,"skills":p.skills,"timezone":p.timezone,"availability":p.availability,"portfolio_url":p.portfolio_url,"resume_filename":p.resume_filename}
+    return {"full_name":p.full_name,"headline":p.headline,"skills":p.skills,"timezone":p.timezone,"availability":p.availability,"portfolio_url":p.portfolio_url,"resume_filename":p.resume_filename,"picture_data":p.picture_data or ""}
 @app.get("/health")
 def health(): return {"status":"ok","service":"instant-employee-api","version":"0.1.0"}
 @app.post("/auth/signup", response_model=TokenOut, status_code=201)
