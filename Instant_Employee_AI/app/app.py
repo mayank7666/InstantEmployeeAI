@@ -65,6 +65,20 @@ def api_request(method, path, *, token=None, **kwargs):
     return payload, None
 
 
+def get_candidate_applications(token):
+    """Combine database-job applications and legacy CSV-job applications for the candidate."""
+    database_rows, database_error = api_request("GET", "/applications/me", token=token)
+    external_rows, external_error = api_request("GET", "/applications/external/me", token=token)
+    combined = []
+    if isinstance(database_rows, list):
+        combined.extend(database_rows)
+    if isinstance(external_rows, list):
+        combined.extend(external_rows)
+    combined.sort(key=lambda row: str(row.get("applied_at", "")), reverse=True)
+    errors = [error for error in (database_error, external_error) if error]
+    return combined, "; ".join(errors) if errors else None
+
+
 def set_candidate_session(token):
     me, error = api_request("GET", "/me", token=token)
     if error:
@@ -492,8 +506,7 @@ elif view == "candidate_dashboard":
             st.session_state.view = "candidate_auth"; st.rerun()
     else:
         token = st.session_state.get("candidate_api_token")
-        applications, applications_error = api_request("GET", "/applications/external/me", token=token)
-        applications = applications if not applications_error and isinstance(applications, list) else []
+        applications, applications_error = get_candidate_applications(token)
         header_col, logout_col = st.columns([5, 1])
         with header_col:
             st.markdown("## 👋 My Profile")
@@ -663,8 +676,7 @@ elif view == "applied_jobs":
             st.session_state.view = "candidate_auth"; st.rerun()
     else:
         token = st.session_state.get("candidate_api_token")
-        applications, applications_error = api_request("GET", "/applications/external/me", token=token)
-        applications = applications if not applications_error and isinstance(applications, list) else []
+        applications, applications_error = get_candidate_applications(token)
         st.markdown("## ✓ Applied Jobs")
         st.caption("Your application history and current status, loaded from the database")
         if applications_error:
