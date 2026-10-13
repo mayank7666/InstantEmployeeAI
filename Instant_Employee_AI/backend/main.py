@@ -108,8 +108,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 class SignupIn(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-    role: str = Field(default="talent", pattern="^(talent|company)$")
     full_name: str = Field(default="", max_length=160)
+
+class BootstrapAdminIn(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+    full_name: str = Field(min_length=1, max_length=160)
+    setup_key: str = Field(min_length=1, max_length=256)
+
 class BulkCompanyUsersIn(BaseModel):
     employees: list[dict] = Field(min_length=1, max_length=100)
 
@@ -218,13 +224,40 @@ def bulk_create_company_users(data: BulkCompanyUsersIn, admin: User = Depends(re
 
 @app.get("/health")
 def health(): return {"status":"ok","service":"instant-employee-api","version":"0.1.0"}
+@app.post("/auth/company/bootstrap", response_model=TokenOut, status_code=201)
+def bootstrap_company_admin(data: BootstrapAdminIn, db: Session = Depends(get_db)):
+    """Create the first company admin only with a private Render environment setup key."""
+    setup_key = os.getenv("ADMIN_SETUP_KEY", "")
+    if not setup_key:
+        raise HTTPException(status_code=503, detail="Initial admin setup is not enabled. Configure ADMIN_SETUP_KEY on the API host.")
+    if not secrets.compare_digest(data.setup_key, setup_key):
+        raise HTTPException(status_code=403, detail="Invalid admin setup key")
+    if db.query(User).filter(User.role == "company", User.company_id.is_(None)).first():
+        raise HTTPException(status_code=409, detail="A primary company admin already exists")
+    email = data.email.lower()
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=409, detail="Email already registered")
+    user = User(email=email, password_hash=hash_password(data.password), role="company", company_id=None)
+    db.add(user)
+    db.flush()
+    db.add(Profile(user_id=user.id, full_name=data.full_name.strip()))
+    db.commit()
+    db.refresh(user)
+    return {"access_token": make_token(user)}
+
 @app.post("/auth/signup", response_model=TokenOut, status_code=201)
 def signup(data: SignupIn, db: Session = Depends(get_db)):
-    email=data.email.lower()
-    if db.query(User).filter(User.email==email).first(): raise HTTPException(status_code=409,detail="Email already registered")
-    user=User(email=email,password_hash=hash_password(data.password),role=data.role); db.add(user); db.flush()
-    db.add(Profile(user_id=user.id,full_name=data.full_name)); db.commit(); db.refresh(user)
-    return {"access_token":make_token(user)}
+    """Public self-service signup is restricted to talent accounts."""
+    email = data.email.lower()
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=409, detail="Email already registered")
+    user = User(email=email, password_hash=hash_password(data.password), role="talent")
+    db.add(user)
+    db.flush()
+    db.add(Profile(user_id=user.id, full_name=data.full_name))
+    db.commit()
+    db.refresh(user)
+    return {"access_token": make_token(user)}
 @app.post("/auth/login", response_model=TokenOut)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user=db.query(User).filter(User.email==form.username.lower()).first()
