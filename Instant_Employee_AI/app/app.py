@@ -131,11 +131,14 @@ if view == "home":
     work_mode_col = next((c for c in jobs.columns if str(c).strip().lower() in {"work mode", "work_mode", "mode"}), None)
     with dept_col:
         departments = sorted({str(x).strip() for x in jobs[dept_col_name].tolist() if str(x).strip()}) if dept_col_name and not jobs.empty else []
-        selected_department = st.selectbox("Category", ["All categories"] + departments)
-        category_search = st.text_input(
-            "Search category",
-            placeholder="Type a job category, e.g. Data Science or IT",
-            key="home_category_search",
+        category_options = ["All categories"] + departments
+        selected_department = st.selectbox(
+            "Category",
+            category_options,
+            index=0,
+            accept_new_options=True,
+            placeholder="Select or type a category",
+            key="home_category_select",
         )
     with mode_col:
         modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()}) if work_mode_col and not jobs.empty else []
@@ -147,24 +150,12 @@ if view == "home":
         if searchable_cols:
             mask = filtered_jobs[searchable_cols].astype(str).apply(lambda row: row.str.contains(search_text.strip(), case=False, regex=False).any(), axis=1)
             filtered_jobs = filtered_jobs[mask]
-    if selected_department != "All categories" and dept_col_name:
+    if selected_department and selected_department != "All categories" and dept_col_name:
         filtered_jobs = filtered_jobs[
-            filtered_jobs[dept_col_name].astype(str) == selected_department
+            filtered_jobs[dept_col_name].astype(str).str.contains(
+                str(selected_department).strip(), case=False, na=False, regex=False
+            )
         ]
-
-    if category_search.strip():
-        search_text = category_search.strip()
-        searchable_columns = [
-            c for c in [dept_col_name, title_col, skills_col, description_col]
-            if c and c in filtered_jobs.columns
-        ]
-        if searchable_columns:
-            matches = pd.Series(False, index=filtered_jobs.index)
-            for search_col in searchable_columns:
-                matches = matches | filtered_jobs[search_col].astype(str).str.contains(
-                    search_text, case=False, na=False, regex=False
-                )
-            filtered_jobs = filtered_jobs[matches]
     if selected_mode != "All modes" and work_mode_col:
         filtered_jobs = filtered_jobs[filtered_jobs[work_mode_col].astype(str) == selected_mode]
 
