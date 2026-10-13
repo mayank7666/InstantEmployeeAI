@@ -452,10 +452,20 @@ elif view == "apply_resume":
                             job_id_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job id", "job_id", "id"}), None)
                             job_record_id = str(selected_job.get(job_id_col, selected_index)) if job_id_col else str(selected_index)
                             company_name = str(selected_job.get(company_col, "Company not specified")) if company_col else "Company not specified"
-                            application_data, application_error = api_request(
-                                "POST", "/applications/external", token=st.session_state.get("candidate_api_token"),
-                                json={"job_key": job_record_id, "job_title": apply_title, "company_name": company_name, "resume_filename": application_resume.name},
-                            )
+                            # Newly posted authenticated jobs use numeric database IDs.
+                            # Older CSV jobs keep the legacy external-application route.
+                            if job_record_id.isdigit():
+                                application_data, application_error = api_request(
+                                    "POST", f"/jobs/{int(job_record_id)}/apply",
+                                    token=st.session_state.get("candidate_api_token"),
+                                    json={"resume_filename": application_resume.name},
+                                )
+                            else:
+                                application_data, application_error = api_request(
+                                    "POST", "/applications/external",
+                                    token=st.session_state.get("candidate_api_token"),
+                                    json={"job_key": job_record_id, "job_title": apply_title, "company_name": company_name, "resume_filename": application_resume.name},
+                                )
                             if application_error:
                                 if "Already applied to this job" in application_error:
                                     st.info("You have already applied to this job from this account. It is listed in Applied Jobs.")
