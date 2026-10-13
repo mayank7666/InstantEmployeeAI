@@ -271,6 +271,28 @@ def my_external_applications(user: User=Depends(require_role("talent")), db: Ses
         "status": a.status,
         "resume_filename": a.resume_filename,
     } for a in rows]
+@app.get("/applications/company")
+def company_applications(user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
+    """Return applications only for jobs owned by the authenticated company."""
+    rows = (
+        db.query(Application)
+        .join(Job, Application.job_id == Job.id)
+        .filter(Job.company_id == user.id)
+        .order_by(Application.created_at.desc())
+        .all()
+    )
+    return [{
+        "id": a.id,
+        "job_id": a.job_id,
+        "job_title": a.job.title,
+        "candidate_id": a.talent_id,
+        "candidate_email": a.talent.email,
+        "candidate_name": a.talent.profile.full_name if a.talent.profile else "",
+        "status": a.status,
+        "applied_at": a.created_at.isoformat(),
+        "resume_filename": a.resume_filename,
+    } for a in rows]
+
 @app.get("/jobs/{job_id}/applications")
 def job_applications(job_id: int, user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     job=db.get(Job,job_id)
