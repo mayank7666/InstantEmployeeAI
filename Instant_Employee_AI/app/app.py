@@ -22,7 +22,7 @@ def api_request(method, path, *, token=None, **kwargs):
     if token:
         headers["Authorization"] = f"Bearer {token}"
     try:
-        response = requests.request(method, f"{API_BASE_URL}{path}", headers=headers, timeout=20, **kwargs)
+        response = requests.request(method, f"{API_BASE_URL}{path}", headers=headers, timeout=60, **kwargs)
         try:
             payload = response.json()
         except ValueError:
