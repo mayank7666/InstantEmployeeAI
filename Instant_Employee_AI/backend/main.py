@@ -164,7 +164,8 @@ def current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_
     user = db.get(User, user_id)
     if not user or not user.is_active: raise HTTPException(status_code=401, detail="Account not found or disabled")
     return user
-def organization_id(user: User) -> int:\n    return user.company_id or user.id\ndef require_role(role: str):
+def organization_id(user: User) -> int:
+    return user.company_id or user.id\ndef require_role(role: str):
     def role_checker(user: User = Depends(current_user)) -> User:
         if user.role != role:
             raise HTTPException(status_code=403, detail=role + " account required")
@@ -175,6 +176,8 @@ def profile_to_dict(p: Profile):
 @app.post("/auth/company/bulk-create")
 def bulk_create_company_users(data: BulkCompanyUsersIn, admin: User = Depends(require_role("company")), db: Session = Depends(get_db)):
     """Create up to 100 company-role login accounts in one request."""
+    if admin.company_id is not None:
+        raise HTTPException(status_code=403, detail="Only the primary company admin can create employee accounts")
     created = []
     errors = []
     seen = set()
@@ -228,7 +231,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
 @app.get("/me")
 def me(user: User = Depends(current_user), db: Session = Depends(get_db)):
     p=db.query(Profile).filter(Profile.user_id==user.id).first()
-    return {"id":user.id,"email":user.email,"role":user.role,"profile":profile_to_dict(p) if p else None}
+    return {"id":user.id,"email":user.email,"role":user.role,"company_id":user.company_id,"profile":profile_to_dict(p) if p else None}
 @app.get("/profiles/me")
 def get_profile(user: User = Depends(current_user), db: Session = Depends(get_db)):
     p=db.query(Profile).filter(Profile.user_id==user.id).first()
