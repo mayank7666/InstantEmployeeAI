@@ -22,6 +22,15 @@ from src.matching_engine import match_candidates
 
 
 # -----------------------------------
+# Company authentication
+# -----------------------------------
+if not st.session_state.get("company_logged_in") or not st.session_state.get("company_api_token"):
+    st.warning("Candidate matching company team ke liye hai. Pehle Company Dashboard par login karein.")
+    st.page_link("pages/4_Employee_Dashboard.py", label="← Company Login / Dashboard", use_container_width=True)
+    st.stop()
+
+
+# -----------------------------------
 # Page Configuration
 # -----------------------------------
 st.set_page_config(
