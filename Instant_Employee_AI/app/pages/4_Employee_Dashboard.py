@@ -51,6 +51,7 @@ def company_session(token):
     st.session_state.company_api_token = token
     st.session_state.company_logged_in = True
     st.session_state.company_email = me.get("email", "")
+    st.session_state.company_is_employee = bool(me.get("company_id"))
     return None
 
 
@@ -90,13 +91,13 @@ with st.sidebar:
         st.caption("SIGNED IN")
         st.write(st.session_state.get("company_email", "Company"))
         if st.button("Log out", use_container_width=True):
-            for key in ("company_api_token", "company_logged_in", "company_email"):
+            for key in ("company_api_token", "company_logged_in", "company_email", "company_is_employee"):
                 st.session_state.pop(key, None)
             st.rerun()
 
 if not st.session_state.get("company_logged_in"):
     st.markdown("<div class='hero'><div class='kicker'>Secure company workspace</div><h1>Company <span>Dashboard</span></h1><p>Sign in to manage your own job postings and review applications submitted to your vacancies.</p></div>", unsafe_allow_html=True)
-    login_tab, signup_tab = st.tabs(["Company Login", "Create Company Account"])
+    login_tab, signup_tab = st.tabs(["Company / Employee Login", "Create Company Account"])
     with login_tab:
         with st.form("company_login_form"):
             email = st.text_input("Company email")
@@ -228,52 +229,56 @@ if not legacy_jobs.empty:
     st.caption("Ye purane jobs.csv workflow ke jobs hain. Inke applications ko company-wise securely connect karna next migration step hai; inhe database application count mein include nahi kiya gaya.")
     st.metric("Legacy jobs in CSV", len(legacy_jobs))
 
-st.divider()
-st.subheader("Create Multiple Employee Login IDs")
-st.caption("Ek baar mein maximum 100 accounts. Har line mein: Name, email, password. Password blank chhodoge to temporary password generate hoga.")
-with st.form("bulk_company_users_form"):
-    employee_rows = st.text_area(
-        "Employee details (one employee per line)",
-        placeholder="Amit Kumar, amit@company.com, TempPass123!\nNeha Singh, neha@company.com,",
-        height=150,
-        help="Comma-separated: Name, Email, optional Password. Email unique hona chahiye."
-    )
-    create_bulk = st.form_submit_button("Create Employee IDs", type="primary", use_container_width=True)
-if create_bulk:
-    rows = []
-    parse_errors = []
-    for line_no, line in enumerate(employee_rows.splitlines(), start=1):
-        if not line.strip():
-            continue
-        parts = [part.strip() for part in line.split(",", 2)]
-        if len(parts) < 2:
-            parse_errors.append(f"Line {line_no}: Name aur email comma se separate karein.")
-            continue
-        rows.append({"name": parts[0], "email": parts[1], "password": parts[2] if len(parts) > 2 else ""})
-    if parse_errors:
-        for message in parse_errors:
-            st.error(message)
-    elif not rows:
-        st.error("Kam se kam ek employee ki details enter karein.")
-    elif len(rows) > 100:
-        st.error("Ek batch mein maximum 100 accounts bana sakte hain.")
-    else:
-        result, error = api_request("POST", "/auth/company/bulk-create", token=token, json={"employees": rows})
-        if error:
-            st.error("Accounts create nahi hue: " + error)
+if not me.get("company_id"):
+    st.divider()
+    st.subheader("Create Multiple Employee Login IDs")
+    st.caption("Ek baar mein maximum 100 accounts. Har line mein: Name, email, password. Password blank chhodoge to temporary password generate hoga.")
+    with st.form("bulk_company_users_form"):
+        employee_rows = st.text_area(
+            "Employee details (one employee per line)",
+            placeholder="Amit Kumar, amit@company.com, TempPass123!\nNeha Singh, neha@company.com,",
+            height=150,
+            help="Comma-separated: Name, Email, optional Password. Email unique hona chahiye."
+        )
+        create_bulk = st.form_submit_button("Create Employee IDs", type="primary", use_container_width=True)
+    if create_bulk:
+        rows = []
+        parse_errors = []
+        for line_no, line in enumerate(employee_rows.splitlines(), start=1):
+            if not line.strip():
+                continue
+            parts = [part.strip() for part in line.split(",", 2)]
+            if len(parts) < 2:
+                parse_errors.append(f"Line {line_no}: Name aur email comma se separate karein.")
+                continue
+            rows.append({"name": parts[0], "email": parts[1], "password": parts[2] if len(parts) > 2 else ""})
+        if parse_errors:
+            for message in parse_errors:
+                st.error(message)
+        elif not rows:
+            st.error("Kam se kam ek employee ki details enter karein.")
+        elif len(rows) > 100:
+            st.error("Ek batch mein maximum 100 accounts bana sakte hain.")
         else:
-            st.success(f"{result.get('created_count', 0)} employee account(s) create ho gaye.")
-            if result.get("created"):
-                st.warning("Temporary passwords abhi copy karke securely employees ko de dein. Ye dobara display nahi honge.")
-                st.dataframe(pd.DataFrame(result["created"]), use_container_width=True, hide_index=True)
-                st.download_button(
-                    "Download Employee Login Details (CSV)",
-                    pd.DataFrame(result["created"]).to_csv(index=False).encode("utf-8-sig"),
-                    file_name="employee_login_details.csv",
-                    mime="text/csv",
-                    use_container_width=True
-                )
-            for item in result.get("errors", []):
-                st.error(f"Row {item.get('row')}: {item.get('email', '')} — {item.get('error')}")
-st.divider()
-st.caption("Instant Employee · Secure company workspace")
+            result, error = api_request("POST", "/auth/company/bulk-create", token=token, json={"employees": rows})
+            if error:
+                st.error("Accounts create nahi hue: " + error)
+            else:
+                st.success(f"{result.get('created_count', 0)} employee account(s) create ho gaye.")
+                if result.get("created"):
+                    st.warning("Temporary passwords abhi copy karke securely employees ko de dein. Ye dobara display nahi honge.")
+                    st.dataframe(pd.DataFrame(result["created"]), use_container_width=True, hide_index=True)
+                    st.download_button(
+                        "Download Employee Login Details (CSV)",
+                        pd.DataFrame(result["created"]).to_csv(index=False).encode("utf-8-sig"),
+                        file_name="employee_login_details.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+                for item in result.get("errors", []):
+                    st.error(f"Row {item.get('row')}: {item.get('email', '')} — {item.get('error')}")
+    st.divider()
+    st.caption("Instant Employee · Secure company workspace")
+
+else:
+    st.info("Aap employee account se login hain. Employee login IDs sirf primary company admin bana sakta hai.")
