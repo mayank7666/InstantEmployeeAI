@@ -127,3 +127,34 @@ def test_talent_cannot_post_company_job():
         "description": "This should not be allowed for a talent account.",
     })
     assert response.status_code == 403
+
+def test_external_application_endpoints_require_talent_authentication():
+    payload = {
+        "job_key": "auth-required-job",
+        "job_title": "Python Developer",
+        "company_name": "Example Company",
+        "resume_filename": "candidate.pdf",
+    }
+    create_response = client.post("/applications/external", json=payload)
+    history_response = client.get("/applications/external/me")
+    assert create_response.status_code == 401
+    assert history_response.status_code == 401
+
+
+def test_company_cannot_use_talent_external_application_endpoints():
+    company_headers = signup("company", unique_email("company-external-access"))
+    payload = {
+        "job_key": "company-role-check",
+        "job_title": "Python Developer",
+        "company_name": "Example Company",
+        "resume_filename": "candidate.pdf",
+    }
+    create_response = client.post(
+        "/applications/external", headers=company_headers, json=payload
+    )
+    history_response = client.get(
+        "/applications/external/me", headers=company_headers
+    )
+    assert create_response.status_code == 403
+    assert history_response.status_code == 403
+
