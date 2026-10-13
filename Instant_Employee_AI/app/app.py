@@ -3,6 +3,7 @@ import html
 import re
 import sys
 import pandas as pd
+import requests
 import streamlit as st
 from pypdf import PdfReader
 
@@ -12,6 +13,39 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 DATA = ROOT / "data"
 JOBS_FILE = DATA / "jobs.csv"
+API_BASE_URL = st.secrets.get("API_BASE_URL", "https://instant-employee-api.onrender.com").rstrip("/")
+
+
+def api_request(method, path, *, token=None, **kwargs):
+    """Call the deployed FastAPI backend and return (data, error)."""
+    headers = kwargs.pop("headers", {})
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    try:
+        response = requests.request(method, f"{API_BASE_URL}{path}", headers=headers, timeout=20, **kwargs)
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {"detail": response.text[:300]}
+        if not response.ok:
+            detail = payload.get("detail", f"API request failed ({response.status_code})") if isinstance(payload, dict) else f"API request failed ({response.status_code})"
+            return None, str(detail)
+        return payload, None
+    except requests.RequestException:
+        return None, "Backend is temporarily unavailable. Please try again in a moment."
+
+
+def set_candidate_session(token):
+    me, error = api_request("GET", "/me", token=token)
+    if error:
+        return error
+    if me.get("role") != "talent":
+        return "This login belongs to a company account. Please use the correct account type."
+    st.session_state.candidate_api_token = token
+    st.session_state.candidate_logged_in = True
+    st.session_state.candidate_name = (me.get("profile") or {}).get("full_name") or me.get("email", "Candidate")
+    st.session_state.candidate_email = me.get("email", "").lower()
+    return None
 
 st.markdown("""
 <style>
@@ -292,7 +326,7 @@ elif view == "job_details":
 
 elif view == "candidate_auth":
     st.markdown("## Candidate account")
-    st.caption("This first prototype stores candidate accounts for the current browser session only.")
+    st.caption("Sign in with the live Instant Employee API. Use at least 8 characters for your password.")
     login, signup = st.tabs(["Login", "Create account"])
     with login:
         with st.form("candidate_login"):
@@ -300,41 +334,54 @@ elif view == "candidate_auth":
             password = st.text_input("Password", type="password", key="candidate_login_password")
             submit = st.form_submit_button("Login", type="primary", use_container_width=True)
         if submit:
-            account = st.session_state.get("candidate_accounts", {}).get(email.strip().lower())
-            if account and account["password"] == password:
-                st.session_state.candidate_logged_in = True
-                st.session_state.candidate_name = account["name"]
-                st.session_state.candidate_email = email.strip().lower()
-                st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"; st.rerun()
+            if not email.strip() or not password:
+                st.error("Enter your email and password.")
             else:
-                st.error("Account not found or password is incorrect. Create an account if you are new.")
+                token_data, error = api_request(
+                    "POST", "/auth/login",
+                    data={"username": email.strip().lower(), "password": password},
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                )
+                if error:
+                    st.error(error)
+                else:
+                    error = set_candidate_session(token_data["access_token"])
+                    if error:
+                        st.error(error)
+                    else:
+                        st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"
+                        st.rerun()
     with signup:
         with st.form("candidate_signup"):
-            name = st.text_input("Full name")
+            name = st.text_input("Full name", key="candidate_signup_name")
             email = st.text_input("Email address", key="candidate_signup_email")
             password = st.text_input("Create password", type="password", key="candidate_signup_password")
-            confirm = st.text_input("Confirm password", type="password")
+            confirm = st.text_input("Confirm password", type="password", key="candidate_signup_confirm")
             submit = st.form_submit_button("Create candidate account", type="primary", use_container_width=True)
         if submit:
             if not name.strip() or not email.strip() or not password:
                 st.error("Please fill in every field.")
             elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email.strip()):
                 st.error("Enter a valid email address.")
-            elif len(password) < 6:
-                st.error("Password must contain at least 6 characters.")
+            elif len(password) < 8:
+                st.error("Password must contain at least 8 characters.")
             elif password != confirm:
                 st.error("Passwords do not match.")
             else:
-                accounts = st.session_state.setdefault("candidate_accounts", {})
-                key = email.strip().lower()
-                if key in accounts:
-                    st.error("This email already has an account. Please log in.")
+                token_data, error = api_request(
+                    "POST", "/auth/signup",
+                    json={"email": email.strip().lower(), "password": password, "role": "talent", "full_name": name.strip()},
+                )
+                if error:
+                    st.error(error)
                 else:
-                    accounts[key] = {"name": name.strip(), "password": password}
-                    st.session_state.candidate_logged_in = True
-                    st.session_state.candidate_name = name.strip()
-                    st.session_state.candidate_email = key
-                    st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"; st.rerun()
+                    error = set_candidate_session(token_data["access_token"])
+                    if error:
+                        st.error(error)
+                    else:
+                        st.success("Candidate account created successfully.")
+                        st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"
+                        st.rerun()
     if st.button("← Back to home"):
         st.session_state.view = "home"; st.rerun()
 
