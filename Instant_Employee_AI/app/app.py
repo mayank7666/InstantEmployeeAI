@@ -100,6 +100,14 @@ with st.sidebar:
         st.session_state.view = "home"; st.rerun()
     if st.button("⇧  Upload Resume", use_container_width=True):
         st.session_state.view = "candidate"; st.rerun()
+    if st.session_state.get("candidate_logged_in"):
+        if st.button("▦  My Dashboard", use_container_width=True):
+            st.session_state.view = "candidate_dashboard"; st.rerun()
+        if st.button("✓  Applied Jobs", use_container_width=True):
+            st.session_state.view = "applied_jobs"; st.rerun()
+    else:
+        if st.button("👤  Candidate Login / Signup", use_container_width=True):
+            st.session_state.view = "candidate_auth"; st.rerun()
     st.divider()
     st.caption("COMPANY ACCESS")
     if st.button("▣  Employee Login", use_container_width=True):
@@ -228,8 +236,9 @@ if view == "home":
             with apply_col:
                 if st.button("Apply now  →", key=f"apply_job_card_{row_index}", type="primary", use_container_width=True):
                     st.session_state.apply_job_index = row_index
+                    st.session_state.pop("application_submitted", None)
                     if st.session_state.get("candidate_logged_in"):
-                        st.session_state.view = "candidate"
+                        st.session_state.view = "apply_resume"
                     else:
                         st.session_state.view = "candidate_auth"
                     st.rerun()
@@ -295,7 +304,7 @@ elif view == "candidate_auth":
                 st.session_state.candidate_logged_in = True
                 st.session_state.candidate_name = account["name"]
                 st.session_state.candidate_email = email.strip().lower()
-                st.session_state.view = "candidate"; st.rerun()
+                st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate"; st.rerun()
             else:
                 st.error("Account not found or password is incorrect. Create an account if you are new.")
     with signup:
@@ -324,9 +333,124 @@ elif view == "candidate_auth":
                     st.session_state.candidate_logged_in = True
                     st.session_state.candidate_name = name.strip()
                     st.session_state.candidate_email = key
-                    st.session_state.view = "candidate"; st.rerun()
+                    st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate"; st.rerun()
     if st.button("← Back to home"):
         st.session_state.view = "home"; st.rerun()
+
+elif view == "apply_resume":
+    if not st.session_state.get("candidate_logged_in"):
+        st.info("Please log in or create a candidate account to apply.")
+        if st.button("Continue to Candidate Login", type="primary", use_container_width=True):
+            st.session_state.view = "candidate_auth"
+            st.rerun()
+    else:
+        selected_index = st.session_state.get("apply_job_index")
+        if selected_index not in jobs.index:
+            st.warning("Please select a job from the home page before applying.")
+            if st.button("Back to jobs"):
+                st.session_state.view = "home"
+                st.rerun()
+        else:
+            selected_job = jobs.loc[selected_index]
+            apply_title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
+            apply_title = str(selected_job.get(apply_title_col, "Selected job")) if apply_title_col else "Selected job"
+            st.markdown("## Apply for this job")
+            st.markdown(f"### {html.escape(apply_title)}")
+            st.caption("Upload your resume as a PDF to submit your application.")
+            with st.form("submit_job_application"):
+                application_resume = st.file_uploader("Upload resume (PDF)", type=["pdf"], key="application_resume_pdf")
+                submit_application = st.form_submit_button("Submit application", type="primary", use_container_width=True)
+            if submit_application:
+                if application_resume is None:
+                    st.error("Please upload your resume PDF first.")
+                else:
+                    try:
+                        uploaded_text = extract_pdf_text(application_resume)
+                        if not uploaded_text:
+                            st.error("No readable text found in this PDF. Please upload a text-based PDF.")
+                        else:
+                            st.session_state.application_resume_name = application_resume.name
+                            st.session_state.application_resume_text = uploaded_text
+                            st.session_state.application_submitted = True
+                            title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
+                            company_col = next((c for c in jobs.columns if str(c).strip().lower() in {"company", "company name", "employer"}), None)
+                            job_id_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job id", "job_id", "id"}), None)
+                            job_record_id = str(selected_job.get(job_id_col, selected_index)) if job_id_col else str(selected_index)
+                            applications = st.session_state.setdefault("candidate_applications", {})
+                            candidate_email = st.session_state.get("candidate_email", "guest").strip().lower()
+                            candidate_list = applications.setdefault(candidate_email, [])
+                            if not any(app.get("job_id") == job_record_id for app in candidate_list):
+                                candidate_list.insert(0, {"job_id": job_record_id, "title": apply_title, "company": str(selected_job.get(company_col, "Company not specified")) if company_col else "Company not specified", "applied_on": __import__("datetime").datetime.now().strftime("%d %b %Y, %I:%M %p"), "status": "Application submitted", "resume": application_resume.name})
+                                st.success("✓ Resume uploaded successfully! Your application has been submitted.")
+                            else:
+                                st.info("You have already applied to this job from this account. It is listed in Applied Jobs.")
+                            st.info("This prototype confirms the application in the current session. Persistent storage and company-side application tracking will be added in a later step.")
+                    except Exception as error:
+                        st.error(f"Could not read this PDF: {error}")
+            if st.session_state.get("application_submitted"):
+                st.caption("Resume: " + st.session_state.get("application_resume_name", "Uploaded PDF"))
+            if st.button("← Back to jobs"):
+                st.session_state.view = "home"
+                st.rerun()
+
+elif view == "candidate_dashboard":
+    if not st.session_state.get("candidate_logged_in"):
+        st.warning("Please log in to view your candidate dashboard.")
+        if st.button("Candidate Login / Signup", type="primary"):
+            st.session_state.view = "candidate_auth"; st.rerun()
+    else:
+        email = st.session_state.get("candidate_email", "").strip().lower()
+        applications = st.session_state.get("candidate_applications", {}).get(email, [])
+        st.markdown("## 👋 My Candidate Dashboard")
+        st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Track your job search in one place.")
+        a, b, c = st.columns(3)
+        a.metric("Total Jobs Applied", len(applications))
+        b.metric("In Progress", sum(1 for app in applications if app.get("status") not in {"Rejected", "Selected", "Offer received"}))
+        c.metric("Selected / Offers", sum(1 for app in applications if app.get("status") in {"Selected", "Offer received"}))
+        st.markdown("### Recent Applications")
+        if not applications:
+            st.info("You have not applied to any jobs yet. Browse jobs and select Apply now to get started.")
+            if st.button("Find jobs", type="primary"):
+                st.session_state.view = "home"; st.rerun()
+        else:
+            for app in applications[:5]:
+                with st.container(border=True):
+                    left, right = st.columns([3, 1])
+                    with left:
+                        st.markdown("#### " + html.escape(app.get("title", "Job")))
+                        st.caption(html.escape(app.get("company", "Company not specified")) + " · Applied " + html.escape(app.get("applied_on", "")))
+                    with right:
+                        st.caption("APPLICATION STATUS")
+                        st.markdown("**" + html.escape(app.get("status", "Application submitted")) + "**")
+            if st.button("View all applied jobs", type="primary"):
+                st.session_state.view = "applied_jobs"; st.rerun()
+        st.info("Prototype note: application history is currently kept in this Streamlit session. Permanent account login and history across devices/restarts need a database and secure authentication.")
+
+elif view == "applied_jobs":
+    if not st.session_state.get("candidate_logged_in"):
+        st.warning("Please log in to view your applied jobs.")
+        if st.button("Candidate Login / Signup", type="primary"):
+            st.session_state.view = "candidate_auth"; st.rerun()
+    else:
+        email = st.session_state.get("candidate_email", "").strip().lower()
+        applications = st.session_state.get("candidate_applications", {}).get(email, [])
+        st.markdown("## ✓ Applied Jobs")
+        st.caption("Your application history and current status")
+        st.metric("Total applications", len(applications))
+        if not applications:
+            st.info("No applications yet. When you apply to a job, it will appear here.")
+        else:
+            filter_status = st.selectbox("Filter by status", ["All statuses"] + sorted({app.get("status", "Application submitted") for app in applications}))
+            visible = applications if filter_status == "All statuses" else [app for app in applications if app.get("status") == filter_status]
+            for app in visible:
+                with st.container(border=True):
+                    st.markdown("### " + html.escape(app.get("title", "Job")))
+                    st.write("**Company:** " + html.escape(app.get("company", "Company not specified")))
+                    st.write("**Applied on:** " + html.escape(app.get("applied_on", "Not available")))
+                    st.write("**Status:** " + html.escape(app.get("status", "Application submitted")))
+                    st.caption("Resume: " + html.escape(app.get("resume", "Uploaded PDF")))
+        if st.button("← Back to My Dashboard"):
+            st.session_state.view = "candidate_dashboard"; st.rerun()
 
 elif view == "candidate":
     if not st.session_state.get("candidate_logged_in"):
