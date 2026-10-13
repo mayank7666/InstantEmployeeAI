@@ -765,26 +765,11 @@ elif view == "candidate":
             st.session_state.view = "home"; st.rerun()
 
 elif view == "employee":
-    st.markdown("## Company employee login")
-    st.caption("Use the employee ID and password assigned by the company. Successful login opens the existing company dashboard.")
-    with st.form("employee_login"):
-        employee_id = st.text_input("Employee ID")
-        password = st.text_input("Password", type="password")
-        submit = st.form_submit_button("Login to company dashboard", type="primary", use_container_width=True)
-    if submit:
-        try:
-            valid_id = str(st.secrets["employee_login"]["username"])
-            valid_password = str(st.secrets["employee_login"]["password"])
-        except Exception:
-            valid_id, valid_password = "", ""
-        if not valid_id or not valid_password:
-            st.error("Employee credentials are not configured. Add employee_login.username and employee_login.password in Streamlit Cloud → App settings → Secrets.")
-        elif employee_id.strip() == valid_id and password == valid_password:
-            st.session_state.employee_authenticated = True
-            st.switch_page("pages/4_Employee_Dashboard.py")
-        else:
-            st.error("Incorrect employee ID or password.")
-    st.info("Candidate accounts cannot open the company dashboard.")
+    st.markdown("## Company workspace")
+    st.caption("Company accounts ab Company Dashboard se securely login ya create kiye jaate hain.")
+    st.info("Company Dashboard par apne company email aur password se login karein. Candidate account se company dashboard access nahi milega.")
+    if st.button("Open Company Login", type="primary", use_container_width=True):
+        st.switch_page("pages/4_Employee_Dashboard.py")
     if st.button("← Back to home"):
         st.session_state.view = "home"; st.rerun()
 
