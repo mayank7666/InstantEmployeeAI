@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "Instant_Employee_AI/backend/**"
+      - "Instant_Employee_AI/app/**"
       - ".github/workflows/backend-tests.yml"
   pull_request:
     paths:
