@@ -158,3 +158,46 @@ def test_company_cannot_use_talent_external_application_endpoints():
     assert create_response.status_code == 403
     assert history_response.status_code == 403
 
+def test_company_application_list_only_returns_owned_job_applications():
+    first_company = signup("company", unique_email("first-company"))
+    second_company = signup("company", unique_email("second-company"))
+    candidate = signup("talent", unique_email("company-dashboard-candidate"))
+
+    def create_job(headers, title):
+        response = client.post("/jobs", headers=headers, json={
+            "title": title,
+            "department": "Engineering",
+            "description": "Build and maintain backend API services.",
+            "required_skills": "Python, FastAPI",
+            "min_budget": 10000,
+            "max_budget": 20000,
+            "work_mode": "Remote",
+            "timezone": "Asia/Kolkata",
+        })
+        assert response.status_code == 201, response.text
+        return response.json()["id"]
+
+    first_job_id = create_job(first_company, "First Company API Engineer")
+    second_job_id = create_job(second_company, "Second Company API Engineer")
+
+    for job_id in (first_job_id, second_job_id):
+        response = client.post(
+            f"/jobs/{job_id}/apply",
+            headers=candidate,
+            json={"resume_filename": "candidate.pdf"},
+        )
+        assert response.status_code == 201, response.text
+
+    first_company_apps = client.get("/applications/company", headers=first_company)
+    second_company_apps = client.get("/applications/company", headers=second_company)
+    assert first_company_apps.status_code == 200, first_company_apps.text
+    assert second_company_apps.status_code == 200, second_company_apps.text
+    assert [row["job_id"] for row in first_company_apps.json()] == [first_job_id]
+    assert [row["job_id"] for row in second_company_apps.json()] == [second_job_id]
+
+
+def test_company_application_list_rejects_talent_and_unauthenticated_users():
+    talent_headers = signup("talent", unique_email("company-app-list-talent"))
+    assert client.get("/applications/company").status_code == 401
+    assert client.get("/applications/company", headers=talent_headers).status_code == 403
+
