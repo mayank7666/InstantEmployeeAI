@@ -132,32 +132,54 @@ if view == "home":
     with dept_col:
         departments = sorted({str(x).strip() for x in jobs[dept_col_name].tolist() if str(x).strip()}) if dept_col_name and not jobs.empty else []
         category_options = ["All categories"] + departments
-        selected_department = st.selectbox(
-            "Category",
-            category_options,
-            index=0,
-            accept_new_options=True,
-            placeholder="Select or type a category",
-            key="home_category_select",
-        )
+        # Keep category selection and typing in the same control when supported by Streamlit.
+        try:
+            selected_department = st.selectbox(
+                "Category",
+                category_options,
+                index=0,
+                accept_new_options=True,
+                placeholder="Select or type a category",
+                key="home_category_filter",
+            )
+        except TypeError:
+            # Compatibility fallback for older Streamlit versions.
+            selected_department = st.selectbox("Category", category_options, index=0, key="home_category_filter")
     with mode_col:
         modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()}) if work_mode_col and not jobs.empty else []
-        selected_mode = st.selectbox("Work mode", ["All modes"] + modes)
+        selected_mode = st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
 
     filtered_jobs = jobs.copy()
     if search_text.strip() and not filtered_jobs.empty:
         searchable_cols = [c for c in [title_col, desc_col, skills_col, dept_col_name] if c]
         if searchable_cols:
-            mask = filtered_jobs[searchable_cols].astype(str).apply(lambda row: row.str.contains(search_text.strip(), case=False, regex=False).any(), axis=1)
-            filtered_jobs = filtered_jobs[mask]
-    if selected_department and selected_department != "All categories" and dept_col_name:
-        filtered_jobs = filtered_jobs[
-            filtered_jobs[dept_col_name].astype(str).str.contains(
-                str(selected_department).strip(), case=False, na=False, regex=False
+            mask = filtered_jobs[searchable_cols].astype(str).apply(
+                lambda row: row.str.contains(search_text.strip(), case=False, regex=False, na=False).any(),
+                axis=1,
             )
-        ]
+            filtered_jobs = filtered_jobs[mask]
+
+    # A typed category searches category, title, skills and description; a selected
+    # known category filters by its category value.
+    if selected_department and selected_department != "All categories":
+        typed_category = str(selected_department).strip()
+        if typed_category in departments and dept_col_name:
+            filtered_jobs = filtered_jobs[
+                filtered_jobs[dept_col_name].astype(str).str.casefold() == typed_category.casefold()
+            ]
+        else:
+            category_search_cols = [c for c in [dept_col_name, title_col, skills_col, desc_col] if c and c in filtered_jobs.columns]
+            if category_search_cols:
+                category_mask = filtered_jobs[category_search_cols].astype(str).apply(
+                    lambda row: row.str.contains(typed_category, case=False, regex=False, na=False).any(),
+                    axis=1,
+                )
+                filtered_jobs = filtered_jobs[category_mask]
+
     if selected_mode != "All modes" and work_mode_col:
-        filtered_jobs = filtered_jobs[filtered_jobs[work_mode_col].astype(str) == selected_mode]
+        filtered_jobs = filtered_jobs[
+            filtered_jobs[work_mode_col].astype(str).str.casefold() == str(selected_mode).casefold()
+        ]
 
     count_a, count_b = st.columns([3, 1])
     with count_a:
