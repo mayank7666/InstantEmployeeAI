@@ -35,6 +35,7 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(20), default="talent")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    company_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     profile: Mapped[Optional["Profile"]] = relationship(back_populates="user", uselist=False)
     jobs: Mapped[list["Job"]] = relationship(back_populates="company")
@@ -97,7 +98,10 @@ if "picture_data" not in {col["name"] for col in inspect(engine).get_columns("pr
     with engine.begin() as connection:
         connection.execute(sql_text("ALTER TABLE profiles ADD COLUMN picture_data TEXT NOT NULL DEFAULT ''"))
 
-app = FastAPI(title="Instant Employee API", version="0.1.0", description="MVP API for talent profiles, jobs, and applications.")
+if "company_id" not in {col["name"] for col in inspect(engine).get_columns("users")}:
+    with engine.begin() as connection:
+        connection.execute(sql_text("ALTER TABLE users ADD COLUMN company_id INTEGER"))
+\napp = FastAPI(title="Instant Employee API", version="0.1.0", description="MVP API for talent profiles, jobs, and applications.")
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "*").split(","), allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 class SignupIn(BaseModel):
@@ -160,7 +164,7 @@ def current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_
     user = db.get(User, user_id)
     if not user or not user.is_active: raise HTTPException(status_code=401, detail="Account not found or disabled")
     return user
-def require_role(role: str):
+def organization_id(user: User) -> int:\n    return user.company_id or user.id\ndef require_role(role: str):
     def role_checker(user: User = Depends(current_user)) -> User:
         if user.role != role:
             raise HTTPException(status_code=403, detail=role + " account required")
@@ -196,7 +200,7 @@ def bulk_create_company_users(data: BulkCompanyUsersIn, admin: User = Depends(re
         if len(password) < 8 or len(password) > 128:
             errors.append({"row": index, "email": email, "error": "Password must be 8-128 characters"})
             continue
-        user = User(email=email, password_hash=hash_password(password), role="company")
+        user = User(email=email, password_hash=hash_password(password), role="company", company_id=admin.id)
         db.add(user)
         db.flush()
         db.add(Profile(user_id=user.id, full_name=name))
@@ -248,11 +252,11 @@ def list_jobs(q: str="", department: str="", work_mode: str="", db: Session=Depe
 @app.post("/jobs", status_code=201)
 def create_job(data: JobIn, user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     if data.max_budget and data.min_budget>data.max_budget: raise HTTPException(status_code=422,detail="Minimum budget cannot exceed maximum budget")
-    job=Job(company_id=user.id,**data.model_dump()); db.add(job); db.commit(); db.refresh(job)
+    job=Job(company_id=organization_id(user),**data.model_dump()); db.add(job); db.commit(); db.refresh(job)
     return {"id":job.id,"title":job.title,"status":"active"}
 @app.get("/jobs/mine")
 def my_jobs(user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
-    jobs=db.query(Job).filter(Job.company_id==user.id).order_by(Job.created_at.desc()).all()
+    jobs=db.query(Job).filter(Job.company_id==organization_id(user)).order_by(Job.created_at.desc()).all()
     return [{"id":j.id,"title":j.title,"department":j.department,"applications_count":len(j.applications),"is_active":j.is_active} for j in jobs]
 @app.post("/jobs/{job_id}/apply", status_code=201)
 def apply(job_id: int, data: ApplicationIn, user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
@@ -319,7 +323,7 @@ def company_applications(user: User=Depends(require_role("company")), db: Sessio
     rows = (
         db.query(Application)
         .join(Job, Application.job_id == Job.id)
-        .filter(Job.company_id == user.id)
+        .filter(Job.company_id == organization_id(user))
         .order_by(Application.created_at.desc())
         .all()
     )
@@ -338,12 +342,12 @@ def company_applications(user: User=Depends(require_role("company")), db: Sessio
 @app.get("/jobs/{job_id}/applications")
 def job_applications(job_id: int, user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     job=db.get(Job,job_id)
-    if not job or job.company_id!=user.id: raise HTTPException(status_code=404,detail="Job not found")
+    if not job or job.company_id!=organization_id(user): raise HTTPException(status_code=404,detail="Job not found")
     return [{"id":a.id,"talent_id":a.talent_id,"email":a.talent.email,"full_name":a.talent.profile.full_name if a.talent.profile else "","status":a.status,"applied_at":a.created_at.isoformat(),"resume_filename":a.resume_filename} for a in job.applications]
 @app.patch("/applications/{application_id}/status")
 def update_status(application_id: int, new_status: str="Under Review", user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     allowed={"Applied","Under Review","Shortlisted","Rejected","Selected"}
     if new_status not in allowed: raise HTTPException(status_code=422,detail="Invalid application status")
     a=db.get(Application,application_id)
-    if not a or a.job.company_id!=user.id: raise HTTPException(status_code=404,detail="Application not found")
+    if not a or a.job.company_id!=organization_id(user): raise HTTPException(status_code=404,detail="Application not found")
     a.status=new_status; db.commit(); return {"id":a.id,"status":a.status}
