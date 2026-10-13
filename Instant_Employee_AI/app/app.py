@@ -101,7 +101,7 @@ with st.sidebar:
     if st.button("⇧  Upload Resume", use_container_width=True):
         st.session_state.view = "candidate"; st.rerun()
     if st.session_state.get("candidate_logged_in"):
-        if st.button("▦  My Dashboard", use_container_width=True):
+        if st.button("▦  My Profile", use_container_width=True):
             st.session_state.view = "candidate_dashboard"; st.rerun()
         if st.button("✓  Applied Jobs", use_container_width=True):
             st.session_state.view = "applied_jobs"; st.rerun()
@@ -396,13 +396,13 @@ elif view == "apply_resume":
 
 elif view == "candidate_dashboard":
     if not st.session_state.get("candidate_logged_in"):
-        st.warning("Please log in to view your candidate dashboard.")
+        st.warning("Please log in to view your profile.")
         if st.button("Candidate Login / Signup", type="primary"):
             st.session_state.view = "candidate_auth"; st.rerun()
     else:
         email = st.session_state.get("candidate_email", "").strip().lower()
         applications = st.session_state.get("candidate_applications", {}).get(email, [])
-        st.markdown("## 👋 My Candidate Dashboard")
+        st.markdown("## 👋 My Profile")
         st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Track your job search in one place.")
         a, b, c = st.columns(3)
         a.metric("Total Jobs Applied", len(applications))
@@ -450,7 +450,7 @@ elif view == "applied_jobs":
                     st.write("**Applied on:** " + html.escape(app.get("applied_on", "Not available")))
                     st.write("**Status:** " + html.escape(app.get("status", "Application submitted")))
                     st.caption("Resume: " + html.escape(app.get("resume", "Uploaded PDF")))
-        if st.button("← Back to My Dashboard"):
+        if st.button("← Back to My Profile"):
             st.session_state.view = "candidate_dashboard"; st.rerun()
 
 elif view == "candidate":
