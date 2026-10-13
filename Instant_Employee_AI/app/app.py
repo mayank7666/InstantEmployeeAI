@@ -458,7 +458,64 @@ elif view == "candidate_dashboard":
                     st.session_state.pop(key, None)
                 st.session_state.view = "home"
                 st.rerun()
-        st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Track your job search in one place.")
+
+        token = st.session_state.get("candidate_api_token")
+        profile, profile_error = api_request("GET", "/profiles/me", token=token)
+        if profile_error:
+            st.error("Profile load nahi ho paya: " + profile_error)
+            profile = {
+                "full_name": st.session_state.get("candidate_name", ""),
+                "headline": "", "skills": "", "timezone": "Asia/Kolkata",
+                "availability": "Available", "portfolio_url": "", "resume_filename": "",
+                "completion_percent": 0,
+            }
+
+        st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Your profile details are saved to the backend.")
+        st.metric("Profile completion", str(profile.get("completion_percent", 0)) + "%")
+        st.progress(max(0, min(100, int(profile.get("completion_percent", 0)))) / 100)
+
+        st.markdown("### Edit profile")
+        with st.form("candidate_profile_edit"):
+            profile_name = st.text_input("Full name", value=profile.get("full_name", "") or "")
+            profile_headline = st.text_input("Professional headline", value=profile.get("headline", "") or "", placeholder="e.g. AIML Fresher | Python | Machine Learning")
+            profile_skills = st.text_area("Skills (comma-separated)", value=profile.get("skills", "") or "", placeholder="Python, SQL, Machine Learning, Power BI")
+            profile_timezone = st.text_input("Timezone", value=profile.get("timezone", "Asia/Kolkata") or "Asia/Kolkata")
+            availability_options = ["Available", "Open to opportunities", "Part-time", "Not available"]
+            current_availability = profile.get("availability", "Available") or "Available"
+            availability_index = availability_options.index(current_availability) if current_availability in availability_options else 0
+            profile_availability = st.selectbox("Availability", availability_options, index=availability_index)
+            profile_portfolio = st.text_input("Portfolio URL", value=profile.get("portfolio_url", "") or "", placeholder="https://...")
+            save_profile = st.form_submit_button("Save profile", type="primary", use_container_width=True)
+
+        if save_profile:
+            if not profile_name.strip():
+                st.error("Full name is required.")
+            else:
+                updated_profile, save_error = api_request(
+                    "PUT", "/profiles/me", token=token,
+                    json={
+                        "full_name": profile_name.strip(),
+                        "headline": profile_headline.strip(),
+                        "skills": profile_skills.strip(),
+                        "timezone": profile_timezone.strip() or "Asia/Kolkata",
+                        "availability": profile_availability,
+                        "portfolio_url": profile_portfolio.strip(),
+                        "resume_filename": profile.get("resume_filename", "") or "",
+                    },
+                )
+                if save_error:
+                    st.error("Profile save nahi hua: " + save_error)
+                else:
+                    st.session_state.candidate_name = updated_profile.get("full_name", profile_name.strip())
+                    st.session_state.profile_saved_message = "Profile database mein successfully save ho gaya."
+                    st.rerun()
+
+        if st.session_state.pop("profile_saved_message", None):
+            st.success("Profile database mein successfully save ho gaya.")
+
+        if profile.get("resume_filename"):
+            st.caption("Saved resume filename: " + html.escape(profile.get("resume_filename", "")))
+        st.divider()
         a, b, c = st.columns(3)
         a.metric("Total Jobs Applied", len(applications))
         b.metric("In Progress", sum(1 for app in applications if app.get("status") not in {"Rejected", "Selected", "Offer received"}))
@@ -480,8 +537,8 @@ elif view == "candidate_dashboard":
                         st.markdown("**" + html.escape(app.get("status", "Application submitted")) + "**")
             if st.button("View all applied jobs", type="primary"):
                 st.session_state.view = "applied_jobs"; st.rerun()
-        st.info("Prototype note: application history is currently kept in this Streamlit session. Permanent account login and history across devices/restarts need a database and secure authentication.")
-
+        st.info("Note: profile details save to the backend database. Application history is still session-based and will be connected separately.")
+ 
 elif view == "applied_jobs":
     if not st.session_state.get("candidate_logged_in"):
         st.warning("Please log in to view your applied jobs.")
