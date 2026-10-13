@@ -9,6 +9,7 @@ from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, create_engine, inspect, text as sql_text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker, Session
+from sqlalchemy.exc import IntegrityError
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./instant_employee.db")
 # Some hosting providers supply PostgreSQL URLs using the legacy postgres:// scheme.
@@ -239,7 +240,12 @@ def apply_to_csv_job(data: ExternalApplicationIn, user: User=Depends(require_rol
         resume_filename=data.resume_filename.strip(),
     )
     db.add(application)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # The database constraint is the final guard against simultaneous duplicate requests.
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Already applied to this job")
     db.refresh(application)
     return {
         "id": application.id,
