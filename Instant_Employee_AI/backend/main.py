@@ -123,9 +123,12 @@ def current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_
     user = db.get(User, user_id)
     if not user or not user.is_active: raise HTTPException(status_code=401, detail="Account not found or disabled")
     return user
-def require_role(role: str, user: User = Depends(current_user)) -> User:
-    if user.role != role: raise HTTPException(status_code=403, detail=role + " account required")
-    return user
+def require_role(role: str):
+    def role_checker(user: User = Depends(current_user)) -> User:
+        if user.role != role:
+            raise HTTPException(status_code=403, detail=role + " account required")
+        return user
+    return role_checker
 def profile_to_dict(p: Profile):
     return {"full_name":p.full_name,"headline":p.headline,"skills":p.skills,"timezone":p.timezone,"availability":p.availability,"portfolio_url":p.portfolio_url,"resume_filename":p.resume_filename}
 @app.get("/health")
