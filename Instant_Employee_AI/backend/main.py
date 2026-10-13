@@ -165,7 +165,8 @@ def current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_
     if not user or not user.is_active: raise HTTPException(status_code=401, detail="Account not found or disabled")
     return user
 def organization_id(user: User) -> int:
-    return user.company_id or user.id\ndef require_role(role: str):
+    return user.company_id or user.id
+def require_role(role: str):
     def role_checker(user: User = Depends(current_user)) -> User:
         if user.role != role:
             raise HTTPException(status_code=403, detail=role + " account required")
