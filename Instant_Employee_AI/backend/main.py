@@ -105,6 +105,9 @@ class SignupIn(BaseModel):
     password: str = Field(min_length=8, max_length=128)
     role: str = Field(default="talent", pattern="^(talent|company)$")
     full_name: str = Field(default="", max_length=160)
+class BulkCompanyUsersIn(BaseModel):
+    employees: list[dict] = Field(min_length=1, max_length=100)
+
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -165,6 +168,45 @@ def require_role(role: str):
     return role_checker
 def profile_to_dict(p: Profile):
     return {"full_name":p.full_name,"headline":p.headline,"skills":p.skills,"timezone":p.timezone,"availability":p.availability,"portfolio_url":p.portfolio_url,"resume_filename":p.resume_filename,"picture_data":p.picture_data or ""}
+@app.post("/auth/company/bulk-create")
+def bulk_create_company_users(data: BulkCompanyUsersIn, admin: User = Depends(require_role("company")), db: Session = Depends(get_db)):
+    """Create up to 100 company-role login accounts in one request."""
+    created = []
+    errors = []
+    seen = set()
+    for index, item in enumerate(data.employees, start=1):
+        if not isinstance(item, dict):
+            errors.append({"row": index, "error": "Expected an object with name and email"})
+            continue
+        name = str(item.get("name", "")).strip()[:160]
+        email = str(item.get("email", "")).strip().lower()
+        password = str(item.get("password", "")).strip()
+        if not name or not email or "@" not in email:
+            errors.append({"row": index, "email": email, "error": "Valid name and email are required"})
+            continue
+        if email in seen:
+            errors.append({"row": index, "email": email, "error": "Duplicate email in this batch"})
+            continue
+        seen.add(email)
+        if db.query(User).filter(User.email == email).first():
+            errors.append({"row": index, "email": email, "error": "Email already registered"})
+            continue
+        if not password:
+            password = secrets.token_urlsafe(10)
+        if len(password) < 8 or len(password) > 128:
+            errors.append({"row": index, "email": email, "error": "Password must be 8-128 characters"})
+            continue
+        user = User(email=email, password_hash=hash_password(password), role="company")
+        db.add(user)
+        db.flush()
+        db.add(Profile(user_id=user.id, full_name=name))
+        created.append({"name": name, "email": email, "temporary_password": password, "role": "company"})
+    if created:
+        db.commit()
+    else:
+        db.rollback()
+    return {"created_count": len(created), "created": created, "errors": errors}
+
 @app.get("/health")
 def health(): return {"status":"ok","service":"instant-employee-api","version":"0.1.0"}
 @app.post("/auth/signup", response_model=TokenOut, status_code=201)
