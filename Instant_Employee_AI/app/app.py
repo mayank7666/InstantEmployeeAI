@@ -508,8 +508,8 @@ elif view == "candidate_dashboard":
         <style>
         [class*="st-key-profile_avatar"] {position:relative; min-height:142px;}
         [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] {
-            position:relative; width:42px; height:42px; margin-top:58px;
-            margin-left:72px; z-index:5;
+            position:absolute; top:76px; left:72px; width:42px; height:42px;
+            margin:0; z-index:5;
         }
         [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] section {
             width:42px!important; min-width:42px!important; height:42px!important;
