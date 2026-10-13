@@ -1,17 +1,47 @@
+import os
 import uuid
 from fastapi.testclient import TestClient
-from main import app
+from main import app, SessionLocal, User
 
 client = TestClient(app)
+TEST_SETUP_KEY = "test-only-setup-key"
+os.environ["ADMIN_SETUP_KEY"] = TEST_SETUP_KEY
+_admin_headers = None
 
 def unique_email(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:12]}@example.com"
 
 def signup(role: str, email: str):
+    global _admin_headers
+    if role == "company":
+        if _admin_headers is None:
+            # Clean up only test-created root admins so this suite can run repeatedly.
+            with SessionLocal() as db:
+                roots = db.query(User).filter(User.role == "company", User.company_id.is_(None)).all()
+                for root in roots:
+                    db.delete(root)
+                db.commit()
+            admin_email = unique_email("test-admin")
+            response = client.post("/auth/company/bootstrap", json={
+                "email": admin_email,
+                "password": "TestPassword123!",
+                "full_name": "Test Admin",
+                "setup_key": TEST_SETUP_KEY,
+            })
+            assert response.status_code == 201, response.text
+            _admin_headers = {"Authorization": f"Bearer {response.json()['access_token']}"}
+        response = client.post("/auth/company/bulk-create", headers=_admin_headers, json={
+            "employees": [{"name": "Test Company", "email": email, "password": "TestPassword123!"}]
+        })
+        assert response.status_code == 200, response.text
+        login_response = client.post("/auth/login", data={
+            "username": email, "password": "TestPassword123!"
+        })
+        assert login_response.status_code == 200, login_response.text
+        return {"Authorization": f"Bearer {login_response.json()['access_token']}"}
     response = client.post("/auth/signup", json={
         "email": email,
         "password": "TestPassword123!",
-        "role": role,
         "full_name": "Test User",
     })
     assert response.status_code == 201, response.text
@@ -201,3 +231,27 @@ def test_company_application_list_rejects_talent_and_unauthenticated_users():
     assert client.get("/applications/company").status_code == 401
     assert client.get("/applications/company", headers=talent_headers).status_code == 403
 
+
+
+def test_public_signup_cannot_create_company_admin():
+    response = client.post("/auth/signup", json={
+        "email": unique_email("public-company"),
+        "password": "TestPassword123!",
+        "full_name": "Unauthorized Company",
+        "role": "company",
+    })
+    assert response.status_code == 201, response.text
+    token = response.json()["access_token"]
+    me = client.get("/me", headers={"Authorization": f"Bearer {token}"})
+    assert me.status_code == 200
+    assert me.json()["role"] == "talent"
+
+
+def test_admin_bootstrap_requires_private_setup_key():
+    response = client.post("/auth/company/bootstrap", json={
+        "email": unique_email("wrong-key"),
+        "password": "TestPassword123!",
+        "full_name": "Test Admin",
+        "setup_key": "incorrect-key",
+    })
+    assert response.status_code == 403
