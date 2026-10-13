@@ -153,11 +153,40 @@ if view == "home":
     if search_text.strip() and not filtered_jobs.empty:
         searchable_cols = [c for c in [title_col, desc_col, skills_col, dept_col_name] if c]
         if searchable_cols:
-            mask = filtered_jobs[searchable_cols].astype(str).apply(
-                lambda row: row.str.contains(search_text.strip(), case=False, regex=False, na=False).any(),
-                axis=1,
+            # Match individual query terms across title, skills, category and description.
+            # Then rank exact/strong title matches above weaker description matches.
+            query = search_text.strip()
+            terms = [term for term in query.split() if term]
+            searchable_text = filtered_jobs[searchable_cols].astype(str).apply(
+                lambda row: " ".join(row.values), axis=1
             )
-            filtered_jobs = filtered_jobs[mask]
+            term_mask = searchable_text.apply(
+                lambda value: all(term.casefold() in value.casefold() for term in terms)
+            )
+            filtered_jobs = filtered_jobs[term_mask].copy()
+
+            if not filtered_jobs.empty:
+                def _job_relevance(row):
+                    title = str(row.get(title_col, "")) if title_col else ""
+                    skills = str(row.get(skills_col, "")) if skills_col else ""
+                    category = str(row.get(dept_col_name, "")) if dept_col_name else ""
+                    description = str(row.get(desc_col, "")) if desc_col else ""
+                    q = query.casefold()
+                    score = 0
+                    if title.casefold() == q:
+                        score += 100
+                    if q in title.casefold():
+                        score += 60
+                    score += sum(12 for term in terms if term.casefold() in title.casefold())
+                    score += sum(8 for term in terms if term.casefold() in skills.casefold())
+                    score += sum(5 for term in terms if term.casefold() in category.casefold())
+                    score += sum(2 for term in terms if term.casefold() in description.casefold())
+                    return score
+
+                filtered_jobs["_search_relevance"] = filtered_jobs.apply(_job_relevance, axis=1)
+                filtered_jobs = filtered_jobs.sort_values(
+                    "_search_relevance", ascending=False, kind="stable"
+                ).drop(columns=["_search_relevance"])
 
     # A typed category searches category, title, skills and description; a selected
     # known category filters by its category value.
