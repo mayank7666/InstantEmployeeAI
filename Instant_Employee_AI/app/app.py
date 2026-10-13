@@ -471,6 +471,8 @@ elif view == "candidate_dashboard":
             }
 
         st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Your profile details are saved to the backend.")
+        if profile.get("picture_data"):
+            st.image(profile["picture_data"], caption="Profile picture", width=160)
         st.metric("Profile completion", str(profile.get("completion_percent", 0)) + "%")
         st.progress(max(0, min(100, int(profile.get("completion_percent", 0)))) / 100)
 
@@ -485,12 +487,22 @@ elif view == "candidate_dashboard":
             availability_index = availability_options.index(current_availability) if current_availability in availability_options else 0
             profile_availability = st.selectbox("Availability", availability_options, index=availability_index)
             profile_portfolio = st.text_input("Portfolio URL", value=profile.get("portfolio_url", "") or "", placeholder="https://...")
+            profile_picture = st.file_uploader("Upload profile picture (JPG or PNG, max 2 MB)", type=["jpg", "jpeg", "png"], key="candidate_profile_picture", help="Choose a clear photo for your candidate profile.")
             save_profile = st.form_submit_button("Save profile", type="primary", use_container_width=True)
 
         if save_profile:
             if not profile_name.strip():
                 st.error("Full name is required.")
             else:
+                picture_data = profile.get("picture_data", "") or ""
+                if profile_picture is not None:
+                    picture_bytes = profile_picture.getvalue()
+                    if len(picture_bytes) > 2 * 1024 * 1024:
+                        st.error("Profile picture 2 MB se chhoti honi chahiye.")
+                        st.stop()
+                    import base64
+                    picture_mime = "image/png" if profile_picture.type == "image/png" else "image/jpeg"
+                    picture_data = "data:" + picture_mime + ";base64," + base64.b64encode(picture_bytes).decode("ascii")
                 updated_profile, save_error = api_request(
                     "PUT", "/profiles/me", token=token,
                     json={
@@ -501,6 +513,7 @@ elif view == "candidate_dashboard":
                         "availability": profile_availability,
                         "portfolio_url": profile_portfolio.strip(),
                         "resume_filename": profile.get("resume_filename", "") or "",
+                        "picture_data": picture_data,
                     },
                 )
                 if save_error:
