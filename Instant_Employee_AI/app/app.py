@@ -447,22 +447,26 @@ elif view == "apply_resume":
                         if not uploaded_text:
                             st.error("No readable text found in this PDF. Please upload a text-based PDF.")
                         else:
-                            st.session_state.application_resume_name = application_resume.name
-                            st.session_state.application_resume_text = uploaded_text
-                            st.session_state.application_submitted = True
                             title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
                             company_col = next((c for c in jobs.columns if str(c).strip().lower() in {"company", "company name", "employer"}), None)
                             job_id_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job id", "job_id", "id"}), None)
                             job_record_id = str(selected_job.get(job_id_col, selected_index)) if job_id_col else str(selected_index)
-                            applications = st.session_state.setdefault("candidate_applications", {})
-                            candidate_email = st.session_state.get("candidate_email", "guest").strip().lower()
-                            candidate_list = applications.setdefault(candidate_email, [])
-                            if not any(app.get("job_id") == job_record_id for app in candidate_list):
-                                candidate_list.insert(0, {"job_id": job_record_id, "title": apply_title, "company": str(selected_job.get(company_col, "Company not specified")) if company_col else "Company not specified", "applied_on": __import__("datetime").datetime.now().strftime("%d %b %Y, %I:%M %p"), "status": "Application submitted", "resume": application_resume.name})
-                                st.success("✓ Resume uploaded successfully! Your application has been submitted.")
+                            company_name = str(selected_job.get(company_col, "Company not specified")) if company_col else "Company not specified"
+                            application_data, application_error = api_request(
+                                "POST", "/applications/external", token=st.session_state.get("candidate_api_token"),
+                                json={"job_key": job_record_id, "job_title": apply_title, "company_name": company_name, "resume_filename": application_resume.name},
+                            )
+                            if application_error:
+                                if "Already applied to this job" in application_error:
+                                    st.info("You have already applied to this job from this account. It is listed in Applied Jobs.")
+                                else:
+                                    st.error("Application database mein save nahi hua: " + application_error)
                             else:
-                                st.info("You have already applied to this job from this account. It is listed in Applied Jobs.")
-                            st.info("This prototype confirms the application in the current session. Persistent storage and company-side application tracking will be added in a later step.")
+                                st.session_state.application_resume_name = application_resume.name
+                                st.session_state.application_resume_text = uploaded_text
+                                st.session_state.application_submitted = True
+                                st.success("✓ Resume uploaded and application saved to the database.")
+                                st.rerun()
                     except Exception as error:
                         st.error(f"Could not read this PDF: {error}")
             if st.session_state.get("application_submitted"):
@@ -477,8 +481,9 @@ elif view == "candidate_dashboard":
         if st.button("Candidate Login / Signup", type="primary"):
             st.session_state.view = "candidate_auth"; st.rerun()
     else:
-        email = st.session_state.get("candidate_email", "").strip().lower()
-        applications = st.session_state.get("candidate_applications", {}).get(email, [])
+        token = st.session_state.get("candidate_api_token")
+        applications, applications_error = api_request("GET", "/applications/external/me", token=token)
+        applications = applications if not applications_error and isinstance(applications, list) else []
         header_col, logout_col = st.columns([5, 1])
         with header_col:
             st.markdown("## 👋 My Profile")
@@ -631,14 +636,15 @@ elif view == "candidate_dashboard":
                 with st.container(border=True):
                     left, right = st.columns([3, 1])
                     with left:
-                        st.markdown("#### " + html.escape(app.get("title", "Job")))
-                        st.caption(html.escape(app.get("company", "Company not specified")) + " · Applied " + html.escape(app.get("applied_on", "")))
+                        st.markdown("#### " + html.escape(app.get("job_title", "Job")))
+                        st.caption(html.escape(app.get("company_name", "Company not specified")) + " · Applied " + html.escape(app.get("applied_at", "")))
                     with right:
                         st.caption("APPLICATION STATUS")
                         st.markdown("**" + html.escape(app.get("status", "Application submitted")) + "**")
             if st.button("View all applied jobs", type="primary"):
                 st.session_state.view = "applied_jobs"; st.rerun()
-        st.info("Note: profile details save to the backend database. Application history is still session-based and will be connected separately.")
+        if applications_error:
+            st.warning("Application history abhi load nahi hui: " + applications_error)
  
 elif view == "applied_jobs":
     if not st.session_state.get("candidate_logged_in"):
@@ -646,23 +652,26 @@ elif view == "applied_jobs":
         if st.button("Candidate Login / Signup", type="primary"):
             st.session_state.view = "candidate_auth"; st.rerun()
     else:
-        email = st.session_state.get("candidate_email", "").strip().lower()
-        applications = st.session_state.get("candidate_applications", {}).get(email, [])
+        token = st.session_state.get("candidate_api_token")
+        applications, applications_error = api_request("GET", "/applications/external/me", token=token)
+        applications = applications if not applications_error and isinstance(applications, list) else []
         st.markdown("## ✓ Applied Jobs")
-        st.caption("Your application history and current status")
+        st.caption("Your application history and current status, loaded from the database")
+        if applications_error:
+            st.error("Application history load nahi hui: " + applications_error)
         st.metric("Total applications", len(applications))
         if not applications:
             st.info("No applications yet. When you apply to a job, it will appear here.")
         else:
-            filter_status = st.selectbox("Filter by status", ["All statuses"] + sorted({app.get("status", "Application submitted") for app in applications}))
+            filter_status = st.selectbox("Filter by status", ["All statuses"] + sorted({app.get("status", "Applied") for app in applications}))
             visible = applications if filter_status == "All statuses" else [app for app in applications if app.get("status") == filter_status]
             for app in visible:
                 with st.container(border=True):
-                    st.markdown("### " + html.escape(app.get("title", "Job")))
-                    st.write("**Company:** " + html.escape(app.get("company", "Company not specified")))
-                    st.write("**Applied on:** " + html.escape(app.get("applied_on", "Not available")))
-                    st.write("**Status:** " + html.escape(app.get("status", "Application submitted")))
-                    st.caption("Resume: " + html.escape(app.get("resume", "Uploaded PDF")))
+                    st.markdown("### " + html.escape(app.get("job_title", "Job")))
+                    st.write("**Company:** " + html.escape(app.get("company_name", "Company not specified")))
+                    st.write("**Applied on:** " + html.escape(app.get("applied_at", "Not available")))
+                    st.write("**Status:** " + html.escape(app.get("status", "Applied")))
+                    st.caption("Resume: " + html.escape(app.get("resume_filename", "Uploaded PDF")))
         if st.button("← Back to My Profile"):
             st.session_state.view = "candidate_dashboard"; st.rerun()
 
