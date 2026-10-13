@@ -560,7 +560,7 @@ elif view == "candidate_dashboard":
                     )
         with avatar_info_col:
             st.markdown("### " + html.escape(profile.get("full_name") or "Your profile"))
-            st.caption("Profile photo · Camera icon se change karein")
+            st.caption("Profile photo · Click the camera icon to change it")
         st.metric("Profile completion", str(profile.get("completion_percent", 0)) + "%")
         st.progress(max(0, min(100, int(profile.get("completion_percent", 0)))) / 100)
 
