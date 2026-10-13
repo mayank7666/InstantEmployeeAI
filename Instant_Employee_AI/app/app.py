@@ -2,6 +2,7 @@ from pathlib import Path
 import html
 import re
 import sys
+import time
 import pandas as pd
 import requests
 import streamlit as st
@@ -17,22 +18,51 @@ API_BASE_URL = "https://instant-employee-api.onrender.com"
 
 
 def api_request(method, path, *, token=None, **kwargs):
-    """Call the deployed FastAPI backend and return (data, error)."""
+    """Call the deployed FastAPI backend, retry transient gateway errors, and return (data, error)."""
     headers = kwargs.pop("headers", {})
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    try:
-        response = requests.request(method, f"{API_BASE_URL}{path}", headers=headers, timeout=60, **kwargs)
+
+    # Free hosting can briefly return a gateway error while the API wakes up.
+    response = None
+    for attempt in range(3):
         try:
-            payload = response.json()
-        except ValueError:
-            payload = {"detail": response.text[:300]}
-        if not response.ok:
-            detail = payload.get("detail", f"API request failed ({response.status_code})") if isinstance(payload, dict) else f"API request failed ({response.status_code})"
-            return None, str(detail)
-        return payload, None
-    except requests.RequestException:
-        return None, "Backend is temporarily unavailable. Please try again in a moment."
+            response = requests.request(
+                method,
+                f"{API_BASE_URL}{path}",
+                headers=headers,
+                timeout=(10, 60),
+                **kwargs,
+            )
+            if response.status_code not in (502, 503, 504) or attempt == 2:
+                break
+        except requests.RequestException:
+            if attempt == 2:
+                return None, (
+                    "Backend abhi response nahi de raha. Service ko wake hone mein "
+                    "thoda time lag sakta hai; 30 seconds baad dobara try karein."
+                )
+        time.sleep(2 * (attempt + 1))
+
+    try:
+        payload = response.json()
+    except (ValueError, AttributeError):
+        payload = {}
+
+    if response is None:
+        return None, "Backend temporarily unavailable. Please try again."
+
+    if not response.ok:
+        detail = payload.get("detail") if isinstance(payload, dict) else None
+        if response.status_code in (502, 503, 504):
+            return None, (
+                f"Backend service abhi unavailable hai (HTTP {response.status_code}). "
+                "Render API ko restart/deploy hone mein problem ho sakti hai. "
+                "Thodi der baad dobara try karein."
+            )
+        return None, str(detail or f"API request failed (HTTP {response.status_code})")
+
+    return payload, None
 
 
 def set_candidate_session(token):
