@@ -501,7 +501,9 @@ elif view == "candidate_dashboard":
             }
 
         st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Your profile details are saved to the backend.")
-        # DP-style avatar with the photo picker visually overlaid as a camera badge.
+        # Preview the newly selected photo immediately; save it with the profile form.
+        profile_picture = None
+        display_picture_data = profile.get("picture_data", "") or ""
         st.markdown("""
         <style>
         [class*="st-key-profile_avatar"] {position:relative; min-height:142px;}
@@ -529,9 +531,20 @@ elif view == "candidate_dashboard":
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
         with avatar_col:
             with st.container(key="profile_avatar"):
-                if profile.get("picture_data"):
+                profile_picture = st.file_uploader(
+                    "Upload/change profile photo", type=["jpg", "jpeg", "png"],
+                    key="candidate_profile_picture", label_visibility="collapsed",
+                    help="Camera icon par click karke JPG/PNG photo select karein (max 2 MB).",
+                )
+                if profile_picture is not None:
+                    import base64
+                    preview_bytes = profile_picture.getvalue()
+                    if len(preview_bytes) <= 2 * 1024 * 1024:
+                        preview_mime = "image/png" if profile_picture.type == "image/png" else "image/jpeg"
+                        display_picture_data = "data:" + preview_mime + ";base64," + base64.b64encode(preview_bytes).decode("ascii")
+                if display_picture_data:
                     st.markdown(
-                        "<img src='" + profile["picture_data"] + "' "
+                        "<img src='" + display_picture_data + "' "
                         "style='width:112px;height:112px;border-radius:50%;object-fit:cover;"
                         "border:3px solid #278bff;box-shadow:0 4px 18px #0005;' "
                         "alt='Profile photo' />",
@@ -545,11 +558,6 @@ elif view == "candidate_dashboard":
                         "👤</div>",
                         unsafe_allow_html=True,
                     )
-                profile_picture = st.file_uploader(
-                    "Upload/change profile photo", type=["jpg", "jpeg", "png"],
-                    key="candidate_profile_picture", label_visibility="collapsed",
-                    help="Camera icon par click karke JPG/PNG photo select karein (max 2 MB).",
-                )
         with avatar_info_col:
             st.markdown("### " + html.escape(profile.get("full_name") or "Your profile"))
             st.caption("Profile photo · Camera icon se change karein")
