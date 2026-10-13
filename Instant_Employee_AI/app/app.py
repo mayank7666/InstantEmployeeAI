@@ -13,7 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 DATA = ROOT / "data"
 JOBS_FILE = DATA / "jobs.csv"
-API_BASE_URL = st.secrets.get("API_BASE_URL", "https://instant-employee-api.onrender.com").rstrip("/")
+API_BASE_URL = "https://instant-employee-api.onrender.com"
 
 
 def api_request(method, path, *, token=None, **kwargs):
@@ -149,7 +149,7 @@ with st.sidebar:
     if st.session_state.get("candidate_logged_in"):
         st.caption("Signed in: " + st.session_state.get("candidate_name", "Candidate"))
         if st.button("Log out", use_container_width=True):
-            for key in ["candidate_logged_in","candidate_name","candidate_email","resume_text","resume_filename","match_results"]:
+            for key in ["candidate_logged_in","candidate_name","candidate_email","candidate_api_token","resume_text","resume_filename","match_results"]:
                 st.session_state.pop(key, None)
             st.session_state.view = "home"; st.rerun()
 
