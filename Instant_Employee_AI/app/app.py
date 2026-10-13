@@ -219,10 +219,20 @@ if view == "home":
             high = str(job.get(high_col, "")) if high_col else ""
             budget = f"₹{low or '—'} – ₹{high or '—'}" if low or high else "Budget discussed during hiring"
             st.markdown(f"""<div class='jobcard'><div style='display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap'><div><div class='kicker'>{html.escape(department)}</div><h3 style='margin:7px 0'>{html.escape(title)}</h3></div><span style='height:fit-content;border:1px solid #29476c;border-radius:20px;padding:5px 10px;color:#d7e7ff;font-size:12px'>{html.escape(mode)}</span></div><p>{html.escape(description[:240] + ('…' if len(description)>240 else '') or 'Open this role to view the complete job description.')}</p><p><b>Required skills:</b> {html.escape(skills[:180])}</p><p><b>Budget:</b> {html.escape(budget)}</p></div>""", unsafe_allow_html=True)
-            if st.button("View job details  →", key=f"view_job_{row_index}", type="primary", use_container_width=False):
-                st.session_state.selected_job_index = row_index
-                st.session_state.view = "job_details"
-                st.rerun()
+            view_col, apply_col = st.columns([1, 1])
+            with view_col:
+                if st.button("View job details  →", key=f"view_job_{row_index}", use_container_width=True):
+                    st.session_state.selected_job_index = row_index
+                    st.session_state.view = "job_details"
+                    st.rerun()
+            with apply_col:
+                if st.button("Apply now  →", key=f"apply_job_card_{row_index}", type="primary", use_container_width=True):
+                    st.session_state.apply_job_index = row_index
+                    if st.session_state.get("candidate_logged_in"):
+                        st.session_state.view = "candidate"
+                    else:
+                        st.session_state.view = "candidate_auth"
+                    st.rerun()
 
     st.markdown("### How it works")
     columns = st.columns(4)
