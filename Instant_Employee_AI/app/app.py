@@ -501,28 +501,58 @@ elif view == "candidate_dashboard":
             }
 
         st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Your profile details are saved to the backend.")
-        # Display the saved photo as a familiar circular DP/avatar.
-        if profile.get("picture_data"):
-            avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
-            with avatar_col:
-                st.markdown(
-                    "<img src='" + profile["picture_data"] + "' "
-                    "style='width:112px;height:112px;border-radius:50%;object-fit:cover;"
-                    "border:3px solid #278bff;box-shadow:0 4px 18px #0005;' "
-                    "alt='Profile photo' />",
-                    unsafe_allow_html=True,
+        # DP-style avatar with the photo picker visually overlaid as a camera badge.
+        st.markdown("""
+        <style>
+        [class*="st-key-profile_avatar"] {position:relative; min-height:142px;}
+        [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] {
+            position:relative; width:42px; height:42px; margin-top:-48px;
+            margin-left:72px; z-index:5;
+        }
+        [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] section {
+            width:42px!important; min-width:42px!important; height:42px!important;
+            min-height:42px!important; padding:0!important; border:2px solid #070d18!important;
+            border-radius:50%!important; background:#1764ff!important; overflow:hidden!important;
+        }
+        [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] section > div,
+        [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] small,
+        [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] button {
+            display:none!important;
+        }
+        [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] section::after {
+            content:"📷"; display:flex; align-items:center; justify-content:center;
+            width:38px; height:38px; font-size:18px; position:absolute; inset:0;
+        }
+        [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] section {cursor:pointer;}
+        </style>
+        """, unsafe_allow_html=True)
+        avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
+        with avatar_col:
+            with st.container(key="profile_avatar"):
+                if profile.get("picture_data"):
+                    st.markdown(
+                        "<img src='" + profile["picture_data"] + "' "
+                        "style='width:112px;height:112px;border-radius:50%;object-fit:cover;"
+                        "border:3px solid #278bff;box-shadow:0 4px 18px #0005;' "
+                        "alt='Profile photo' />",
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(
+                        "<div style='width:112px;height:112px;border-radius:50%;"
+                        "background:#14243b;border:2px dashed #278bff;display:flex;"
+                        "align-items:center;justify-content:center;font-size:42px;color:#8dbdff;'>"
+                        "👤</div>",
+                        unsafe_allow_html=True,
+                    )
+                profile_picture = st.file_uploader(
+                    "Upload/change profile photo", type=["jpg", "jpeg", "png"],
+                    key="candidate_profile_picture", label_visibility="collapsed",
+                    help="Camera icon par click karke JPG/PNG photo select karein (max 2 MB).",
                 )
-            with avatar_info_col:
-                st.markdown("### " + html.escape(profile.get("full_name") or "Your profile"))
-                st.caption("Profile photo · Round display picture")
-        else:
-            st.markdown(
-                "<div style='width:112px;height:112px;border-radius:50%;"
-                "background:#14243b;border:2px dashed #278bff;display:flex;"
-                "align-items:center;justify-content:center;font-size:42px;color:#8dbdff;'>"
-                "👤</div><p style='color:#a8b8d0;font-size:13px'>Add a profile photo</p>",
-                unsafe_allow_html=True,
-            )
+        with avatar_info_col:
+            st.markdown("### " + html.escape(profile.get("full_name") or "Your profile"))
+            st.caption("Profile photo · Camera icon se change karein")
         st.metric("Profile completion", str(profile.get("completion_percent", 0)) + "%")
         st.progress(max(0, min(100, int(profile.get("completion_percent", 0)))) / 100)
 
@@ -537,7 +567,6 @@ elif view == "candidate_dashboard":
             availability_index = availability_options.index(current_availability) if current_availability in availability_options else 0
             profile_availability = st.selectbox("Availability", availability_options, index=availability_index)
             profile_portfolio = st.text_input("Portfolio URL", value=profile.get("portfolio_url", "") or "", placeholder="https://...")
-            profile_picture = st.file_uploader("Change profile photo (JPG or PNG, max 2 MB)", type=["jpg", "jpeg", "png"], key="candidate_profile_picture", help="Choose a clear face photo. It will appear as a round DP after you save your profile.")
             save_profile = st.form_submit_button("Save profile", type="primary", use_container_width=True)
 
         if save_profile:
