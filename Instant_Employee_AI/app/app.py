@@ -449,7 +449,15 @@ elif view == "candidate_dashboard":
     else:
         email = st.session_state.get("candidate_email", "").strip().lower()
         applications = st.session_state.get("candidate_applications", {}).get(email, [])
-        st.markdown("## 👋 My Profile")
+        header_col, logout_col = st.columns([5, 1])
+        with header_col:
+            st.markdown("## 👋 My Profile")
+        with logout_col:
+            if st.button("Log out", key="candidate_dashboard_logout", use_container_width=True):
+                for key in ["candidate_logged_in", "candidate_name", "candidate_email", "candidate_api_token", "resume_text", "resume_filename", "match_results"]:
+                    st.session_state.pop(key, None)
+                st.session_state.view = "home"
+                st.rerun()
         st.caption("Welcome back, " + st.session_state.get("candidate_name", "Candidate") + ". Track your job search in one place.")
         a, b, c = st.columns(3)
         a.metric("Total Jobs Applied", len(applications))
