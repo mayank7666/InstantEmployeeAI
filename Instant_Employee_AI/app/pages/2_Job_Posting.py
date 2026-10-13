@@ -2,6 +2,7 @@
 from pathlib import Path
 from datetime import date
 import uuid
+import requests
 
 import pandas as pd
 import streamlit as st
@@ -12,6 +13,7 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
 JOBS_FILE = DATA_DIR / "jobs.csv"
+API_BASE_URL = "https://instant-employee-api.onrender.com"
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -31,7 +33,8 @@ JOB_COLUMNS = [
     "Maximum Budget",
     "Work Mode",
     "Timezone",
-    "Posted On"
+    "Posted On",
+    "Company Name"
 ]
 
 
@@ -278,6 +281,30 @@ with st.sidebar:
     st.caption("Your Company · Recruiter Panel")
 
 
+# Company pages require a company-role account created through the dashboard.
+if not st.session_state.get("company_logged_in") or not st.session_state.get("company_api_token"):
+    st.warning("Job post karne ke liye pehle Company Dashboard par login karein.")
+    st.page_link("pages/4_Employee_Dashboard.py", label="← Company Login / Dashboard", use_container_width=True)
+    st.stop()
+
+def create_api_job(payload):
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/jobs",
+            headers={"Authorization": f"Bearer {st.session_state.company_api_token}"},
+            json=payload,
+            timeout=(8, 30),
+        )
+        try:
+            data = response.json()
+        except ValueError:
+            data = {}
+        if not response.ok:
+            return None, str(data.get("detail", f"API request failed (HTTP {response.status_code})"))
+        return data, None
+    except requests.RequestException:
+        return None, "API abhi available nahi hai. Job database mein save nahi hua; thodi der baad retry karein."
+
 # =========================================
 # JOB POSTING BANNER
 # =========================================
@@ -389,33 +416,47 @@ if submitted:
         st.error("Minimum budget cannot exceed maximum budget.")
 
     else:
-        current_jobs = load_jobs()
-
-        new_job = {
-            "Job ID": str(uuid.uuid4())[:8],
-            "Job Title": job_title.strip(),
-            "Department": department,
-            "Description": description.strip(),
-            "Required Skills": required_skills.strip(),
-            "Minimum Budget": minimum_budget,
-            "Maximum Budget": maximum_budget,
-            "Work Mode": work_mode,
-            "Timezone": timezone,
-            "Posted On": date.today().isoformat()
+        api_payload = {
+            "title": job_title.strip(),
+            "department": department,
+            "description": description.strip(),
+            "required_skills": required_skills.strip(),
+            "min_budget": int(minimum_budget),
+            "max_budget": int(maximum_budget),
+            "work_mode": work_mode,
+            "timezone": timezone,
         }
+        created_job, api_error = create_api_job(api_payload)
 
-        updated_jobs = pd.concat(
-            [current_jobs, pd.DataFrame([new_job])],
-            ignore_index=True
-        )
-
-        try:
-            save_jobs(updated_jobs)
-            st.success(f"Job posted successfully: {job_title}")
-            st.rerun()
-
-        except OSError as error:
-            st.error(f"Could not save the job: {error}")
+        if api_error:
+            st.error("Job database mein save nahi hua: " + api_error)
+            st.info("CSV mein save nahi kiya gaya, taaki public listing aur company database mein mismatch na ho.")
+        else:
+            current_jobs = load_jobs()
+            new_job = {
+                "Job ID": str(created_job["id"]),
+                "Job Title": job_title.strip(),
+                "Department": department,
+                "Description": description.strip(),
+                "Required Skills": required_skills.strip(),
+                "Minimum Budget": minimum_budget,
+                "Maximum Budget": maximum_budget,
+                "Work Mode": work_mode,
+                "Timezone": timezone,
+                "Posted On": date.today().isoformat(),
+                "Company Name": st.session_state.get("company_email", "Company"),
+            }
+            updated_jobs = pd.concat(
+                [current_jobs, pd.DataFrame([new_job])],
+                ignore_index=True
+            )
+            try:
+                save_jobs(updated_jobs)
+                st.success(f"Job database mein post ho gaya: {job_title}")
+                st.rerun()
+            except OSError as error:
+                st.error(f"Job database mein save ho gaya, lekin public CSV update nahi hua: {error}")
+                st.warning("Dashboard par job rahega; public job listing ke liye CSV sync fix karna hoga.")
 
 
 # =========================================
