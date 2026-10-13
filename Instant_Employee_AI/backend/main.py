@@ -77,6 +77,18 @@ class Application(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     job: Mapped["Job"] = relationship(back_populates="applications")
     talent: Mapped["User"] = relationship(back_populates="applications")
+class ExternalApplication(Base):
+    """Persist applications for jobs still managed in the legacy jobs.csv workflow."""
+    __tablename__ = "external_applications"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    job_key: Mapped[str] = mapped_column(String(120), index=True)
+    job_title: Mapped[str] = mapped_column(String(200))
+    company_name: Mapped[str] = mapped_column(String(200), default="Company not specified")
+    talent_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    resume_filename: Mapped[str] = mapped_column(String(255), default="")
+    status: Mapped[str] = mapped_column(String(40), default="Applied")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    talent: Mapped["User"] = relationship()
 Base.metadata.create_all(bind=engine)
 # Lightweight migration for existing deployments.
 if "picture_data" not in {col["name"] for col in inspect(engine).get_columns("profiles")}:
@@ -114,6 +126,11 @@ class JobIn(BaseModel):
     timezone: str = "Asia/Kolkata"
 class ApplicationIn(BaseModel):
     resume_filename: str = ""
+class ExternalApplicationIn(BaseModel):
+    job_key: str = Field(min_length=1, max_length=120)
+    job_title: str = Field(min_length=1, max_length=200)
+    company_name: str = Field(default="Company not specified", max_length=200)
+    resume_filename: str = Field(default="", max_length=255)
 def get_db():
     db = SessionLocal()
     try: yield db
@@ -204,6 +221,49 @@ def apply(job_id: int, data: ApplicationIn, user: User=Depends(require_role("tal
 def my_applications(user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
     rows=db.query(Application).filter(Application.talent_id==user.id).order_by(Application.created_at.desc()).all()
     return [{"id":a.id,"job_id":a.job_id,"job_title":a.job.title,"company_id":a.job.company_id,"applied_at":a.created_at.isoformat(),"status":a.status,"resume_filename":a.resume_filename} for a in rows]
+@app.post("/applications/external", status_code=201)
+def apply_to_csv_job(data: ExternalApplicationIn, user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
+    """Save an application for a job currently stored in the Streamlit jobs.csv file."""
+    job_key = data.job_key.strip()
+    if db.query(ExternalApplication).filter(
+        ExternalApplication.job_key == job_key,
+        ExternalApplication.talent_id == user.id,
+    ).first():
+        raise HTTPException(status_code=409, detail="Already applied to this job")
+    application = ExternalApplication(
+        job_key=job_key,
+        job_title=data.job_title.strip(),
+        company_name=data.company_name.strip() or "Company not specified",
+        talent_id=user.id,
+        resume_filename=data.resume_filename.strip(),
+    )
+    db.add(application)
+    db.commit()
+    db.refresh(application)
+    return {
+        "id": application.id,
+        "job_key": application.job_key,
+        "job_title": application.job_title,
+        "company_name": application.company_name,
+        "status": application.status,
+        "applied_at": application.created_at.isoformat(),
+        "resume_filename": application.resume_filename,
+    }
+
+@app.get("/applications/external/me")
+def my_external_applications(user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
+    rows = db.query(ExternalApplication).filter(
+        ExternalApplication.talent_id == user.id
+    ).order_by(ExternalApplication.created_at.desc()).all()
+    return [{
+        "id": a.id,
+        "job_key": a.job_key,
+        "job_title": a.job_title,
+        "company_name": a.company_name,
+        "applied_at": a.created_at.isoformat(),
+        "status": a.status,
+        "resume_filename": a.resume_filename,
+    } for a in rows]
 @app.get("/jobs/{job_id}/applications")
 def job_applications(job_id: int, user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     job=db.get(Job,job_id)
