@@ -305,7 +305,7 @@ elif view == "candidate_auth":
                 st.session_state.candidate_logged_in = True
                 st.session_state.candidate_name = account["name"]
                 st.session_state.candidate_email = email.strip().lower()
-                st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate"; st.rerun()
+                st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"; st.rerun()
             else:
                 st.error("Account not found or password is incorrect. Create an account if you are new.")
     with signup:
@@ -334,7 +334,7 @@ elif view == "candidate_auth":
                     st.session_state.candidate_logged_in = True
                     st.session_state.candidate_name = name.strip()
                     st.session_state.candidate_email = key
-                    st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate"; st.rerun()
+                    st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"; st.rerun()
     if st.button("← Back to home"):
         st.session_state.view = "home"; st.rerun()
 
