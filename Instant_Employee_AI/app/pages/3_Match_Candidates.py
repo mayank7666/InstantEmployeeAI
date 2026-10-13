@@ -22,6 +22,16 @@ from src.matching_engine import match_candidates
 
 
 # -----------------------------------
+# Page Configuration
+# -----------------------------------
+st.set_page_config(
+    page_title="Find Talent | Instant Employee",
+    page_icon="👥",
+    layout="wide",
+)
+
+
+# -----------------------------------
 # Company authentication
 # -----------------------------------
 if not st.session_state.get("company_logged_in") or not st.session_state.get("company_api_token"):
@@ -30,14 +40,6 @@ if not st.session_state.get("company_logged_in") or not st.session_state.get("co
     st.stop()
 
 
-# -----------------------------------
-# Page Configuration
-# -----------------------------------
-st.set_page_config(
-    page_title="Find Talent | Instant Employee",
-    page_icon="👥",
-    layout="wide",
-)
 
 SHORTLIST_COLUMNS = [
     "Job ID",
