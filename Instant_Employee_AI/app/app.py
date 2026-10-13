@@ -564,51 +564,52 @@ elif view == "candidate_dashboard":
         st.metric("Profile completion", str(profile.get("completion_percent", 0)) + "%")
         st.progress(max(0, min(100, int(profile.get("completion_percent", 0)))) / 100)
 
-        st.markdown("### Edit profile")
-        with st.form("candidate_profile_edit"):
-            profile_name = st.text_input("Full name", value=profile.get("full_name", "") or "")
-            profile_headline = st.text_input("Professional headline", value=profile.get("headline", "") or "", placeholder="e.g. AIML Fresher | Python | Machine Learning")
-            profile_skills = st.text_area("Skills (comma-separated)", value=profile.get("skills", "") or "", placeholder="Python, SQL, Machine Learning, Power BI")
-            profile_timezone = st.text_input("Timezone", value=profile.get("timezone", "Asia/Kolkata") or "Asia/Kolkata")
-            availability_options = ["Available", "Open to opportunities", "Part-time", "Not available"]
-            current_availability = profile.get("availability", "Available") or "Available"
-            availability_index = availability_options.index(current_availability) if current_availability in availability_options else 0
-            profile_availability = st.selectbox("Availability", availability_options, index=availability_index)
-            profile_portfolio = st.text_input("Portfolio URL", value=profile.get("portfolio_url", "") or "", placeholder="https://...")
-            save_profile = st.form_submit_button("Save profile", type="primary", use_container_width=True)
+        with st.expander("Edit profile", expanded=False):
+            with st.form("candidate_profile_edit"):
+                profile_name = st.text_input("Full name", value=profile.get("full_name", "") or "")
+                profile_headline = st.text_input("Professional headline", value=profile.get("headline", "") or "", placeholder="e.g. AIML Fresher | Python | Machine Learning")
+                profile_skills = st.text_area("Skills (comma-separated)", value=profile.get("skills", "") or "", placeholder="Python, SQL, Machine Learning, Power BI")
+                profile_timezone = st.text_input("Timezone", value=profile.get("timezone", "Asia/Kolkata") or "Asia/Kolkata")
+                availability_options = ["Available", "Open to opportunities", "Part-time", "Not available"]
+                current_availability = profile.get("availability", "Available") or "Available"
+                availability_index = availability_options.index(current_availability) if current_availability in availability_options else 0
+                profile_availability = st.selectbox("Availability", availability_options, index=availability_index)
+                profile_portfolio = st.text_input("Portfolio URL", value=profile.get("portfolio_url", "") or "", placeholder="https://...")
+                save_profile = st.form_submit_button("Save profile", type="primary", use_container_width=True)
 
-        if save_profile:
-            if not profile_name.strip():
-                st.error("Full name is required.")
-            else:
-                picture_data = profile.get("picture_data", "") or ""
-                if profile_picture is not None:
-                    picture_bytes = profile_picture.getvalue()
-                    if len(picture_bytes) > 2 * 1024 * 1024:
-                        st.error("Profile picture 2 MB se chhoti honi chahiye.")
-                        st.stop()
-                    import base64
-                    picture_mime = "image/png" if profile_picture.type == "image/png" else "image/jpeg"
-                    picture_data = "data:" + picture_mime + ";base64," + base64.b64encode(picture_bytes).decode("ascii")
-                updated_profile, save_error = api_request(
-                    "PUT", "/profiles/me", token=token,
-                    json={
-                        "full_name": profile_name.strip(),
-                        "headline": profile_headline.strip(),
-                        "skills": profile_skills.strip(),
-                        "timezone": profile_timezone.strip() or "Asia/Kolkata",
-                        "availability": profile_availability,
-                        "portfolio_url": profile_portfolio.strip(),
-                        "resume_filename": profile.get("resume_filename", "") or "",
-                        "picture_data": picture_data,
-                    },
-                )
-                if save_error:
-                    st.error("Profile save nahi hua: " + save_error)
+            if save_profile:
+                if not profile_name.strip():
+                    st.error("Full name is required.")
                 else:
-                    st.session_state.candidate_name = updated_profile.get("full_name", profile_name.strip())
-                    st.session_state.profile_saved_message = "Profile database mein successfully save ho gaya."
-                    st.rerun()
+                    picture_data = profile.get("picture_data", "") or ""
+                    if profile_picture is not None:
+                        picture_bytes = profile_picture.getvalue()
+                        if len(picture_bytes) > 2 * 1024 * 1024:
+                            st.error("Profile picture 2 MB se chhoti honi chahiye.")
+                            st.stop()
+                        import base64
+                        picture_mime = "image/png" if profile_picture.type == "image/png" else "image/jpeg"
+                        picture_data = "data:" + picture_mime + ";base64," + base64.b64encode(picture_bytes).decode("ascii")
+                    updated_profile, save_error = api_request(
+                        "PUT", "/profiles/me", token=token,
+                        json={
+                            "full_name": profile_name.strip(),
+                            "headline": profile_headline.strip(),
+                            "skills": profile_skills.strip(),
+                            "timezone": profile_timezone.strip() or "Asia/Kolkata",
+                            "availability": profile_availability,
+                            "portfolio_url": profile_portfolio.strip(),
+                            "resume_filename": profile.get("resume_filename", "") or "",
+                            "picture_data": picture_data,
+                        },
+                    )
+                    if save_error:
+                        st.error("Profile save nahi hua: " + save_error)
+                    else:
+                        st.session_state.candidate_name = updated_profile.get("full_name", profile_name.strip())
+                        st.session_state.profile_saved_message = "Profile database mein successfully save ho gaya."
+                        st.rerun()
+
 
         if st.session_state.pop("profile_saved_message", None):
             st.success("Profile database mein successfully save ho gaya.")
