@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
       - "Instant_Employee_AI/backend/**"
+      - "Instant_Employee_AI/app/**"
       - ".github/workflows/backend-tests.yml"
   workflow_dispatch:
 
