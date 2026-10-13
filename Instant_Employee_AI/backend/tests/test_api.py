@@ -78,6 +78,28 @@ def test_company_can_post_job_and_talent_can_apply_once():
     assert history.status_code == 200
     assert any(item["job_id"] == job_id for item in history.json())
 
+def test_csv_job_applications_are_persisted_and_duplicates_blocked():
+    talent_headers = signup("talent", unique_email("csv-candidate"))
+    payload = {
+        "job_key": "csv-job-abc123",
+        "job_title": "Machine Learning Engineer",
+        "company_name": "Instant Employee",
+        "resume_filename": "candidate-resume.pdf",
+    }
+
+    applied = client.post("/applications/external", headers=talent_headers, json=payload)
+    assert applied.status_code == 201, applied.text
+    assert applied.json()["job_title"] == payload["job_title"]
+    assert applied.json()["resume_filename"] == payload["resume_filename"]
+
+    duplicate = client.post("/applications/external", headers=talent_headers, json=payload)
+    assert duplicate.status_code == 409
+
+    history = client.get("/applications/external/me", headers=talent_headers)
+    assert history.status_code == 200, history.text
+    assert any(item["job_key"] == payload["job_key"] for item in history.json())
+
+
 def test_talent_cannot_post_company_job():
     talent_headers = signup("talent", unique_email("talent"))
     response = client.post("/jobs", headers=talent_headers, json={
