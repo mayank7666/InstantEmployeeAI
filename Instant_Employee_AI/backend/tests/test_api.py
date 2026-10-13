@@ -100,6 +100,26 @@ def test_csv_job_applications_are_persisted_and_duplicates_blocked():
     assert any(item["job_key"] == payload["job_key"] for item in history.json())
 
 
+def test_external_application_history_is_private_to_each_candidate():
+    first_headers = signup("talent", unique_email("first-candidate"))
+    second_headers = signup("talent", unique_email("second-candidate"))
+    payload = {
+        "job_key": "private-csv-job",
+        "job_title": "Data Analyst",
+        "company_name": "Example Company",
+        "resume_filename": "first.pdf",
+    }
+    response = client.post("/applications/external", headers=first_headers, json=payload)
+    assert response.status_code == 201, response.text
+
+    first_history = client.get("/applications/external/me", headers=first_headers)
+    second_history = client.get("/applications/external/me", headers=second_headers)
+    assert first_history.status_code == 200
+    assert any(item["job_key"] == payload["job_key"] for item in first_history.json())
+    assert second_history.status_code == 200
+    assert all(item["job_key"] != payload["job_key"] for item in second_history.json())
+
+
 def test_talent_cannot_post_company_job():
     talent_headers = signup("talent", unique_email("talent"))
     response = client.post("/jobs", headers=talent_headers, json={
