@@ -142,6 +142,18 @@ a{color:#075fc7!important}
     border-color:#a9c4ff!important;
     color:#17458f!important;
 }
+/* Softer Company Login call-to-action */
+[class*="st-key-company_login_cta"] button[kind="primary"]{
+    background:#e4edff!important;
+    border-color:#c9d9ff!important;
+    color:#2456a6!important;
+    box-shadow:0 2px 7px #2456a610!important;
+}
+[class*="st-key-company_login_cta"] button[kind="primary"]:hover{
+    background:#d5e3ff!important;
+    border-color:#a9c4ff!important;
+    color:#17458f!important;
+}
 @media(max-width:700px){.hero{padding:24px}.hero h1{letter-spacing:-1px}}
 </style>
 """, unsafe_allow_html=True)
@@ -870,8 +882,9 @@ elif view == "employee":
     st.markdown("## Company workspace")
     st.caption("Company accounts can be securely accessed or created from the Company Dashboard.")
     st.info("Log in to the Company Dashboard with your company email and password. Candidate accounts cannot access the company dashboard.")
-    if st.button("Open Company Login", type="primary", use_container_width=True):
-        st.switch_page("pages/4_Employee_Dashboard.py")
+    with st.container(key="company_login_cta"):
+        if st.button("Open Company Login", type="primary", use_container_width=True):
+            st.switch_page("pages/4_Employee_Dashboard.py")
     if st.button("← Back to home"):
         st.session_state.view = "home"; st.rerun()
 
