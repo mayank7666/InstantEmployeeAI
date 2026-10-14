@@ -28,7 +28,7 @@ def api_request(method, path, token=None, **kwargs):
             return None, str(detail or f"API request failed (HTTP {response.status_code})")
         return payload, None
     except requests.RequestException:
-        return None, "API abhi available nahi hai. Thodi der baad dobara try karein."
+        return None, "The API is currently unavailable. Please try again shortly."
 
 
 def read_csv(path):
@@ -47,7 +47,7 @@ def company_session(token):
     if error:
         return error
     if me.get("role") != "company":
-        return "Yeh talent account hai. Company account se login karein."
+        return "This is a candidate account. Please log in with a company account."
     st.session_state.company_api_token = token
     st.session_state.company_logged_in = True
     st.session_state.company_email = me.get("email", "")
@@ -116,7 +116,7 @@ if not st.session_state.get("company_logged_in"):
             submitted = st.form_submit_button("Login to Dashboard", type="primary", use_container_width=True)
         if submitted:
             if not email.strip() or not password:
-                st.error("Email aur password dono fill karein.")
+                st.error("Please enter both email and password.")
             else:
                 token_data, error = api_request("POST", "/auth/login", data={"username": email.strip().lower(), "password": password}, headers={"Content-Type": "application/x-www-form-urlencoded"})
                 if error:
@@ -129,7 +129,7 @@ if not st.session_state.get("company_logged_in"):
                         st.success("Company login successful.")
                         st.rerun()
     with setup_tab:
-        st.info("Yeh sirf pehle company admin ko setup karne ke liye hai. Render API par ADMIN_SETUP_KEY configure kiye bina account create nahi hoga. Baad mein employee IDs admin dashboard se banenge.")
+        st.info("This setup is only for creating the initial company admin. An account cannot be created until ADMIN_SETUP_KEY is configured on the Render API. Employee accounts can be created later from the admin dashboard.")
         with st.form("company_bootstrap_form"):
             company_name = st.text_input("Company / admin name", key="bootstrap_company_name")
             admin_email = st.text_input("Admin email", key="bootstrap_admin_email")
@@ -139,11 +139,11 @@ if not st.session_state.get("company_logged_in"):
             submitted = st.form_submit_button("Set Up First Admin", type="primary", use_container_width=True)
         if submitted:
             if not company_name.strip() or not admin_email.strip() or not admin_password or not setup_key:
-                st.error("Saare fields fill karein.")
+                st.error("Please complete all fields.")
             elif len(admin_password) < 8:
-                st.error("Password kam se kam 8 characters ka hona chahiye.")
+                st.error("The password must contain at least 8 characters.")
             elif admin_password != confirm_password:
-                st.error("Passwords match nahi karte.")
+                st.error("Passwords do not match.")
             else:
                 result, error = api_request("POST", "/auth/company/bootstrap", json={"email": admin_email.strip().lower(), "password": admin_password, "full_name": company_name.strip(), "setup_key": setup_key})
                 if error:
@@ -155,7 +155,7 @@ if not st.session_state.get("company_logged_in"):
                     else:
                         st.success("First company admin successfully set up.")
                         st.rerun()
-    st.info("Public signup sirf candidate/talent accounts ke liye hai. Company admin signup private setup key se protected hai.")
+    st.info("Public sign-up is available only for candidate accounts. Company admin sign-up is protected by a private setup key.")
     st.stop()
 
 token = st.session_state.company_api_token
@@ -163,7 +163,7 @@ me, me_error = api_request("GET", "/me", token=token)
 if me_error or not me or me.get("role") != "company":
     for key in ("company_api_token", "company_logged_in", "company_email"):
         st.session_state.pop(key, None)
-    st.warning("Session expire ho gaya. Dobara login karein.")
+    st.warning("Your session has expired. Please log in again.")
     st.stop()
 
 jobs, jobs_error = api_request("GET", "/jobs/mine", token=token)
@@ -176,9 +176,9 @@ shortlist = read_csv(SHORTLIST_FILE)
 st.markdown(f"<div class='hero'><div class='kicker'>Company workspace · Signed in as {safe(me.get('email'))}</div><h1>Your hiring <span>overview</span></h1><p>Manage your own vacancies, monitor candidate applications, and move from job posting to shortlist in one workspace.</p></div>", unsafe_allow_html=True)
 
 if jobs_error:
-    st.warning("Database jobs load nahi ho paaye: " + jobs_error)
+    st.warning("Database jobs could not be loaded: " + jobs_error)
 if apps_error:
-    st.warning("Applications load nahi ho paaye: " + apps_error)
+    st.warning("Applications could not be loaded: " + apps_error)
 
 total_applications = len(applications)
 shortlisted_count = sum(1 for row in applications if str(row.get("status", "")).lower() == "shortlisted")
@@ -193,7 +193,7 @@ left, right = st.columns([1.35, 1], gap="large")
 with left:
     st.subheader("Your Recent Jobs")
     if not jobs:
-        st.info("Abhi aapke account par database job nahi hai. Post a Job se pehli vacancy create karein.")
+        st.info("There are no database jobs for your account yet. Select Post a Job to create your first vacancy.")
     else:
         for job in jobs[:8]:
             status = "Active" if job.get("is_active") else "Closed"
@@ -206,7 +206,7 @@ with right:
     st.subheader("Quick Actions")
     st.page_link("pages/2_Job_Posting.py", label="＋  Post a Job", use_container_width=True)
     st.page_link("pages/3_Match_Candidates.py", label="⌕  AI Candidate Matching", use_container_width=True)
-    st.markdown("<div class='panel'><h4>Application privacy</h4><p>Yahan sirf aapke account ke jobs par aayi database applications dikhengi. Dusri companies ki applications expose nahi hoti.</p></div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel'><h4>Application privacy</h4><p>Only database applications for jobs belonging to your account are shown here. Applications from other companies are not exposed.</p></div>", unsafe_allow_html=True)
 
 selected_job_id = st.session_state.get("dashboard_selected_job")
 if selected_job_id is not None:
@@ -214,7 +214,7 @@ if selected_job_id is not None:
     st.subheader("Applications for selected job")
     selected_apps = [row for row in applications if row.get("job_id") == selected_job_id]
     if not selected_apps:
-        st.info("Is job ke liye abhi koi application nahi hai.")
+        st.info("There are no applications for this job yet.")
     else:
         st.dataframe(pd.DataFrame([{
             "Candidate": row.get("candidate_name") or "Name not provided",
@@ -233,19 +233,19 @@ if selected_job_id is not None:
             if error:
                 st.error(error)
             else:
-                st.success("Application status update ho gaya.")
+                st.success("Application status updated successfully.")
                 st.rerun()
 
 if not legacy_jobs.empty:
     st.divider()
     st.subheader("Legacy CSV jobs")
-    st.caption("Ye purane jobs.csv workflow ke jobs hain. Inke applications ko company-wise securely connect karna next migration step hai; inhe database application count mein include nahi kiya gaya.")
+    st.caption("These jobs belong to the legacy jobs.csv workflow. Securely associating their applications with individual companies is a future migration step, so they are not included in database application counts.")
     st.metric("Legacy jobs in CSV", len(legacy_jobs))
 
 if not me.get("company_id"):
     st.divider()
     st.subheader("Create Multiple Employee Login IDs")
-    st.caption("Ek baar mein maximum 100 accounts. Har line mein: Name, email, password. Password blank chhodoge to temporary password generate hoga.")
+    st.caption("You can create up to 100 accounts at a time. Enter one account per line in this format: Name, email, password. Leave the password blank to generate a temporary password.")
     with st.form("bulk_company_users_form"):
         employee_rows = st.text_area(
             "Employee details (one employee per line)",
@@ -262,24 +262,24 @@ if not me.get("company_id"):
                 continue
             parts = [part.strip() for part in line.split(",", 2)]
             if len(parts) < 2:
-                parse_errors.append(f"Line {line_no}: Name aur email comma se separate karein.")
+                parse_errors.append(f"Line {line_no}: Separate the name and email with a comma.")
                 continue
             rows.append({"name": parts[0], "email": parts[1], "password": parts[2] if len(parts) > 2 else ""})
         if parse_errors:
             for message in parse_errors:
                 st.error(message)
         elif not rows:
-            st.error("Kam se kam ek employee ki details enter karein.")
+            st.error("Please enter details for at least one employee.")
         elif len(rows) > 100:
-            st.error("Ek batch mein maximum 100 accounts bana sakte hain.")
+            st.error("You can create a maximum of 100 accounts per batch.")
         else:
             result, error = api_request("POST", "/auth/company/bulk-create", token=token, json={"employees": rows})
             if error:
-                st.error("Accounts create nahi hue: " + error)
+                st.error("Accounts could not be created: " + error)
             else:
-                st.success(f"{result.get('created_count', 0)} employee account(s) create ho gaye.")
+                st.success(f"{result.get('created_count', 0)} employee account(s) created successfully.")
                 if result.get("created"):
-                    st.warning("Temporary passwords abhi copy karke securely employees ko de dein. Ye dobara display nahi honge.")
+                    st.warning("Copy the temporary passwords now and share them securely with the employees. They will not be displayed again.")
                     st.dataframe(pd.DataFrame(result["created"]), use_container_width=True, hide_index=True)
                     st.download_button(
                         "Download Employee Login Details (CSV)",
@@ -294,4 +294,4 @@ if not me.get("company_id"):
     st.caption("Instant Employee · Secure company workspace")
 
 else:
-    st.info("Aap employee account se login hain. Employee login IDs sirf primary company admin bana sakta hai.")
+    st.info("You are logged in with an employee account. Only the primary company admin can create employee login IDs.")
