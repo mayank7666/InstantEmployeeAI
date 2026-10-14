@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 
 import pandas as pd
+import requests
 import streamlit as st
 from pypdf import PdfReader
 
@@ -38,6 +39,22 @@ if not st.session_state.get("company_logged_in") or not st.session_state.get("co
     st.warning("Candidate matching is available to the company team. Please log in to the Company Dashboard first.")
     st.page_link("pages/4_Employee_Dashboard.py", label="← Company Login / Dashboard", use_container_width=True)
     st.stop()
+
+API_BASE_URL = "https://instant-employee-api.onrender.com"
+
+def api_get(path):
+    try:
+        response = requests.get(
+            f"{API_BASE_URL}{path}",
+            headers={"Authorization": f"Bearer {st.session_state.company_api_token}"},
+            timeout=(8, 30),
+        )
+        payload = response.json()
+        if not response.ok:
+            return None, str(payload.get("detail", f"API error {response.status_code}"))
+        return payload, None
+    except Exception as error:
+        return None, str(error)
 
 
 
@@ -357,8 +374,68 @@ def number(value):
 # -----------------------------------
 st.title("👥 Find Talent")
 st.caption(
-    "Discover suitable candidates for your company's open positions."
+    "Automatically rank every applicant using the resume saved in their candidate profile."
 )
+
+st.subheader("Automatic job-wise matching")
+st.caption("Candidates who apply with a saved profile resume are matched automatically. No manual resume upload is needed for these applicants.")
+company_jobs, jobs_error = api_get("/jobs/mine")
+company_apps, apps_error = api_get("/applications/company")
+company_jobs = company_jobs if isinstance(company_jobs, list) else []
+company_apps = company_apps if isinstance(company_apps, list) else []
+if jobs_error:
+    st.warning("Could not load company jobs: " + jobs_error)
+if apps_error:
+    st.warning("Could not load applicants: " + apps_error)
+
+if not company_jobs:
+    st.info("No database jobs found for this company yet. Post a job first.")
+else:
+    job_options = {f"{job.get('title', 'Job')} · #{job.get('id')}": job for job in company_jobs}
+    chosen_job_label = st.selectbox("Select a job to rank its applicants", list(job_options.keys()), key="automatic_matching_job")
+    chosen_job = job_options[chosen_job_label]
+    job_applicants = [row for row in company_apps if row.get("job_id") == chosen_job.get("id")]
+    applicants_with_resume = [row for row in job_applicants if str(row.get("resume_text") or "").strip()]
+    st.metric("Applicants for this job", len(job_applicants))
+    if not job_applicants:
+        st.info("No one has applied to this job yet. New applications will appear here.")
+    elif not applicants_with_resume:
+        st.info("Applicants are present, but none has a saved readable resume yet. Ask candidates to save a PDF in My Profile.")
+    else:
+        job_description = next((str(row.get("job_description") or "") for row in applicants_with_resume if row.get("job_description")), "")
+        resumes = {}
+        app_by_label = {}
+        for row in applicants_with_resume:
+            email = str(row.get("candidate_email") or "")
+            name = str(row.get("candidate_name") or email or f"Candidate {row.get('candidate_id')}")
+            label = f"{name} ({email})" if email else name
+            resumes[label] = str(row.get("resume_text") or "")
+            app_by_label[label] = row
+        try:
+            ranked_candidates = match_candidates(job_description, resumes)
+            ranked_table = []
+            for rank, candidate in enumerate(ranked_candidates, start=1):
+                app_row = app_by_label.get(candidate.get("name"), {})
+                ranked_table.append({
+                    "Rank": rank,
+                    "Candidate": candidate.get("name", "Candidate"),
+                    "Match Score": f"{float(candidate.get('final_score', 0)):.1f}%",
+                    "Skill Coverage": f"{float(candidate.get('skill_coverage', 0)):.1f}%",
+                    "Matched Skills": ", ".join(candidate.get("matched_skills") or []),
+                    "Missing Skills": ", ".join(candidate.get("missing_skills") or []),
+                    "Status": app_row.get("status", "Applied"),
+                    "Resume": app_row.get("resume_filename", ""),
+                })
+            if ranked_table:
+                st.dataframe(pd.DataFrame(ranked_table), use_container_width=True, hide_index=True)
+                st.success(f"Best match: {ranked_table[0]['Candidate']} · {ranked_table[0]['Match Score']}")
+                st.caption("Ranking is recalculated from all current applicants whenever this page loads. Review resumes before making hiring decisions.")
+        except Exception as error:
+            st.error("Automatic candidate matching failed: " + str(error))
+
+st.divider()
+with st.expander("Legacy manual resume screening (CSV jobs)", expanded=False):
+    st.caption("Use this only for old CSV jobs or resumes that have not applied through the candidate profile workflow.")
 
 
 # -----------------------------------
