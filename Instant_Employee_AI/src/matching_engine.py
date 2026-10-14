@@ -364,37 +364,51 @@ def match_candidates(job_description, resumes):
         ]
 
         if required_skills:
-            skill_coverage = (
-                len(matched_skills) / len(required_skills)
-            ) * 100
+            skill_coverage = (len(matched_skills) / len(required_skills)) * 100
         else:
-            skill_coverage = 0.0
+            # Do not penalize a candidate because a job has no recognizable skills.
+            skill_coverage = 100.0
+
+        experience_score, required_years, candidate_years = experience_fit_score(
+            job_description, resume
+        )
+        education_score, required_education, candidate_education = education_fit_score(
+            job_description, resume
+        )
 
         if semantic_scores is not None:
             semantic_score = semantic_scores[index]
-
-            if required_skills:
-                final_score = (
-                    0.30 * semantic_score
-                    + 0.20 * lexical_score
-                    + 0.50 * skill_coverage
-                )
-            else:
-                final_score = (
-                    0.60 * semantic_score
-                    + 0.40 * lexical_score
-                )
-
+            final_score = (
+                0.25 * semantic_score
+                + 0.15 * lexical_score
+                + 0.40 * skill_coverage
+                + 0.10 * experience_score
+                + 0.10 * education_score
+            )
         else:
             semantic_score = None
+            final_score = (
+                0.25 * lexical_score
+                + 0.50 * skill_coverage
+                + 0.15 * experience_score
+                + 0.10 * education_score
+            )
 
-            if required_skills:
-                final_score = (
-                    0.50 * lexical_score
-                    + 0.50 * skill_coverage
-                )
-            else:
-                final_score = lexical_score
+        reasons = []
+        if matched_skills:
+            reasons.append("Matched skills: " + ", ".join(matched_skills[:5]))
+        if missing_skills:
+            reasons.append("Missing skills: " + ", ".join(missing_skills[:5]))
+        if required_years is not None:
+            reasons.append(
+                f"Experience stated: {candidate_years if candidate_years is not None else 'unknown'} years; job asks for {required_years}"
+            )
+        if required_education is not None:
+            reasons.append(
+                f"Education requirement level {required_education}; candidate level {candidate_education if candidate_education is not None else 'not stated'}"
+            )
+        if not reasons:
+            reasons.append("Ranking is based mainly on resume/job text relevance.")
 
         results.append({
             "name": name,
@@ -404,9 +418,14 @@ def match_candidates(job_description, resumes):
                 if semantic_score is not None else None
             ),
             "skill_coverage": round(skill_coverage, 2),
-            "final_score": round(
-                max(0.0, min(100.0, final_score)), 2
-            ),
+            "experience_fit": round(experience_score, 2),
+            "required_experience_years": required_years,
+            "candidate_experience_years": candidate_years,
+            "education_fit": round(education_score, 2),
+            "required_education_level": required_education,
+            "candidate_education_level": candidate_education,
+            "reasons": reasons,
+            "final_score": round(max(0.0, min(100.0, final_score)), 2),
             "matched_skills": matched_skills,
             "missing_skills": missing_skills,
         })
