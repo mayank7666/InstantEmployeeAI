@@ -189,6 +189,15 @@ h1,h2,h3,h4,h5,h6,[data-testid="stMarkdownContainer"] strong{color:var(--ink)!im
     animation:none!important;
     transition:none!important;
 }
+[data-testid="stForm"] button,
+[data-testid="stFormSubmitButton"] button {
+    font-size:15px!important;
+    line-height:1.4!important;
+    text-indent:0!important;
+    letter-spacing:normal!important;
+    white-space:nowrap!important;
+}
+
 [data-testid="stForm"] button:hover,
 [data-testid="stForm"] button:focus,
 [data-testid="stForm"] button:active,
@@ -580,7 +589,7 @@ elif view == "candidate_auth":
             with st.form("candidate_login"):
                 email = st.text_input("Email address", key="candidate_login_email", placeholder="Enter your email address")
                 password = st.text_input("Password", type="password", key="candidate_login_password", placeholder="Enter your password")
-                submit = st.form_submit_button("→  Login to Dashboard", type="primary", use_container_width=True)
+                submit = st.form_submit_button("Login to Dashboard  →", type="primary", use_container_width=True)
             st.markdown("<div class='candidate-auth-note'>♢  Your candidate account keeps your profile and applications in one place.</div>", unsafe_allow_html=True)
         with feature_col:
             st.markdown(
