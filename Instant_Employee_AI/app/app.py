@@ -101,6 +101,38 @@ html,body,[class*="css"]{font-family:Inter,system-ui,sans-serif}
 .main .block-container{max-width:1240px;padding-top:1rem;padding-bottom:3rem}
 [data-testid="stSidebar"]{background:linear-gradient(180deg,#ffffff,#edf3ff);border-right:1px solid var(--line)}
 [data-testid="stSidebar"] *{color:var(--ink)!important}
+/* Cleaner candidate/company navigation in the sidebar */
+[data-testid="stSidebar"] [data-testid="stButton"]{margin:5px 0}
+[data-testid="stSidebar"] [data-testid="stButton"] button{
+    background:linear-gradient(135deg,#ffffff,#f5f8ff)!important;
+    border:1px solid #d7e2f4!important;
+    border-radius:12px!important;
+    color:#243653!important;
+    font-weight:600!important;
+    min-height:46px!important;
+    box-shadow:0 2px 6px #203d7008!important;
+    transition:background .15s ease,border-color .15s ease,transform .15s ease!important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button:hover{
+    background:#e8f0ff!important;
+    border-color:#b9cefa!important;
+    color:#174b9b!important;
+    transform:translateY(-1px);
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button:focus{
+    box-shadow:0 0 0 2px #d8e6ff!important;
+}
+[data-testid="stSidebar"] hr{
+    margin:22px 0!important;
+    border-color:#dce5f2!important;
+}
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"]{
+    color:#61728d!important;
+    font-size:12px!important;
+    font-weight:700!important;
+    letter-spacing:.7px!important;
+}
+
 [data-testid="stSidebarNav"]{display:none}
 .stMarkdown,.stText,[data-testid="stCaptionContainer"],label,p,li{color:var(--muted)}
 h1,h2,h3,h4,h5,h6,[data-testid="stMarkdownContainer"] strong{color:var(--ink)!important}
