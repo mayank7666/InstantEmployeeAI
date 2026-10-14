@@ -844,8 +844,14 @@ elif view == "candidate":
                             st.metric("AI match score", f"{item['score']}%")
                             st.caption(f"Text relevance: {item['lexical']}%")
                             st.caption(f"Required skill coverage: {item.get('skill_coverage', 0)}%")
+                            st.caption(f"Experience fit: {item.get('experience_fit', 100)}%")
+                            st.caption(f"Education fit: {item.get('education_fit', 100)}%")
                             if item.get("semantic") is not None:
                                 st.caption(f"Semantic similarity: {item['semantic']}%")
+                            if item.get("reasons"):
+                                with st.expander("Why this job matched"):
+                                    for reason in item["reasons"]:
+                                        st.write("• " + reason)
                             if item["low"] or item["high"]: st.caption(f"Budget: ₹{item['low'] or '—'} – ₹{item['high'] or '—'}")
         if st.button("← Back to home"):
             st.session_state.view = "home"; st.rerun()
