@@ -247,23 +247,35 @@ def match_resume_to_jobs(resume_text, jobs):
         required_skills = extract_skills(job_documents[index])
         matched = [skill for skill in required_skills if skill in candidate_skills]
         missing = [skill for skill in required_skills if skill not in candidate_skills]
-        coverage = (len(matched) / len(required_skills) * 100) if required_skills else 100.0
+        coverage = (len(matched) / len(required_skills) * 100) if required_skills else 0.0
         lexical = lexical_scores[index]
         experience_score, required_years, candidate_years = experience_fit_score(job_documents[index], resume_text)
         education_score, required_education, candidate_education = education_fit_score(job_documents[index], resume_text)
 
         if semantic_scores is not None:
             semantic = semantic_scores[index]
-            score = (
-                0.25 * semantic + 0.15 * lexical + 0.40 * coverage
-                + 0.10 * experience_score + 0.10 * education_score
-            )
+            if required_skills:
+                score = (
+                    0.25 * semantic + 0.15 * lexical + 0.40 * coverage
+                    + 0.10 * experience_score + 0.10 * education_score
+                )
+            else:
+                score = (
+                    0.50 * semantic + 0.30 * lexical
+                    + 0.10 * experience_score + 0.10 * education_score
+                )
         else:
             semantic = None
-            score = (
-                0.25 * lexical + 0.50 * coverage
-                + 0.15 * experience_score + 0.10 * education_score
-            )
+            if required_skills:
+                score = (
+                    0.25 * lexical + 0.50 * coverage
+                    + 0.15 * experience_score + 0.10 * education_score
+                )
+            else:
+                score = (
+                    0.70 * lexical + 0.20 * experience_score
+                    + 0.10 * education_score
+                )
 
         reasons = []
         if matched:
@@ -367,7 +379,7 @@ def match_candidates(job_description, resumes):
             skill_coverage = (len(matched_skills) / len(required_skills)) * 100
         else:
             # Do not penalize a candidate because a job has no recognizable skills.
-            skill_coverage = 100.0
+            skill_coverage = 0.0
 
         experience_score, required_years, candidate_years = experience_fit_score(
             job_description, resume
@@ -378,21 +390,33 @@ def match_candidates(job_description, resumes):
 
         if semantic_scores is not None:
             semantic_score = semantic_scores[index]
-            final_score = (
-                0.25 * semantic_score
-                + 0.15 * lexical_score
-                + 0.40 * skill_coverage
-                + 0.10 * experience_score
-                + 0.10 * education_score
-            )
+            if required_skills:
+                final_score = (
+                    0.25 * semantic_score
+                    + 0.15 * lexical_score
+                    + 0.40 * skill_coverage
+                    + 0.10 * experience_score
+                    + 0.10 * education_score
+                )
+            else:
+                final_score = (
+                    0.50 * semantic_score + 0.30 * lexical_score
+                    + 0.10 * experience_score + 0.10 * education_score
+                )
         else:
             semantic_score = None
-            final_score = (
-                0.25 * lexical_score
-                + 0.50 * skill_coverage
-                + 0.15 * experience_score
-                + 0.10 * education_score
-            )
+            if required_skills:
+                final_score = (
+                    0.25 * lexical_score
+                    + 0.50 * skill_coverage
+                    + 0.15 * experience_score
+                    + 0.10 * education_score
+                )
+            else:
+                final_score = (
+                    0.70 * lexical_score + 0.20 * experience_score
+                    + 0.10 * education_score
+                )
 
         reasons = []
         if matched_skills:
