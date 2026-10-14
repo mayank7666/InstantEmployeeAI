@@ -309,8 +309,11 @@ if selected_job_id is not None:
                         "Candidate": candidate.get("name", "Candidate"),
                         "Match Score": f"{float(candidate.get('final_score', 0)):.1f}%",
                         "Skill Coverage": f"{float(candidate.get('skill_coverage', 0)):.1f}%",
+                        "Experience Fit": f"{float(candidate.get('experience_fit', 100)):.1f}%",
+                        "Education Fit": f"{float(candidate.get('education_fit', 100)):.1f}%",
                         "Matched Skills": ", ".join(candidate.get("matched_skills") or []),
                         "Missing Skills": ", ".join(candidate.get("missing_skills") or []),
+                        "Why this rank": " | ".join(candidate.get("reasons") or []),
                         "Application Status": row.get("status", "Applied"),
                         "Resume": row.get("resume_filename", ""),
                     })
