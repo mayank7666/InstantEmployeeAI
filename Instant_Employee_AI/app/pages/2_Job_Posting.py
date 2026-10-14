@@ -308,15 +308,38 @@ def create_api_job(payload):
 # =========================================
 # JOB POSTING BANNER
 # =========================================
-st.markdown("""
-<div class="job-hero">
-    <h1>💼 Job Posting</h1>
-    <p>
-        Create and manage job vacancies, define required skills,
-        set monthly budgets, and find the right talent for your team.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+BANNER_FILE = PROJECT_ROOT / "assets" / "Modern Job Posting Banner.png"
+
+hero_text_col, hero_image_col = st.columns([1.15, 0.85], gap="large")
+with hero_text_col:
+    st.markdown("""
+    <div class="job-hero">
+        <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:800;color:#2870c7;margin-bottom:10px;">
+            INSTANT EMPLOYEE · RECRUITER WORKSPACE
+        </div>
+        <h1>💼 Job Posting</h1>
+        <p>
+            Create and manage job vacancies, define required skills,
+            set monthly budgets, and find the right talent for your team.
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;">
+            <span style="background:#e3eeff;color:#2456a6;padding:7px 11px;border-radius:20px;font-size:12px;font-weight:700;">✦ Create roles</span>
+            <span style="background:#e0f7ed;color:#137b5b;padding:7px 11px;border-radius:20px;font-size:12px;font-weight:700;">✓ Define skills</span>
+            <span style="background:#fff0d7;color:#95610d;padding:7px 11px;border-radius:20px;font-size:12px;font-weight:700;">₹ Set budget</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+with hero_image_col:
+    if BANNER_FILE.exists():
+        st.image(str(BANNER_FILE), caption="Create the next opportunity for your team", use_container_width=True)
+    else:
+        st.markdown("""
+        <div class="job-hero" style="height:100%;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:56px;">💼 ✦</div>
+            <h2 style="color:#12315f;">Build your team</h2>
+            <p>Clear roles. The right skills. Better matches.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # =========================================
