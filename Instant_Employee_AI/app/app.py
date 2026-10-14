@@ -130,6 +130,18 @@ input,textarea,[data-baseweb="input"],[data-baseweb="textarea"]{background:#fff!
 [data-testid="stAlert"] p{color:#34445e!important}
 hr{border-color:var(--line)!important}
 a{color:#075fc7!important}
+/* Softer, more polished Apply Now buttons on job cards */
+[class*="st-key-apply_job_card_"] button[kind="primary"]{
+    background:#e4edff!important;
+    border-color:#c9d9ff!important;
+    color:#2456a6!important;
+    box-shadow:0 2px 7px #2456a610!important;
+}
+[class*="st-key-apply_job_card_"] button[kind="primary"]:hover{
+    background:#d5e3ff!important;
+    border-color:#a9c4ff!important;
+    color:#17458f!important;
+}
 @media(max-width:700px){.hero{padding:24px}.hero h1{letter-spacing:-1px}}
 </style>
 """, unsafe_allow_html=True)
