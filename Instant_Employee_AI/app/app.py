@@ -135,13 +135,49 @@ a{color:#075fc7!important}
 """, unsafe_allow_html=True)
 
 def load_jobs():
+    """Prefer live database jobs and keep only CSV jobs not yet migrated."""
+    columns = ["Job ID", "Job Title", "Department", "Description", "Required Skills",
+               "Minimum Budget", "Maximum Budget", "Work Mode", "Timezone", "Posted On", "Company Name"]
     try:
-        frame = pd.read_csv(JOBS_FILE).fillna("") if JOBS_FILE.exists() else pd.DataFrame()
-        if "Status" in frame.columns:
-            frame = frame[frame["Status"].astype(str).str.lower().isin(["active", "open", "published", ""])]
-        return frame
+        legacy = pd.read_csv(JOBS_FILE).fillna("") if JOBS_FILE.exists() else pd.DataFrame(columns=columns)
+        if "Status" in legacy.columns:
+            legacy = legacy[legacy["Status"].astype(str).str.lower().isin(["active", "open", "published", ""])]
     except Exception:
-        return pd.DataFrame()
+        legacy = pd.DataFrame(columns=columns)
+    database_jobs, _ = api_request("GET", "/jobs")
+    if not isinstance(database_jobs, list) or not database_jobs:
+        return legacy
+    database_rows = []
+    database_keys = set()
+    for job in database_jobs:
+        title = str(job.get("title") or "").strip()
+        department = str(job.get("department") or "Other").strip()
+        database_keys.add((title.casefold(), department.casefold()))
+        database_rows.append({
+            "Job ID": str(job.get("id", "")),
+            "Job Title": title,
+            "Department": department,
+            "Description": str(job.get("description") or ""),
+            "Required Skills": str(job.get("required_skills") or ""),
+            "Minimum Budget": job.get("min_budget", 0),
+            "Maximum Budget": job.get("max_budget", 0),
+            "Work Mode": str(job.get("work_mode") or "Remote"),
+            "Timezone": str(job.get("timezone") or "Asia/Kolkata"),
+            "Posted On": str(job.get("created_at") or "")[:10],
+            "Company Name": str(job.get("company_name") or "Company"),
+        })
+    if not legacy.empty:
+        title_col = next((x for x in legacy.columns if str(x).strip().lower() in {"job title", "title", "job_title"}), None)
+        dept_col = next((x for x in legacy.columns if str(x).strip().lower() in {"department", "team"}), None)
+        if title_col:
+            keep = []
+            for _, row in legacy.iterrows():
+                key = (str(row.get(title_col, "")).strip().casefold(),
+                       str(row.get(dept_col, "Other") if dept_col else "Other").strip().casefold())
+                keep.append(key not in database_keys)
+            legacy = legacy.loc[keep]
+    combined = pd.concat([pd.DataFrame(database_rows, columns=columns), legacy], ignore_index=True)
+    return combined.fillna("")
 
 def extract_pdf_text(uploaded_file):
     reader = PdfReader(uploaded_file)
@@ -444,51 +480,48 @@ elif view == "apply_resume":
             apply_title = str(selected_job.get(apply_title_col, "Selected job")) if apply_title_col else "Selected job"
             st.markdown("## Apply for this job")
             st.markdown(f"### {html.escape(apply_title)}")
-            st.caption("Upload your resume as a PDF to submit your application.")
-            with st.form("submit_job_application"):
-                application_resume = st.file_uploader("Upload resume (PDF)", type=["pdf"], key="application_resume_pdf")
-                submit_application = st.form_submit_button("Submit application", type="primary", use_container_width=True)
-            if submit_application:
-                if application_resume is None:
-                    st.error("Please upload your resume PDF first.")
-                else:
-                    try:
-                        uploaded_text = extract_pdf_text(application_resume)
-                        if not uploaded_text:
-                            st.error("No readable text found in this PDF. Please upload a text-based PDF.")
+            saved_profile, saved_profile_error = api_request(
+                "GET", "/profiles/me", token=st.session_state.get("candidate_api_token")
+            )
+            saved_resume = (saved_profile or {}).get("resume_filename", "")
+            if saved_profile_error:
+                st.error("Could not check your saved profile resume: " + saved_profile_error)
+            elif not (saved_profile or {}).get("resume_text"):
+                st.warning("Upload your resume once in My Profile. After that, you can apply to jobs without uploading it again.")
+                if st.button("Open My Profile to Upload Resume", type="primary", use_container_width=True):
+                    st.session_state.view = "candidate_dashboard"
+                    st.rerun()
+            else:
+                st.success("Using your saved profile resume: " + html.escape(saved_resume or "Saved PDF"))
+                with st.form("submit_job_application"):
+                    submit_application = st.form_submit_button("Apply with Saved Resume", type="primary", use_container_width=True)
+                if submit_application:
+                    title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
+                    company_col = next((c for c in jobs.columns if str(c).strip().lower() in {"company", "company name", "employer"}), None)
+                    job_id_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job id", "job_id", "id"}), None)
+                    job_record_id = str(selected_job.get(job_id_col, selected_index)) if job_id_col else str(selected_index)
+                    company_name = str(selected_job.get(company_col, "Company not specified")) if company_col else "Company not specified"
+                    if job_record_id.isdigit():
+                        application_data, application_error = api_request(
+                            "POST", f"/jobs/{int(job_record_id)}/apply",
+                            token=st.session_state.get("candidate_api_token"), json={}
+                        )
+                    else:
+                        application_data, application_error = api_request(
+                            "POST", "/applications/external",
+                            token=st.session_state.get("candidate_api_token"),
+                            json={"job_key": job_record_id, "job_title": apply_title, "company_name": company_name, "resume_filename": saved_resume},
+                        )
+                    if application_error:
+                        if "Already applied to this job" in application_error:
+                            st.info("You have already applied to this job from this account. It is listed in Applied Jobs.")
                         else:
-                            title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
-                            company_col = next((c for c in jobs.columns if str(c).strip().lower() in {"company", "company name", "employer"}), None)
-                            job_id_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job id", "job_id", "id"}), None)
-                            job_record_id = str(selected_job.get(job_id_col, selected_index)) if job_id_col else str(selected_index)
-                            company_name = str(selected_job.get(company_col, "Company not specified")) if company_col else "Company not specified"
-                            # Newly posted authenticated jobs use numeric database IDs.
-                            # Older CSV jobs keep the legacy external-application route.
-                            if job_record_id.isdigit():
-                                application_data, application_error = api_request(
-                                    "POST", f"/jobs/{int(job_record_id)}/apply",
-                                    token=st.session_state.get("candidate_api_token"),
-                                    json={"resume_filename": application_resume.name},
-                                )
-                            else:
-                                application_data, application_error = api_request(
-                                    "POST", "/applications/external",
-                                    token=st.session_state.get("candidate_api_token"),
-                                    json={"job_key": job_record_id, "job_title": apply_title, "company_name": company_name, "resume_filename": application_resume.name},
-                                )
-                            if application_error:
-                                if "Already applied to this job" in application_error:
-                                    st.info("You have already applied to this job from this account. It is listed in Applied Jobs.")
-                                else:
-                                    st.error("The application could not be saved to the database: " + application_error)
-                            else:
-                                st.session_state.application_resume_name = application_resume.name
-                                st.session_state.application_resume_text = uploaded_text
-                                st.session_state.application_submitted = True
-                                st.success("✓ Resume uploaded and application saved to the database.")
-                                st.rerun()
-                    except Exception as error:
-                        st.error(f"Could not read this PDF: {error}")
+                            st.error("The application could not be saved to the database: " + application_error)
+                    else:
+                        st.session_state.application_resume_name = saved_resume
+                        st.session_state.application_submitted = True
+                        st.success("✓ Application submitted using your saved profile resume.")
+                        st.rerun()
             if st.session_state.get("application_submitted"):
                 st.caption("Resume: " + st.session_state.get("application_resume_name", "Uploaded PDF"))
             if st.button("← Back to jobs"):
@@ -638,8 +671,53 @@ elif view == "candidate_dashboard":
         if st.session_state.pop("profile_saved_message", None):
             st.success("Profile saved to the database successfully.")
 
+        st.markdown("### Resume in your profile")
+        st.caption("Upload your PDF once. It is stored with your profile and reused whenever you apply.")
+        with st.form("candidate_profile_resume_form"):
+            profile_resume_upload = st.file_uploader(
+                "Upload or replace resume (PDF)", type=["pdf"], key="candidate_profile_resume_pdf"
+            )
+            save_resume = st.form_submit_button("Save Resume to Profile", type="primary", use_container_width=True)
+        if save_resume:
+            if profile_resume_upload is None:
+                st.error("Choose a PDF resume first.")
+            elif len(profile_resume_upload.getvalue()) > 5 * 1024 * 1024:
+                st.error("Resume PDF must be 5 MB or smaller.")
+            else:
+                try:
+                    resume_bytes = profile_resume_upload.getvalue()
+                    resume_text = extract_pdf_text(profile_resume_upload)
+                    if not resume_text or len(resume_text.strip()) < 20:
+                        st.error("Could not extract readable text. Please use a text-based PDF resume.")
+                    else:
+                        import base64
+                        saved, resume_error = api_request(
+                            "PUT", "/profiles/me", token=token,
+                            json={
+                                "full_name": profile.get("full_name", ""),
+                                "headline": profile.get("headline", ""),
+                                "skills": profile.get("skills", ""),
+                                "timezone": profile.get("timezone", "Asia/Kolkata"),
+                                "availability": profile.get("availability", "Available"),
+                                "portfolio_url": profile.get("portfolio_url", ""),
+                                "picture_data": profile.get("picture_data", "") or "",
+                                "resume_filename": profile_resume_upload.name,
+                                "resume_text": resume_text[:1000000],
+                                "resume_data": base64.b64encode(resume_bytes).decode("ascii"),
+                            },
+                        )
+                        if resume_error:
+                            st.error("Resume could not be saved: " + resume_error)
+                        else:
+                            st.success("Resume saved to your profile successfully.")
+                            st.rerun()
+                except Exception as error:
+                    st.error("Could not read this PDF: " + str(error))
+
         if profile.get("resume_filename"):
-            st.caption("Saved resume filename: " + html.escape(profile.get("resume_filename", "")))
+            st.success("Saved resume: " + html.escape(profile.get("resume_filename", "")))
+        else:
+            st.info("No resume saved yet. Upload it above before applying to jobs.")
         st.divider()
         a, b, c = st.columns(3)
         a.metric("Total Jobs Applied", len(applications))
