@@ -434,8 +434,8 @@ else:
             st.error("Automatic candidate matching failed: " + str(error))
 
 st.divider()
-with st.expander("Legacy manual resume screening (CSV jobs)", expanded=False):
-    st.caption("Use this only for old CSV jobs or resumes that have not applied through the candidate profile workflow.")
+st.subheader("Legacy manual resume screening (CSV jobs)")
+st.caption("Use this only for old CSV jobs or resumes that have not applied through the candidate profile workflow.")
 
 
 # -----------------------------------
