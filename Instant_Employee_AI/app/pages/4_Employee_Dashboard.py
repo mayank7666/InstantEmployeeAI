@@ -244,52 +244,78 @@ if not legacy_jobs.empty:
 
 if not me.get("company_id"):
     st.divider()
-    st.subheader("Create Multiple Employee Login IDs")
-    st.caption("You can create up to 100 accounts at a time. Enter one account per line in this format: Name, email, password. Leave the password blank to generate a temporary password.")
-    with st.form("bulk_company_users_form"):
-        employee_rows = st.text_area(
-            "Employee details (one employee per line)",
-            placeholder="Amit Kumar, amit@company.com, TempPass123!\nNeha Singh, neha@company.com,",
-            height=150,
-            help="Comma-separated: Name, Email, optional Password. Email unique hona chahiye."
-        )
-        create_bulk = st.form_submit_button("Create Employee IDs", type="primary", use_container_width=True)
-    if create_bulk:
-        rows = []
-        parse_errors = []
-        for line_no, line in enumerate(employee_rows.splitlines(), start=1):
-            if not line.strip():
-                continue
-            parts = [part.strip() for part in line.split(",", 2)]
-            if len(parts) < 2:
-                parse_errors.append(f"Line {line_no}: Separate the name and email with a comma.")
-                continue
-            rows.append({"name": parts[0], "email": parts[1], "password": parts[2] if len(parts) > 2 else ""})
-        if parse_errors:
-            for message in parse_errors:
-                st.error(message)
-        elif not rows:
-            st.error("Please enter details for at least one employee.")
-        elif len(rows) > 100:
-            st.error("You can create a maximum of 100 accounts per batch.")
-        else:
-            result, error = api_request("POST", "/auth/company/bulk-create", token=token, json={"employees": rows})
-            if error:
-                st.error("Accounts could not be created: " + error)
+    st.subheader("🔐 Private Admin Verification")
+    st.caption("Employee ID creation is locked. Enter the private setup key to unlock this section. The key is checked by the API and is never saved in the repository.")
+    if not st.session_state.get("employee_setup_unlocked", False):
+        with st.form("employee_setup_key_form"):
+            employee_setup_key = st.text_input("Private setup key", type="password", help="Must match ADMIN_SETUP_KEY configured privately on the API host.")
+            unlock_setup = st.form_submit_button("Unlock Employee ID Creation", type="primary", use_container_width=True)
+        if unlock_setup:
+            if not employee_setup_key:
+                st.error("Enter the private setup key first.")
             else:
-                st.success(f"{result.get('created_count', 0)} employee account(s) created successfully.")
-                if result.get("created"):
-                    st.warning("Copy the temporary passwords now and share them securely with the employees. They will not be displayed again.")
-                    st.dataframe(pd.DataFrame(result["created"]), use_container_width=True, hide_index=True)
-                    st.download_button(
-                        "Download Employee Login Details (CSV)",
-                        pd.DataFrame(result["created"]).to_csv(index=False).encode("utf-8-sig"),
-                        file_name="employee_login_details.csv",
-                        mime="text/csv",
-                        use_container_width=True
-                    )
-                for item in result.get("errors", []):
-                    st.error(f"Row {item.get('row')}: {item.get('email', '')} — {item.get('error')}")
+                _, key_error = api_request(
+                    "POST",
+                    "/auth/company/status",
+                    headers={"X-Admin-Setup-Key": employee_setup_key},
+                )
+                if key_error:
+                    st.error("Setup key was not accepted. Check the key and try again.")
+                else:
+                    st.session_state.employee_setup_unlocked = True
+                    st.success("Verified. Employee ID creation is now unlocked for this session.")
+                    st.rerun()
+    else:
+        st.success("Private setup key verified for this session.")
+        if st.button("Lock Employee ID Creation", use_container_width=True):
+            st.session_state.pop("employee_setup_unlocked", None)
+            st.rerun()
+        st.subheader("Create Multiple Employee Login IDs")
+        st.caption("You can create up to 100 accounts at a time. Enter one account per line in this format: Name, email, password. Leave the password blank to generate a temporary password.")
+        with st.form("bulk_company_users_form"):
+            employee_rows = st.text_area(
+                "Employee details (one employee per line)",
+                placeholder="Amit Kumar, amit@company.com, TempPass123!\nNeha Singh, neha@company.com,",
+                height=150,
+                help="Comma-separated: Name, Email, optional Password. Email unique hona chahiye."
+            )
+            create_bulk = st.form_submit_button("Create Employee IDs", type="primary", use_container_width=True)
+        if create_bulk:
+            rows = []
+            parse_errors = []
+            for line_no, line in enumerate(employee_rows.splitlines(), start=1):
+                if not line.strip():
+                    continue
+                parts = [part.strip() for part in line.split(",", 2)]
+                if len(parts) < 2:
+                    parse_errors.append(f"Line {line_no}: Separate the name and email with a comma.")
+                    continue
+                rows.append({"name": parts[0], "email": parts[1], "password": parts[2] if len(parts) > 2 else ""})
+            if parse_errors:
+                for message in parse_errors:
+                    st.error(message)
+            elif not rows:
+                st.error("Please enter details for at least one employee.")
+            elif len(rows) > 100:
+                st.error("You can create a maximum of 100 accounts per batch.")
+            else:
+                result, error = api_request("POST", "/auth/company/bulk-create", token=token, json={"employees": rows})
+                if error:
+                    st.error("Accounts could not be created: " + error)
+                else:
+                    st.success(f"{result.get('created_count', 0)} employee account(s) created successfully.")
+                    if result.get("created"):
+                        st.warning("Copy the temporary passwords now and share them securely with the employees. They will not be displayed again.")
+                        st.dataframe(pd.DataFrame(result["created"]), use_container_width=True, hide_index=True)
+                        st.download_button(
+                            "Download Employee Login Details (CSV)",
+                            pd.DataFrame(result["created"]).to_csv(index=False).encode("utf-8-sig"),
+                            file_name="employee_login_details.csv",
+                            mime="text/csv",
+                            use_container_width=True
+                        )
+                    for item in result.get("errors", []):
+                        st.error(f"Row {item.get('row')}: {item.get('email', '')} — {item.get('error')}")
     st.divider()
     st.caption("Instant Employee · Secure company workspace")
 
