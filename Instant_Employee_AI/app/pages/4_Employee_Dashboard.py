@@ -218,6 +218,87 @@ input,textarea,[data-baseweb="input"],[data-baseweb="textarea"]{background:#fff!
 }
 .stButton>button{border-radius:9px!important;font-weight:700!important;background:#fff!important;color:#17233b!important;border-color:#cbd7e8!important}
 .stButton>button[kind="primary"]{background:#2454f5!important;border-color:#2454f5!important;color:#fff!important}
+
+/* Shared responsive layout: mobile phones, tablets and desktop */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    max-width: 100%;
+}
+[data-testid="stMainBlockContainer"] {
+    width: 100% !important;
+    max-width: 1440px !important;
+    padding-left: clamp(12px, 3vw, 40px) !important;
+    padding-right: clamp(12px, 3vw, 40px) !important;
+}
+[data-testid="stHorizontalBlock"] {
+    flex-wrap: wrap !important;
+    align-items: stretch;
+    gap: clamp(10px, 1.5vw, 22px) !important;
+}
+[data-testid="stHorizontalBlock"] > [data-testid="column"] {
+    min-width: 0 !important;
+}
+[data-testid="stTable"], [data-testid="stDataFrame"], [data-testid="stDataEditor"],
+[data-testid="stTable"] > div, [data-testid="stDataFrame"] > div {
+    max-width: 100% !important;
+}
+[data-testid="stForm"], [data-testid="stVerticalBlockBorderWrapper"],
+[data-testid="stMetric"], .job-hero, .matching-hero, .candidate-auth-feature {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+img, svg, video, iframe {
+    max-width: 100%;
+}
+@media (max-width: 900px) {
+    [data-testid="stMainBlockContainer"] {
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        flex: 1 1 280px !important;
+        width: auto !important;
+    }
+    h1 { font-size: clamp(1.65rem, 5vw, 2.3rem) !important; }
+    h2 { font-size: clamp(1.3rem, 4vw, 1.8rem) !important; }
+}
+@media (max-width: 600px) {
+    [data-testid="stMainBlockContainer"] {
+        padding: 12px 12px 28px !important;
+    }
+    [data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+    [data-testid="stForm"] {
+        padding: 16px !important;
+        border-radius: 15px !important;
+    }
+    [data-testid="stForm"] input, [data-testid="stTextInput"] input,
+    [data-testid="stNumberInput"] input, [data-testid="stSelectbox"] {
+        max-width: 100% !important;
+    }
+    [data-testid="stButton"] button, [data-testid="stFormSubmitButton"] button {
+        width: 100% !important;
+        white-space: normal !important;
+        min-height: 42px !important;
+    }
+    [data-testid="stTable"], [data-testid="stDataFrame"], [data-testid="stDataEditor"] {
+        overflow-x: auto !important;
+    }
+    .job-hero, .matching-hero, .candidate-auth-feature {
+        padding: 18px !important;
+        border-radius: 16px !important;
+    }
+    .candidate-auth-hero { padding: 20px !important; }
+    .candidate-auth-feature { min-height: 0 !important; }
+    [data-testid="stMetric"] { padding: 12px !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
