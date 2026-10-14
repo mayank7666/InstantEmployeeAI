@@ -119,6 +119,9 @@ class BootstrapAdminIn(BaseModel):
 class BulkCompanyUsersIn(BaseModel):
     employees: list[dict] = Field(min_length=1, max_length=100)
 
+class LegacyJobsImportIn(BaseModel):
+    jobs: list[dict] = Field(min_length=1, max_length=200)
+
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -313,6 +316,53 @@ def create_job(data: JobIn, user: User=Depends(require_role("company")), db: Ses
 def my_jobs(user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     jobs=db.query(Job).filter(Job.company_id==organization_id(user)).order_by(Job.created_at.desc()).all()
     return [{"id":j.id,"title":j.title,"department":j.department,"applications_count":len(j.applications),"is_active":j.is_active} for j in jobs]
+
+@app.post("/jobs/import-legacy")
+def import_legacy_jobs(data: LegacyJobsImportIn, user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
+    """Import legacy CSV jobs into the signed-in primary company's database account."""
+    if user.company_id is not None:
+        raise HTTPException(status_code=403, detail="Only the primary company admin can import legacy jobs")
+    imported = []
+    skipped = []
+    existing = {
+        (job.title.strip().casefold(), job.department.strip().casefold())
+        for job in db.query(Job).filter(Job.company_id == user.id).all()
+    }
+    for index, item in enumerate(data.jobs, start=1):
+        title = str(item.get("title") or item.get("Job Title") or "").strip()[:200]
+        department = str(item.get("department") or item.get("Department") or "Other").strip()[:120] or "Other"
+        description = str(item.get("description") or item.get("Description") or "").strip()
+        skills = str(item.get("required_skills") or item.get("Required Skills") or "").strip()
+        try:
+            min_budget = max(0, int(float(item.get("min_budget", item.get("Minimum Budget", 0)) or 0)))
+            max_budget = max(0, int(float(item.get("max_budget", item.get("Maximum Budget", 0)) or 0)))
+        except (TypeError, ValueError):
+            skipped.append({"row": index, "title": title, "reason": "Budget values are invalid"})
+            continue
+        work_mode = str(item.get("work_mode") or item.get("Work Mode") or "Remote").strip()[:40] or "Remote"
+        timezone_name = str(item.get("timezone") or item.get("Timezone") or "Asia/Kolkata").strip()[:80] or "Asia/Kolkata"
+        if len(title) < 2 or len(description) < 10:
+            skipped.append({"row": index, "title": title, "reason": "Job title or description is missing/too short"})
+            continue
+        if max_budget and min_budget > max_budget:
+            skipped.append({"row": index, "title": title, "reason": "Minimum budget exceeds maximum budget"})
+            continue
+        dedupe_key = (title.casefold(), department.casefold())
+        if dedupe_key in existing:
+            skipped.append({"row": index, "title": title, "reason": "This job already exists for your company"})
+            continue
+        job = Job(company_id=user.id, title=title, department=department, description=description,
+                  required_skills=skills, min_budget=min_budget, max_budget=max_budget,
+                  work_mode=work_mode, timezone=timezone_name, is_active=True)
+        db.add(job)
+        db.flush()
+        imported.append({"id": job.id, "title": title})
+        existing.add(dedupe_key)
+    if imported:
+        db.commit()
+    else:
+        db.rollback()
+    return {"imported_count": len(imported), "imported": imported, "skipped": skipped}
 @app.post("/jobs/{job_id}/apply", status_code=201)
 def apply(job_id: int, data: ApplicationIn, user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
     job=db.get(Job,job_id)
