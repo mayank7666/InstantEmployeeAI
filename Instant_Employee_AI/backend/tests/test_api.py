@@ -126,7 +126,7 @@ def test_company_can_post_job_and_talent_can_apply_once():
 
 def test_csv_job_applications_are_persisted_and_duplicates_blocked():
     talent_headers = signup("talent", unique_email("csv-candidate"))
-    save_test_resume(talent_headers)
+    save_test_resume(talent_headers, "candidate-resume.pdf")
     payload = {
         "job_key": "csv-job-abc123",
         "job_title": "Machine Learning Engineer",
