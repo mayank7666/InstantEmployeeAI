@@ -208,8 +208,6 @@ with st.sidebar:
     st.caption("CANDIDATE")
     if st.button("⌂  Home", use_container_width=True):
         st.session_state.view = "home"; st.rerun()
-    if st.button("⇧  Upload Resume", use_container_width=True):
-        st.session_state.view = "candidate"; st.rerun()
     if st.session_state.get("candidate_logged_in"):
         if st.button("▦  My Profile", use_container_width=True):
             st.session_state.view = "candidate_dashboard"; st.rerun()
