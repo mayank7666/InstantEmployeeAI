@@ -428,6 +428,38 @@ else:
                 })
             if ranked_table:
                 st.dataframe(pd.DataFrame(ranked_table), use_container_width=True, hide_index=True)
+                st.markdown("### Shortlist candidates")
+                st.caption("Use the action beside each candidate's name to shortlist them for this job.")
+                for rank, candidate in enumerate(ranked_candidates, start=1):
+                    app_row = app_by_label.get(candidate.get("name"), {})
+                    candidate_name = str(candidate.get("name", "Candidate"))
+                    candidate_status = str(app_row.get("status", "Applied")).strip()
+                    name_col, action_col = st.columns([3, 1.4], vertical_alignment="center")
+                    with name_col:
+                        st.write(f"**{rank}. {candidate_name}**")
+                    with action_col:
+                        if candidate_status.casefold() == "shortlisted":
+                            st.markdown(
+                                "<span style='display:inline-block;background:#e4f6e9;color:#22643b;"
+                                "border:1px solid #b8e2c4;border-radius:14px;padding:5px 11px;"
+                                "font-size:12px;font-weight:700;white-space:nowrap'>✓ Shortlisted</span>",
+                                unsafe_allow_html=True,
+                            )
+                        elif app_row.get("id") is not None:
+                            if st.button("＋ Shortlist", key=f"auto_shortlist_{app_row.get('id')}"):
+                                _, status_error = api_request(
+                                    "PATCH",
+                                    f"/applications/{app_row.get('id')}/status",
+                                    token=st.session_state.get("company_api_token"),
+                                    params={"new_status": "Shortlisted"},
+                                )
+                                if status_error:
+                                    st.error("Could not shortlist candidate: " + status_error)
+                                else:
+                                    st.success(f"{candidate_name} was shortlisted.")
+                                    st.rerun()
+                        else:
+                            st.caption("Status unavailable")
                 st.success(f"Best match: {ranked_table[0]['Candidate']} · {ranked_table[0]['Match Score']}")
                 st.caption("Ranking is recalculated from all current applicants whenever this page loads. Review resumes before making hiring decisions.")
         except Exception as error:
