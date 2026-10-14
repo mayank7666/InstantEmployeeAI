@@ -4,6 +4,7 @@ import time
 import pandas as pd
 import requests
 import streamlit as st
+from src.matching_engine import match_candidates
 
 st.set_page_config(page_title="Instant Employee | Company Dashboard", page_icon="✦", layout="wide")
 ROOT = Path(__file__).resolve().parents[2]
@@ -245,6 +246,48 @@ if selected_job_id is not None:
             "Resume File": row.get("resume_filename", ""),
             "Status": row.get("status", "Applied"),
         } for row in selected_apps]), use_container_width=True, hide_index=True)
+
+        st.markdown("### 🤖 Automatic AI Candidate Ranking")
+        matchable_apps = [row for row in selected_apps if str(row.get("resume_text") or "").strip()]
+        job_description = next((str(row.get("job_description") or "") for row in selected_apps if row.get("job_description")), "")
+        if not matchable_apps:
+            st.info("Applicants will appear in AI ranking automatically after they save a readable PDF resume to their profile and apply.")
+        elif not job_description.strip():
+            st.warning("Job description is not available, so candidate matching cannot run for this job yet.")
+        else:
+            resumes = {}
+            applicant_lookup = {}
+            for row in matchable_apps:
+                email = str(row.get("candidate_email") or "")
+                label = str(row.get("candidate_name") or email or f"Candidate {row.get('candidate_id')}")
+                unique_label = f"{label} ({email})" if email else label
+                resumes[unique_label] = str(row.get("resume_text") or "")
+                applicant_lookup[unique_label] = row
+            try:
+                ranked = match_candidates(job_description, resumes)
+                ranked_rows = []
+                for rank, candidate in enumerate(ranked, start=1):
+                    row = applicant_lookup.get(candidate.get("name"), {})
+                    ranked_rows.append({
+                        "Rank": rank,
+                        "Candidate": candidate.get("name", "Candidate"),
+                        "Match Score": f"{float(candidate.get('final_score', 0)):.1f}%",
+                        "Skill Coverage": f"{float(candidate.get('skill_coverage', 0)):.1f}%",
+                        "Matched Skills": ", ".join(candidate.get("matched_skills") or []),
+                        "Missing Skills": ", ".join(candidate.get("missing_skills") or []),
+                        "Application Status": row.get("status", "Applied"),
+                        "Resume": row.get("resume_filename", ""),
+                    })
+                if ranked_rows:
+                    st.dataframe(pd.DataFrame(ranked_rows), use_container_width=True, hide_index=True)
+                    best = ranked_rows[0]
+                    st.success(f"Best current match: {best['Candidate']} — {best['Match Score']}")
+                    st.caption("Ranking updates from all applicants currently saved for this job. Scores are decision support; review each resume before shortlisting.")
+                else:
+                    st.info("No candidate matches were returned for this job.")
+            except Exception as error:
+                st.warning("Automatic matching could not run: " + str(error))
+
         status_options = ["Applied", "Under Review", "Shortlisted", "Rejected", "Selected"]
         chosen = st.selectbox("Update application status", status_options, key=f"status_{selected_job_id}")
         candidate_options = {f"{row.get('candidate_name') or row.get('candidate_email')} · #{row.get('id')}": row for row in selected_apps}
