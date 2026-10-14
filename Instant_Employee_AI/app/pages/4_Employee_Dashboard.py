@@ -1,4 +1,5 @@
 from pathlib import Path
+import base64
 import html
 import sys
 import time
@@ -251,6 +252,36 @@ if selected_job_id is not None:
             "Resume File": row.get("resume_filename", ""),
             "Status": row.get("status", "Applied"),
         } for row in selected_apps]), use_container_width=True, hide_index=True)
+
+        st.markdown("### Candidate resumes")
+        for row in selected_apps:
+            candidate_label = row.get("candidate_name") or row.get("candidate_email") or f"Candidate {row.get('candidate_id')}"
+            left_resume, right_resume = st.columns([3, 1])
+            with left_resume:
+                st.write(candidate_label)
+                st.caption(row.get("resume_filename") or "No saved resume filename")
+            with right_resume:
+                if row.get("resume_filename") and st.button("Load resume", key=f"load_resume_{row.get('id')}"):
+                    resume_payload, resume_error = api_request(
+                        "GET", f"/applications/{row.get('id')}/resume", token=token
+                    )
+                    if resume_error:
+                        st.error("Resume unavailable: " + resume_error)
+                    else:
+                        st.session_state[f"resume_download_{row.get('id')}"] = resume_payload
+            resume_payload = st.session_state.get(f"resume_download_{row.get('id')}")
+            if resume_payload and resume_payload.get("resume_data"):
+                try:
+                    resume_bytes = base64.b64decode(resume_payload["resume_data"])
+                    st.download_button(
+                        f"Download {resume_payload.get('filename', 'resume.pdf')}",
+                        data=resume_bytes,
+                        file_name=resume_payload.get("filename", "candidate_resume.pdf"),
+                        mime="application/pdf",
+                        key=f"download_resume_{row.get('id')}",
+                    )
+                except Exception:
+                    st.warning("This saved resume could not be decoded.")
 
         st.markdown("### 🤖 Automatic AI Candidate Ranking")
         matchable_apps = [row for row in selected_apps if str(row.get("resume_text") or "").strip()]
