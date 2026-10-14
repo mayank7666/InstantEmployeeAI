@@ -145,6 +145,40 @@ h1,h2,h3,h4,h5,h6,[data-testid="stMarkdownContainer"] strong{color:var(--ink)!im
 .step{min-height:125px;background:#f2f6ff}
 .stepnum{font-size:12px;color:#1764ff;font-weight:900;letter-spacing:1px}
 .smallmuted{color:#52637e;font-size:13px}
+/* Candidate login/signup split-panel design (CSS only; no generated screenshot used) */
+.candidate-auth-hero{padding:30px 34px;margin:8px 0 16px;background:linear-gradient(115deg,#ffffff,#eaf2ff)}
+.candidate-auth-hero h1{font-size:clamp(32px,4vw,46px);letter-spacing:-1.2px}
+.candidate-auth-hero p{max-width:780px;margin-bottom:0}
+[data-testid="stTabs"] [data-baseweb="tab-list"]{gap:8px;border-bottom:1px solid #dce6f5}
+[data-testid="stTabs"] button[data-baseweb="tab"]{padding:10px 16px;color:#61728d;font-weight:650}
+[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"]{color:#1764ff;border-bottom:2px solid #1764ff}
+.candidate-auth-heading{display:flex;align-items:center;gap:15px;margin:4px 0 20px}
+.candidate-auth-heading h3{margin:0 0 5px;color:#172e55;font-size:24px}
+.candidate-auth-heading p{margin:0;color:#647792;font-size:14px;line-height:1.55}
+.candidate-auth-icon{display:flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:17px;background:linear-gradient(140deg,#d6e5ff,#edf3ff);color:#1764ff;font-size:29px;font-weight:800;flex-shrink:0}
+.candidate-signup-icon{background:linear-gradient(140deg,#e4ddff,#f3efff);color:#7047d7}
+[data-testid="stForm"]{background:linear-gradient(145deg,#ffffff,#f9fbff)!important;border:1px solid #dce6f5!important;border-radius:20px!important;padding:22px!important;box-shadow:0 12px 32px #25466d0c!important}
+[data-testid="stForm"] label{font-weight:600!important;color:#34445e!important}
+[data-testid="stForm"] input{border-radius:11px!important;min-height:44px!important}
+[data-testid="stForm"] button[kind="primary"],[data-testid="stFormSubmitButton"] button,[data-testid="stForm"] button[type="submit"]{background:linear-gradient(100deg,#318bff,#1764ff)!important;border:1px solid #1764ff!important;color:#fff!important;border-radius:11px!important;font-weight:700!important;min-height:46px!important;box-shadow:0 5px 13px #1764ff22!important}
+[data-testid="stForm"] button[kind="primary"] *,[data-testid="stFormSubmitButton"] button *,[data-testid="stForm"] button[type="submit"] *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+[data-testid="stForm"] button[kind="primary"]:hover,[data-testid="stFormSubmitButton"] button:hover,[data-testid="stForm"] button[type="submit"]:hover{background:linear-gradient(100deg,#267de9,#1055df)!important}
+.candidate-auth-note{margin-top:12px;padding:13px 15px;background:#eaf2ff;border:1px solid #d9e7ff;border-radius:12px;color:#536d91;font-size:13px;line-height:1.55}
+.candidate-auth-feature{height:100%;min-height:420px;padding:30px;border:1px solid #d6e5fa;border-radius:22px;background:radial-gradient(circle at 90% 5%,#d8e9ff 0,transparent 35%),linear-gradient(145deg,#edf5ff,#f9fbff 75%);box-shadow:0 12px 32px #25466d0a}
+.candidate-auth-feature .kicker{font-size:11px;letter-spacing:1.3px;color:#2863c7;font-weight:800}
+.candidate-auth-feature h2{font-size:clamp(25px,3vw,34px);letter-spacing:-.7px;line-height:1.2;margin:13px 0;color:#142d59}
+.candidate-auth-feature h2 span{color:#1764ff}
+.candidate-auth-feature>p{font-size:14px;line-height:1.7;color:#607492;margin:0 0 26px}
+.candidate-feature-row{display:flex;align-items:center;gap:13px;margin:21px 0}
+.candidate-feature-icon{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;font-size:23px;font-weight:800;flex-shrink:0}
+.cfi-blue{background:#dceaff;color:#2863d9}
+.cfi-green{background:#d8f7eb;color:#0d9a70}
+.cfi-amber{background:#fff0d2;color:#c47b05}
+.candidate-feature-row b{display:block;color:#1c3155;font-size:15px;margin-bottom:4px}
+.candidate-feature-row small{display:block;color:#647792;font-size:13px;line-height:1.5}
+.candidate-feature-foot{border-top:1px solid #d5e4f7;margin-top:26px;padding-top:17px;color:#456caa;font-size:13px;font-weight:650}
+@media(max-width:900px){.candidate-auth-feature{min-height:0;padding:22px}.candidate-auth-feature h2{font-size:25px}.candidate-auth-heading h3{font-size:20px}}
+
 div[data-testid="stMetric"]{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 4px 15px #203d7008}
 div[data-testid="stMetric"] label,div[data-testid="stMetricValue"],div[data-testid="stMetricDelta"]{color:var(--ink)!important}
 .stButton>button,[data-testid="stFormSubmitButton"] button{border-radius:10px!important;font-weight:750!important;min-height:43px;background:#fff!important;color:#17233b!important;border:1px solid #cbd7e8!important}
@@ -488,14 +522,37 @@ elif view == "job_details":
             st.rerun()
 
 elif view == "candidate_auth":
-    st.markdown("## Candidate account")
-    st.caption("Sign in with the live Instant Employee API. Use at least 8 characters for your password.")
+    st.markdown(
+        "<div class='hero candidate-auth-hero'><div class='kicker'>INSTANT EMPLOYEE · CAREER PORTAL</div>"
+        "<h1>Candidate <span>account</span></h1>"
+        "<p>Sign in to manage your profile, save your resume and discover opportunities matched to your skills.</p></div>",
+        unsafe_allow_html=True,
+    )
     login, signup = st.tabs(["Login", "Create account"])
     with login:
-        with st.form("candidate_login"):
-            email = st.text_input("Email address", key="candidate_login_email")
-            password = st.text_input("Password", type="password", key="candidate_login_password")
-            submit = st.form_submit_button("Login", type="primary", use_container_width=True)
+        form_col, feature_col = st.columns([1.05, 0.95], gap="large")
+        with form_col:
+            st.markdown(
+                "<div class='candidate-auth-heading'><div class='candidate-auth-icon'>♙</div><div>"
+                "<h3>Welcome back!</h3><p>Login to your candidate account to explore job opportunities and manage your profile.</p></div></div>",
+                unsafe_allow_html=True,
+            )
+            with st.form("candidate_login"):
+                email = st.text_input("Email address", key="candidate_login_email", placeholder="Enter your email address")
+                password = st.text_input("Password", type="password", key="candidate_login_password", placeholder="Enter your password")
+                submit = st.form_submit_button("→  Login to Dashboard", type="primary", use_container_width=True)
+            st.markdown("<div class='candidate-auth-note'>♢  Your candidate account keeps your profile and applications in one place.</div>", unsafe_allow_html=True)
+        with feature_col:
+            st.markdown(
+                "<div class='candidate-auth-feature'><div class='kicker'>YOUR NEXT MOVE STARTS HERE</div>"
+                "<h2>Find your <span>next opportunity.</span></h2>"
+                "<p>Create your profile, showcase your skills, and discover job opportunities that fit your experience.</p>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-blue'>⌕</span><div><b>Browse jobs</b><small>Explore roles and review job details.</small></div></div>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-green'>▤</span><div><b>Build your profile</b><small>Keep your resume and skills in one place.</small></div></div>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✦</span><div><b>Get matched</b><small>Review AI-assisted job match estimates.</small></div></div>"
+                "<div class='candidate-feature-foot'>✦  Take the next step in your career</div></div>",
+                unsafe_allow_html=True,
+            )
         if submit:
             if not email.strip() or not password:
                 st.error("Enter your email and password.")
@@ -515,12 +572,31 @@ elif view == "candidate_auth":
                         st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"
                         st.rerun()
     with signup:
-        with st.form("candidate_signup"):
-            name = st.text_input("Full name", key="candidate_signup_name")
-            email = st.text_input("Email address", key="candidate_signup_email")
-            password = st.text_input("Create password", type="password", key="candidate_signup_password")
-            confirm = st.text_input("Confirm password", type="password", key="candidate_signup_confirm")
-            submit = st.form_submit_button("Create candidate account", type="primary", use_container_width=True)
+        form_col, feature_col = st.columns([1.05, 0.95], gap="large")
+        with form_col:
+            st.markdown(
+                "<div class='candidate-auth-heading'><div class='candidate-auth-icon candidate-signup-icon'>✦</div><div>"
+                "<h3>Create your account</h3><p>Set up your candidate profile to start exploring opportunities.</p></div></div>",
+                unsafe_allow_html=True,
+            )
+            with st.form("candidate_signup"):
+                name = st.text_input("Full name", key="candidate_signup_name", placeholder="Enter your full name")
+                email = st.text_input("Email address", key="candidate_signup_email", placeholder="Enter your email address")
+                password = st.text_input("Create password", type="password", key="candidate_signup_password", placeholder="At least 8 characters")
+                confirm = st.text_input("Confirm password", type="password", key="candidate_signup_confirm", placeholder="Re-enter your password")
+                submit = st.form_submit_button("✦  Create candidate account", type="primary", use_container_width=True)
+            st.markdown("<div class='candidate-auth-note'>♢  Use a strong password and keep your account details private.</div>", unsafe_allow_html=True)
+        with feature_col:
+            st.markdown(
+                "<div class='candidate-auth-feature'><div class='kicker'>A PROFILE THAT WORKS FOR YOU</div>"
+                "<h2>Showcase your <span>potential.</span></h2>"
+                "<p>A simple candidate workspace designed to keep your job search organized.</p>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-blue'>♙</span><div><b>Your profile</b><small>Keep your candidate details up to date.</small></div></div>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-green'>▤</span><div><b>Your resume</b><small>Upload and manage your resume from My Profile.</small></div></div>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✓</span><div><b>Your applications</b><small>Keep track of the roles you apply for.</small></div></div>"
+                "<div class='candidate-feature-foot'>✦  One account for your job search</div></div>",
+                unsafe_allow_html=True,
+            )
         if submit:
             if not name.strip() or not email.strip() or not password:
                 st.error("Please fill in every field.")
