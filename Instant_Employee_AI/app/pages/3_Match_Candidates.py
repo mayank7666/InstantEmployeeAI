@@ -57,6 +57,28 @@ def api_get(path):
         return None, str(error)
 
 
+def api_request(method, path, token=None, params=None):
+    """Send an authenticated request to the backend and return payload/error."""
+    try:
+        auth_token = token or st.session_state.get("company_api_token", "")
+        response = requests.request(
+            method,
+            f"{API_BASE_URL}{path}",
+            headers={"Authorization": f"Bearer {auth_token}"},
+            params=params,
+            timeout=(8, 30),
+        )
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {}
+        if not response.ok:
+            detail = payload.get("detail", f"API error {response.status_code}")
+            return None, str(detail)
+        return payload, None
+    except Exception as error:
+        return None, str(error)
+
 
 SHORTLIST_COLUMNS = [
     "Job ID",
