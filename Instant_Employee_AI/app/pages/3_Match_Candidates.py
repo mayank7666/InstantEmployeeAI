@@ -206,6 +206,25 @@ st.markdown(
         border-color: #104da8 !important;
     }
 
+    /* Light, readable Shortlist button in automatic matching */
+    [class*="st-key-auto_shortlist_"] button {
+        background: #e4edff !important;
+        color: #2456a6 !important;
+        -webkit-text-fill-color: #2456a6 !important;
+        border: 1px solid #c9d9ff !important;
+        border-radius: 10px !important;
+        font-weight: 650 !important;
+        box-shadow: 0 2px 7px #2456a610 !important;
+    }
+    [class*="st-key-auto_shortlist_"] button * {
+        color: #2456a6 !important;
+        -webkit-text-fill-color: #2456a6 !important;
+    }
+    [class*="st-key-auto_shortlist_"] button:hover {
+        background: #d5e3ff !important;
+        border-color: #a9c4ff !important;
+    }
+
     [data-testid="stDataFrame"] {
         border: 1px solid #dce7f5;
         border-radius: 10px;
