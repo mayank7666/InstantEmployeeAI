@@ -830,7 +830,7 @@ elif view == "candidate":
             results = st.session_state.get("match_results", [])
             if results:
                 st.markdown("### Your job matches")
-                st.caption("Scores are AI-assisted estimates based on text similarity and recognized skill coverage, not a hiring decision.")
+                st.caption("Scores are AI-assisted estimates using text relevance, recognized skills, and explicit experience/education requirements when present. Review resumes before making hiring decisions.")
                 for item in results:
                     with st.container(border=True):
                         a,b = st.columns([3,1])
