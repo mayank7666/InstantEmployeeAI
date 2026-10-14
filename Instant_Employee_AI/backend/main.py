@@ -329,7 +329,7 @@ def list_jobs(q: str="", department: str="", work_mode: str="", db: Session=Depe
     if q: query=query.filter((Job.title.ilike("%"+q+"%"))|(Job.description.ilike("%"+q+"%"))|(Job.required_skills.ilike("%"+q+"%")))
     if department: query=query.filter(Job.department==department)
     if work_mode: query=query.filter(Job.work_mode==work_mode)
-    return [{"id":j.id,"title":j.title,"department":j.department,"description":j.description,"required_skills":j.required_skills,"min_budget":j.min_budget,"max_budget":j.max_budget,"work_mode":j.work_mode,"timezone":j.timezone,"created_at":j.created_at.isoformat()} for j in query.order_by(Job.created_at.desc()).all()]
+    return [{"id":j.id,"title":j.title,"department":j.department,"description":j.description,"required_skills":j.required_skills,"min_budget":j.min_budget,"max_budget":j.max_budget,"work_mode":j.work_mode,"timezone":j.timezone,"created_at":j.created_at.isoformat(),"company_name":j.company.email} for j in query.order_by(Job.created_at.desc()).all()]
 @app.post("/jobs", status_code=201)
 def create_job(data: JobIn, user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     if data.max_budget and data.min_budget>data.max_budget: raise HTTPException(status_code=422,detail="Minimum budget cannot exceed maximum budget")
