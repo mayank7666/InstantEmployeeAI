@@ -801,13 +801,22 @@ elif view == "candidate":
                         mode_col = find_col({"work mode","work_mode"})
                         low_col = find_col({"minimum budget","min budget","minimum_budget"})
                         high_col = find_col({"maximum budget","max budget","maximum_budget"})
+                        from src.matching_engine import match_resume_to_jobs
+                        ai_jobs = []
                         for _, job in jobs.iterrows():
                             title = str(job.get(title_col, "Open role")) if title_col else "Open role"
                             description = str(job.get(desc_col, "")) if desc_col else ""
                             required = str(job.get(skills_col, "")) if skills_col else ""
-                            score, lexical, matched, missing = get_match_score(f"{title}. {description}. Required skills: {required}", resume_text)
-                            results.append({"title":title,"description":description,"department":str(job.get(dept_col,"Not specified")) if dept_col else "Not specified","mode":str(job.get(mode_col,"Not specified")) if mode_col else "Not specified","low":str(job.get(low_col,"")) if low_col else "","high":str(job.get(high_col,"")) if high_col else "","score":score,"lexical":lexical,"matched":matched,"missing":missing})
-                        results.sort(key=lambda item:item["score"], reverse=True)
+                            ai_jobs.append({
+                                "title": title,
+                                "description": description,
+                                "required_skills": required,
+                                "department": str(job.get(dept_col, "Not specified")) if dept_col else "Not specified",
+                                "mode": str(job.get(mode_col, "Not specified")) if mode_col else "Not specified",
+                                "low": str(job.get(low_col, "")) if low_col else "",
+                                "high": str(job.get(high_col, "")) if high_col else "",
+                            })
+                        results = match_resume_to_jobs(resume_text, ai_jobs)
                         st.session_state.match_results = results
                         st.success(f"Resume analyzed. Found {len(results)} job match(es).")
             except Exception as error:
@@ -832,8 +841,11 @@ elif view == "candidate":
                             if item["matched"]: st.write("**Matching skills:** " + ", ".join(item["matched"]))
                             if item["missing"]: st.write("**Skills to build:** " + ", ".join(item["missing"]))
                         with b:
-                            st.metric("Match score", f"{item['score']}%")
-                            st.caption(f"Text similarity: {item['lexical']}%")
+                            st.metric("AI match score", f"{item['score']}%")
+                            st.caption(f"Text relevance: {item['lexical']}%")
+                            st.caption(f"Required skill coverage: {item.get('skill_coverage', 0)}%")
+                            if item.get("semantic") is not None:
+                                st.caption(f"Semantic similarity: {item['semantic']}%")
                             if item["low"] or item["high"]: st.caption(f"Budget: ₹{item['low'] or '—'} – ₹{item['high'] or '—'}")
         if st.button("← Back to home"):
             st.session_state.view = "home"; st.rerun()
