@@ -580,7 +580,7 @@ elif view == "candidate_auth":
             with st.form("candidate_login"):
                 email = st.text_input("Email address", key="candidate_login_email", placeholder="Enter your email address")
                 password = st.text_input("Password", type="password", key="candidate_login_password", placeholder="Enter your password")
-                submit = st.form_submit_button("Login to Dashboard", type="primary", use_container_width=True)
+                submit = st.form_submit_button("→  Login to Dashboard", type="primary", use_container_width=True)
             st.markdown("<div class='candidate-auth-note'>♢  Your candidate account keeps your profile and applications in one place.</div>", unsafe_allow_html=True)
         with feature_col:
             st.markdown(
