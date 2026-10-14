@@ -11,6 +11,21 @@ _admin_headers = None
 def unique_email(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:12]}@example.com"
 
+def save_test_resume(headers, filename="test-resume.pdf"):
+    response = client.put("/profiles/me", headers=headers, json={
+        "full_name": "Test Candidate",
+        "headline": "Python Developer",
+        "skills": "Python, FastAPI, SQL, Machine Learning",
+        "timezone": "Asia/Kolkata",
+        "availability": "Available",
+        "portfolio_url": "",
+        "resume_filename": filename,
+        "resume_text": "Python developer with FastAPI SQL and machine learning project experience.",
+        "resume_data": "dGVzdC1wZGY=",
+    })
+    assert response.status_code == 200, response.text
+
+
 def signup(role: str, email: str):
     global _admin_headers
     if role == "company":
@@ -75,6 +90,7 @@ def test_talent_profile_and_completion():
 def test_company_can_post_job_and_talent_can_apply_once():
     company_headers = signup("company", unique_email("company"))
     talent_headers = signup("talent", unique_email("candidate"))
+    save_test_resume(talent_headers)
 
     created = client.post("/jobs", headers=company_headers, json={
         "title": "Backend Engineer",
@@ -110,6 +126,7 @@ def test_company_can_post_job_and_talent_can_apply_once():
 
 def test_csv_job_applications_are_persisted_and_duplicates_blocked():
     talent_headers = signup("talent", unique_email("csv-candidate"))
+    save_test_resume(talent_headers)
     payload = {
         "job_key": "csv-job-abc123",
         "job_title": "Machine Learning Engineer",
@@ -133,6 +150,8 @@ def test_csv_job_applications_are_persisted_and_duplicates_blocked():
 def test_external_application_history_is_private_to_each_candidate():
     first_headers = signup("talent", unique_email("first-candidate"))
     second_headers = signup("talent", unique_email("second-candidate"))
+    save_test_resume(first_headers, "first.pdf")
+    save_test_resume(second_headers, "second.pdf")
     payload = {
         "job_key": "private-csv-job",
         "job_title": "Data Analyst",
@@ -192,6 +211,7 @@ def test_company_application_list_only_returns_owned_job_applications():
     first_company = signup("company", unique_email("first-company"))
     second_company = signup("company", unique_email("second-company"))
     candidate = signup("talent", unique_email("company-dashboard-candidate"))
+    save_test_resume(candidate)
 
     def create_job(headers, title):
         response = client.post("/jobs", headers=headers, json={
