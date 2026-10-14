@@ -2,7 +2,7 @@
 import os, hashlib, secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -224,6 +224,23 @@ def bulk_create_company_users(data: BulkCompanyUsersIn, admin: User = Depends(re
 
 @app.get("/health")
 def health(): return {"status":"ok","service":"instant-employee-api","version":"0.1.0"}
+@app.post("/auth/company/status")
+def company_admin_status(
+    setup_key: str = Header(default="", alias="X-Admin-Setup-Key"),
+    db: Session = Depends(get_db),
+):
+    """Reveal the primary admin email only to a caller with the private setup key."""
+    expected_key = os.getenv("ADMIN_SETUP_KEY", "")
+    if not expected_key:
+        raise HTTPException(status_code=503, detail="Admin setup is not configured")
+    if not setup_key or not secrets.compare_digest(setup_key, expected_key):
+        raise HTTPException(status_code=403, detail="Invalid admin setup key")
+    admin = db.query(User).filter(User.role == "company", User.company_id.is_(None)).first()
+    if not admin:
+        return {"admin_exists": False, "email": None}
+    return {"admin_exists": True, "email": admin.email}
+
+
 @app.post("/auth/company/bootstrap", response_model=TokenOut, status_code=201)
 def bootstrap_company_admin(data: BootstrapAdminIn, db: Session = Depends(get_db)):
     """Create the first company admin only with a private Render environment setup key."""
