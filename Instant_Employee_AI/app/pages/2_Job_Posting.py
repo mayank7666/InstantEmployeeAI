@@ -260,8 +260,8 @@ with st.sidebar:
     st.divider()
 
     st.page_link(
-        "app.py",
-        label="🏠 Dashboard",
+        "pages/4_Employee_Dashboard.py",
+        label="🏠 Company Dashboard",
         use_container_width=True
     )
 
