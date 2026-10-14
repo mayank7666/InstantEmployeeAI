@@ -52,6 +52,9 @@ class Profile(Base):
     portfolio_url: Mapped[str] = mapped_column(String(500), default="")
     resume_filename: Mapped[str] = mapped_column(String(255), default="")
     picture_data: Mapped[str] = mapped_column(Text, default="")
+    resume_filename: Mapped[str] = mapped_column(String(255), default="")
+    resume_text: Mapped[str] = mapped_column(Text, default="")
+    resume_data: Mapped[str] = mapped_column(Text, default="")
     user: Mapped["User"] = relationship(back_populates="profile")
 class Job(Base):
     __tablename__ = "jobs"
@@ -102,6 +105,16 @@ if "company_id" not in {col["name"] for col in inspect(engine).get_columns("user
     with engine.begin() as connection:
         connection.execute(sql_text("ALTER TABLE users ADD COLUMN company_id INTEGER"))
 
+# Add saved-resume fields to existing profiles without losing current profile data.
+profile_columns = {col["name"] for col in inspect(engine).get_columns("profiles")}
+with engine.begin() as connection:
+    if "resume_filename" not in profile_columns:
+        connection.execute(sql_text("ALTER TABLE profiles ADD COLUMN resume_filename VARCHAR(255) NOT NULL DEFAULT ''"))
+    if "resume_text" not in profile_columns:
+        connection.execute(sql_text("ALTER TABLE profiles ADD COLUMN resume_text TEXT NOT NULL DEFAULT ''"))
+    if "resume_data" not in profile_columns:
+        connection.execute(sql_text("ALTER TABLE profiles ADD COLUMN resume_data TEXT NOT NULL DEFAULT ''"))
+
 app = FastAPI(title="Instant Employee API", version="0.1.0", description="MVP API for talent profiles, jobs, and applications.")
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "*").split(","), allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -134,6 +147,9 @@ class ProfileIn(BaseModel):
     portfolio_url: str = ""
     resume_filename: str = ""
     picture_data: str = Field(default="", max_length=2800000)
+    resume_filename: str = Field(default="", max_length=255)
+    resume_text: Optional[str] = Field(default=None, max_length=1000000)
+    resume_data: Optional[str] = Field(default=None, max_length=7000000)
 class JobIn(BaseModel):
     title: str = Field(min_length=2, max_length=200)
     department: str = "Other"
@@ -183,7 +199,7 @@ def require_role(role: str):
         return user
     return role_checker
 def profile_to_dict(p: Profile):
-    return {"full_name":p.full_name,"headline":p.headline,"skills":p.skills,"timezone":p.timezone,"availability":p.availability,"portfolio_url":p.portfolio_url,"resume_filename":p.resume_filename,"picture_data":p.picture_data or ""}
+    return {"full_name":p.full_name,"headline":p.headline,"skills":p.skills,"timezone":p.timezone,"availability":p.availability,"portfolio_url":p.portfolio_url,"resume_filename":p.resume_filename or "","resume_text":p.resume_text or "","resume_uploaded":bool(p.resume_text),"picture_data":p.picture_data or ""}
 @app.post("/auth/company/bulk-create")
 def bulk_create_company_users(data: BulkCompanyUsersIn, admin: User = Depends(require_role("company")), db: Session = Depends(get_db)):
     """Create up to 100 company-role login accounts in one request."""
@@ -297,7 +313,14 @@ def get_profile(user: User = Depends(current_user), db: Session = Depends(get_db
 def update_profile(data: ProfileIn, user: User = Depends(current_user), db: Session = Depends(get_db)):
     p=db.query(Profile).filter(Profile.user_id==user.id).first()
     if not p: p=Profile(user_id=user.id); db.add(p)
-    for k,v in data.model_dump().items(): setattr(p,k,v)
+    values = data.model_dump()
+    # Optional resume fields are only changed when explicitly supplied.
+    for k, v in values.items():
+        if k in {"resume_text", "resume_data"}:
+            if v is not None:
+                setattr(p, k, v)
+        else:
+            setattr(p, k, v)
     db.commit(); db.refresh(p); result=profile_to_dict(p); keys=["full_name","headline","skills","timezone","availability","portfolio_url","resume_filename"]
     result["completion_percent"]=round(sum(bool(result[k]) for k in keys)/len(keys)*100); return result
 @app.get("/jobs")
@@ -367,8 +390,11 @@ def import_legacy_jobs(data: LegacyJobsImportIn, user: User=Depends(require_role
 def apply(job_id: int, data: ApplicationIn, user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
     job=db.get(Job,job_id)
     if not job or not job.is_active: raise HTTPException(status_code=404,detail="Active job not found")
+    profile=db.query(Profile).filter(Profile.user_id==user.id).first()
+    if not profile or not profile.resume_text.strip():
+        raise HTTPException(status_code=400,detail="Upload a resume to your candidate profile before applying")
     if db.query(Application).filter(Application.job_id==job_id,Application.talent_id==user.id).first(): raise HTTPException(status_code=409,detail="Already applied to this job")
-    a=Application(job_id=job_id,talent_id=user.id,resume_filename=data.resume_filename); db.add(a); db.commit(); db.refresh(a)
+    a=Application(job_id=job_id,talent_id=user.id,resume_filename=profile.resume_filename); db.add(a); db.commit(); db.refresh(a)
     return {"id":a.id,"job_id":job_id,"job_title":job.title,"status":a.status,"applied_at":a.created_at.isoformat()}
 @app.get("/applications/me")
 def my_applications(user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
@@ -378,6 +404,9 @@ def my_applications(user: User=Depends(require_role("talent")), db: Session=Depe
 def apply_to_csv_job(data: ExternalApplicationIn, user: User=Depends(require_role("talent")), db: Session=Depends(get_db)):
     """Save an application for a job currently stored in the Streamlit jobs.csv file."""
     job_key = data.job_key.strip()
+    profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+    if not profile or not profile.resume_text.strip():
+        raise HTTPException(status_code=400, detail="Upload a resume to your candidate profile before applying")
     if db.query(ExternalApplication).filter(
         ExternalApplication.job_key == job_key,
         ExternalApplication.talent_id == user.id,
@@ -388,7 +417,7 @@ def apply_to_csv_job(data: ExternalApplicationIn, user: User=Depends(require_rol
         job_title=data.job_title.strip(),
         company_name=data.company_name.strip() or "Company not specified",
         talent_id=user.id,
-        resume_filename=data.resume_filename.strip(),
+        resume_filename=profile.resume_filename,
     )
     db.add(application)
     try:
@@ -442,6 +471,9 @@ def company_applications(user: User=Depends(require_role("company")), db: Sessio
         "status": a.status,
         "applied_at": a.created_at.isoformat(),
         "resume_filename": a.resume_filename,
+        "resume_text": a.talent.profile.resume_text if a.talent.profile else "",
+        "job_description": a.job.description,
+        "candidate_skills": a.talent.profile.skills if a.talent.profile else "",
     } for a in rows]
 
 @app.get("/jobs/{job_id}/applications")
