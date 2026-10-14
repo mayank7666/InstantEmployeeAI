@@ -303,6 +303,37 @@ a{color:#075fc7!important}
     color:#17458f!important;
 }
 @media(max-width:700px){.hero{padding:24px}.hero h1{letter-spacing:-1px}}
+
+/* Final, high-specificity override for candidate login submit button */
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > button,
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > button[kind="primary"],
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > button:hover,
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > button:focus,
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > button:active {
+    background: #1764ff !important;
+    background-color: #1764ff !important;
+    background-image: none !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-indent: 0 !important;
+    font-size: 15px !important;
+    letter-spacing: normal !important;
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+}
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > button span,
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > button p,
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > button div {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: none !important;
+    transition: none !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
