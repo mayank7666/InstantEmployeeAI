@@ -144,9 +144,8 @@ class ProfileIn(BaseModel):
     timezone: str = "Asia/Kolkata"
     availability: str = "Available"
     portfolio_url: str = ""
-    resume_filename: str = ""
     picture_data: str = Field(default="", max_length=2800000)
-    resume_filename: str = Field(default="", max_length=255)
+    resume_filename: Optional[str] = Field(default=None, max_length=255)
     resume_text: Optional[str] = Field(default=None, max_length=1000000)
     resume_data: Optional[str] = Field(default=None, max_length=7000000)
 class JobIn(BaseModel):
@@ -315,7 +314,7 @@ def update_profile(data: ProfileIn, user: User = Depends(current_user), db: Sess
     values = data.model_dump()
     # Optional resume fields are only changed when explicitly supplied.
     for k, v in values.items():
-        if k in {"resume_text", "resume_data"}:
+        if k in {"resume_text", "resume_data", "resume_filename"}:
             if v is not None:
                 setattr(p, k, v)
         else:
