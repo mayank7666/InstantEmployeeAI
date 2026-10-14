@@ -160,9 +160,49 @@ h1,h2,h3,h4,h5,h6,[data-testid="stMarkdownContainer"] strong{color:var(--ink)!im
 [data-testid="stForm"]{background:linear-gradient(145deg,#ffffff,#f9fbff)!important;border:1px solid #dce6f5!important;border-radius:20px!important;padding:22px!important;box-shadow:0 12px 32px #25466d0c!important}
 [data-testid="stForm"] label{font-weight:600!important;color:#34445e!important}
 [data-testid="stForm"] input{border-radius:11px!important;min-height:44px!important}
-[data-testid="stForm"] button[kind="primary"],[data-testid="stFormSubmitButton"] button,[data-testid="stForm"] button[type="submit"]{background:#1764ff!important;background-image:none!important;border:1px solid #1764ff!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-radius:11px!important;font-weight:700!important;min-height:46px!important;box-shadow:0 5px 13px #1764ff22!important;opacity:1!important;visibility:visible!important;animation:none!important;transition:none!important;filter:none!important}
-[data-testid="stForm"] button[kind="primary"] *,[data-testid="stFormSubmitButton"] button *,[data-testid="stForm"] button[type="submit"] *{color:#fff!important;-webkit-text-fill-color:#fff!important}
-[data-testid="stForm"] button[kind="primary"]:hover,[data-testid="stFormSubmitButton"] button:hover,[data-testid="stForm"] button[type="submit"]:hover{background:#1764ff!important;background-image:none!important;animation:none!important;transition:none!important;filter:none!important}
+/* Stable form submit buttons: keep label and blue background visible in every state */
+[data-testid="stForm"] button,
+[data-testid="stFormSubmitButton"],
+[data-testid="stFormSubmitButton"] button {
+    background:#1764ff!important;
+    background-color:#1764ff!important;
+    background-image:none!important;
+    border:1px solid #1764ff!important;
+    border-radius:11px!important;
+    color:#ffffff!important;
+    -webkit-text-fill-color:#ffffff!important;
+    font-weight:700!important;
+    min-height:46px!important;
+    box-shadow:0 5px 13px #1764ff22!important;
+    opacity:1!important;
+    visibility:visible!important;
+    animation:none!important;
+    transition:none!important;
+    filter:none!important;
+}
+[data-testid="stForm"] button *,
+[data-testid="stFormSubmitButton"] * {
+    color:#ffffff!important;
+    -webkit-text-fill-color:#ffffff!important;
+    opacity:1!important;
+    visibility:visible!important;
+    animation:none!important;
+    transition:none!important;
+}
+[data-testid="stForm"] button:hover,
+[data-testid="stForm"] button:focus,
+[data-testid="stForm"] button:active,
+[data-testid="stFormSubmitButton"]:hover,
+[data-testid="stFormSubmitButton"]:focus {
+    background:#1764ff!important;
+    background-color:#1764ff!important;
+    background-image:none!important;
+    color:#ffffff!important;
+    -webkit-text-fill-color:#ffffff!important;
+    animation:none!important;
+    transition:none!important;
+    filter:none!important;
+}
 .candidate-auth-note{margin-top:12px;padding:13px 15px;background:#eaf2ff;border:1px solid #d9e7ff;border-radius:12px;color:#536d91;font-size:13px;line-height:1.55}
 .candidate-auth-feature{height:100%;min-height:420px;padding:30px;border:1px solid #d6e5fa;border-radius:22px;background:radial-gradient(circle at 90% 5%,#d8e9ff 0,transparent 35%),linear-gradient(145deg,#edf5ff,#f9fbff 75%);box-shadow:0 12px 32px #25466d0a}
 .candidate-auth-feature .kicker{font-size:11px;letter-spacing:1.3px;color:#2863c7;font-weight:800}
