@@ -284,7 +284,17 @@ if selected_job_id is not None:
             candidate_label = row.get("candidate_name") or row.get("candidate_email") or f"Candidate {row.get('candidate_id')}"
             left_resume, right_resume = st.columns([3, 1])
             with left_resume:
-                st.write(candidate_label)
+                name_col, status_col = st.columns([3, 1.2])
+                with name_col:
+                    st.write(candidate_label)
+                with status_col:
+                    if str(row.get("status", "")).strip().casefold() == "shortlisted":
+                        st.markdown(
+                            "<span style='display:inline-block;background:#e4f6e9;color:#22643b;"
+                            "border:1px solid #b8e2c4;border-radius:14px;padding:3px 9px;"
+                            "font-size:12px;font-weight:700;white-space:nowrap'>✓ Shortlisted</span>",
+                            unsafe_allow_html=True,
+                        )
                 st.caption(row.get("resume_filename") or "No saved resume filename")
             with right_resume:
                 if row.get("resume_filename") and st.button("Load resume", key=f"load_resume_{row.get('id')}"):
