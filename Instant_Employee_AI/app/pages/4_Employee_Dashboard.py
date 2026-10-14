@@ -102,7 +102,7 @@ with st.sidebar:
         st.caption("SIGNED IN")
         st.write(st.session_state.get("company_email", "Company"))
         if st.button("Log out", use_container_width=True):
-            for key in ("company_api_token", "company_logged_in", "company_email", "company_is_employee"):
+            for key in ("company_api_token", "company_logged_in", "company_email", "company_is_employee", "employee_setup_unlocked"):
                 st.session_state.pop(key, None)
             st.rerun()
 
