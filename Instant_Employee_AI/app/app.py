@@ -39,8 +39,8 @@ def api_request(method, path, *, token=None, **kwargs):
         except requests.RequestException:
             if attempt == 2:
                 return None, (
-                    "Backend abhi response nahi de raha. Service ko wake hone mein "
-                    "thoda time lag sakta hai; 30 seconds baad dobara try karein."
+                    "The backend is not responding yet. The service may need time to wake up. "
+                    "Please wait 30 seconds and try again."
                 )
         time.sleep(2 * (attempt + 1))
 
@@ -56,9 +56,9 @@ def api_request(method, path, *, token=None, **kwargs):
         detail = payload.get("detail") if isinstance(payload, dict) else None
         if response.status_code in (502, 503, 504):
             return None, (
-                f"Backend service abhi unavailable hai (HTTP {response.status_code}). "
-                "Render API ko restart/deploy hone mein problem ho sakti hai. "
-                "Thodi der baad dobara try karein."
+                f"The backend service is currently unavailable (HTTP {response.status_code}). "
+                "The Render API may be restarting or deploying. "
+                "Please try again in a little while."
             )
         return None, str(detail or f"API request failed (HTTP {response.status_code})")
 
@@ -480,7 +480,7 @@ elif view == "apply_resume":
                                 if "Already applied to this job" in application_error:
                                     st.info("You have already applied to this job from this account. It is listed in Applied Jobs.")
                                 else:
-                                    st.error("Application database mein save nahi hua: " + application_error)
+                                    st.error("The application could not be saved to the database: " + application_error)
                             else:
                                 st.session_state.application_resume_name = application_resume.name
                                 st.session_state.application_resume_text = uploaded_text
@@ -516,7 +516,7 @@ elif view == "candidate_dashboard":
         token = st.session_state.get("candidate_api_token")
         profile, profile_error = api_request("GET", "/profiles/me", token=token)
         if profile_error:
-            st.error("Profile load nahi ho paya: " + profile_error)
+            st.error("The profile could not be loaded: " + profile_error)
             profile = {
                 "full_name": st.session_state.get("candidate_name", ""),
                 "headline": "", "skills": "", "timezone": "Asia/Kolkata",
@@ -558,7 +558,7 @@ elif view == "candidate_dashboard":
                 profile_picture = st.file_uploader(
                     "Upload/change profile photo", type=["jpg", "jpeg", "png"],
                     key="candidate_profile_picture", label_visibility="collapsed",
-                    help="Camera icon par click karke JPG/PNG photo select karein (max 2 MB).",
+                    help="Click the camera icon to select a JPG/PNG photo (max 2 MB).",
                 )
                 if profile_picture is not None:
                     import base64
@@ -609,7 +609,7 @@ elif view == "candidate_dashboard":
                     if profile_picture is not None:
                         picture_bytes = profile_picture.getvalue()
                         if len(picture_bytes) > 2 * 1024 * 1024:
-                            st.error("Profile picture 2 MB se chhoti honi chahiye.")
+                            st.error("The profile picture must be smaller than 2 MB.")
                             st.stop()
                         import base64
                         picture_mime = "image/png" if profile_picture.type == "image/png" else "image/jpeg"
@@ -628,15 +628,15 @@ elif view == "candidate_dashboard":
                         },
                     )
                     if save_error:
-                        st.error("Profile save nahi hua: " + save_error)
+                        st.error("The profile could not be saved: " + save_error)
                     else:
                         st.session_state.candidate_name = updated_profile.get("full_name", profile_name.strip())
-                        st.session_state.profile_saved_message = "Profile database mein successfully save ho gaya."
+                        st.session_state.profile_saved_message = "Profile saved to the database successfully."
                         st.rerun()
 
 
         if st.session_state.pop("profile_saved_message", None):
-            st.success("Profile database mein successfully save ho gaya.")
+            st.success("Profile saved to the database successfully.")
 
         if profile.get("resume_filename"):
             st.caption("Saved resume filename: " + html.escape(profile.get("resume_filename", "")))
@@ -663,7 +663,7 @@ elif view == "candidate_dashboard":
             if st.button("View all applied jobs", type="primary"):
                 st.session_state.view = "applied_jobs"; st.rerun()
         if applications_error:
-            st.warning("Application history abhi load nahi hui: " + applications_error)
+            st.warning("Application history could not be loaded yet: " + applications_error)
  
 elif view == "applied_jobs":
     if not st.session_state.get("candidate_logged_in"):
@@ -676,7 +676,7 @@ elif view == "applied_jobs":
         st.markdown("## ✓ Applied Jobs")
         st.caption("Your application history and current status, loaded from the database")
         if applications_error:
-            st.error("Application history load nahi hui: " + applications_error)
+            st.error("Application history could not be loaded: " + applications_error)
         st.metric("Total applications", len(applications))
         if not applications:
             st.info("No applications yet. When you apply to a job, it will appear here.")
@@ -762,8 +762,8 @@ elif view == "candidate":
 
 elif view == "employee":
     st.markdown("## Company workspace")
-    st.caption("Company accounts ab Company Dashboard se securely login ya create kiye jaate hain.")
-    st.info("Company Dashboard par apne company email aur password se login karein. Candidate account se company dashboard access nahi milega.")
+    st.caption("Company accounts can be securely accessed or created from the Company Dashboard.")
+    st.info("Log in to the Company Dashboard with your company email and password. Candidate accounts cannot access the company dashboard.")
     if st.button("Open Company Login", type="primary", use_container_width=True):
         st.switch_page("pages/4_Employee_Dashboard.py")
     if st.button("← Back to home"):
