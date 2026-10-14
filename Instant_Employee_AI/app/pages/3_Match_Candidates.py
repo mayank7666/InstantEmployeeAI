@@ -36,8 +36,9 @@ st.set_page_config(
 # Company authentication
 # -----------------------------------
 if not st.session_state.get("company_logged_in") or not st.session_state.get("company_api_token"):
-    st.warning("Candidate matching is available to the company team. Please log in to the Company Dashboard first.")
-    st.page_link("pages/4_Employee_Dashboard.py", label="← Company Login / Dashboard", use_container_width=True)
+    st.warning("Your company login session is missing or has expired. Open the Company Dashboard, sign in, then use Find Talent from the sidebar. Avoid refreshing this page after login.")
+    if st.button("Open Company Login", type="primary", use_container_width=True):
+        st.switch_page("pages/4_Employee_Dashboard.py")
     st.stop()
 
 API_BASE_URL = "https://instant-employee-api.onrender.com"
