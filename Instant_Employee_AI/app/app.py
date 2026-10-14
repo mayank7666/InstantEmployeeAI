@@ -160,9 +160,9 @@ h1,h2,h3,h4,h5,h6,[data-testid="stMarkdownContainer"] strong{color:var(--ink)!im
 [data-testid="stForm"]{background:linear-gradient(145deg,#ffffff,#f9fbff)!important;border:1px solid #dce6f5!important;border-radius:20px!important;padding:22px!important;box-shadow:0 12px 32px #25466d0c!important}
 [data-testid="stForm"] label{font-weight:600!important;color:#34445e!important}
 [data-testid="stForm"] input{border-radius:11px!important;min-height:44px!important}
-[data-testid="stForm"] button[kind="primary"],[data-testid="stFormSubmitButton"] button,[data-testid="stForm"] button[type="submit"]{background:linear-gradient(100deg,#318bff,#1764ff)!important;border:1px solid #1764ff!important;color:#fff!important;border-radius:11px!important;font-weight:700!important;min-height:46px!important;box-shadow:0 5px 13px #1764ff22!important}
+[data-testid="stForm"] button[kind="primary"],[data-testid="stFormSubmitButton"] button,[data-testid="stForm"] button[type="submit"]{background:#1764ff!important;background-image:none!important;border:1px solid #1764ff!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-radius:11px!important;font-weight:700!important;min-height:46px!important;box-shadow:0 5px 13px #1764ff22!important;opacity:1!important;visibility:visible!important;animation:none!important;transition:none!important;filter:none!important}
 [data-testid="stForm"] button[kind="primary"] *,[data-testid="stFormSubmitButton"] button *,[data-testid="stForm"] button[type="submit"] *{color:#fff!important;-webkit-text-fill-color:#fff!important}
-[data-testid="stForm"] button[kind="primary"]:hover,[data-testid="stFormSubmitButton"] button:hover,[data-testid="stForm"] button[type="submit"]:hover{background:linear-gradient(100deg,#267de9,#1055df)!important}
+[data-testid="stForm"] button[kind="primary"]:hover,[data-testid="stFormSubmitButton"] button:hover,[data-testid="stForm"] button[type="submit"]:hover{background:#1764ff!important;background-image:none!important;animation:none!important;transition:none!important;filter:none!important}
 .candidate-auth-note{margin-top:12px;padding:13px 15px;background:#eaf2ff;border:1px solid #d9e7ff;border-radius:12px;color:#536d91;font-size:13px;line-height:1.55}
 .candidate-auth-feature{height:100%;min-height:420px;padding:30px;border:1px solid #d6e5fa;border-radius:22px;background:radial-gradient(circle at 90% 5%,#d8e9ff 0,transparent 35%),linear-gradient(145deg,#edf5ff,#f9fbff 75%);box-shadow:0 12px 32px #25466d0a}
 .candidate-auth-feature .kicker{font-size:11px;letter-spacing:1.3px;color:#2863c7;font-weight:800}
@@ -540,7 +540,7 @@ elif view == "candidate_auth":
             with st.form("candidate_login"):
                 email = st.text_input("Email address", key="candidate_login_email", placeholder="Enter your email address")
                 password = st.text_input("Password", type="password", key="candidate_login_password", placeholder="Enter your password")
-                submit = st.form_submit_button("→  Login to Dashboard", type="primary", use_container_width=True)
+                submit = st.form_submit_button("Login to Dashboard", type="primary", use_container_width=True)
             st.markdown("<div class='candidate-auth-note'>♢  Your candidate account keeps your profile and applications in one place.</div>", unsafe_allow_html=True)
         with feature_col:
             st.markdown(
