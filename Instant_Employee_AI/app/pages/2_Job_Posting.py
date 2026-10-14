@@ -283,7 +283,7 @@ with st.sidebar:
 
 # Company pages require a company-role account created through the dashboard.
 if not st.session_state.get("company_logged_in") or not st.session_state.get("company_api_token"):
-    st.warning("Job post karne ke liye pehle Company Dashboard par login karein.")
+    st.warning("Please log in to the Company Dashboard before posting a job.")
     st.page_link("pages/4_Employee_Dashboard.py", label="← Company Login / Dashboard", use_container_width=True)
     st.stop()
 
@@ -303,7 +303,7 @@ def create_api_job(payload):
             return None, str(data.get("detail", f"API request failed (HTTP {response.status_code})"))
         return data, None
     except requests.RequestException:
-        return None, "API abhi available nahi hai. Job database mein save nahi hua; thodi der baad retry karein."
+        return None, "The API is currently unavailable. The job was not saved to the database; please try again shortly."
 
 # =========================================
 # JOB POSTING BANNER
@@ -429,8 +429,8 @@ if submitted:
         created_job, api_error = create_api_job(api_payload)
 
         if api_error:
-            st.error("Job database mein save nahi hua: " + api_error)
-            st.info("CSV mein save nahi kiya gaya, taaki public listing aur company database mein mismatch na ho.")
+            st.error("The job could not be saved to the database: " + api_error)
+            st.info("The job was not saved to the CSV to prevent a mismatch between the public listing and the company database.")
         else:
             current_jobs = load_jobs()
             new_job = {
@@ -452,11 +452,11 @@ if submitted:
             )
             try:
                 save_jobs(updated_jobs)
-                st.success(f"Job database mein post ho gaya: {job_title}")
+                st.success(f"Job posted to the database: {job_title}")
                 st.rerun()
             except OSError as error:
-                st.error(f"Job database mein save ho gaya, lekin public CSV update nahi hua: {error}")
-                st.warning("Dashboard par job rahega; public job listing ke liye CSV sync fix karna hoga.")
+                st.error(f"The job was saved to the database, but the public CSV could not be updated: {error}")
+                st.warning("The job will remain on the dashboard. CSV synchronization must be fixed to show it in the public job listing.")
 
 
 # =========================================
