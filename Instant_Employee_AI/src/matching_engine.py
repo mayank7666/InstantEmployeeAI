@@ -130,6 +130,71 @@ def calculate_semantic_similarity(job_description, resume_texts):
         return None
 
 
+
+def extract_required_experience_years(text):
+    """Read an explicit experience requirement such as '2+ years' from job text."""
+    normalized = normalize_text(text)
+    patterns = [
+        r"(\d+)\s*\+?\s*(?:years|year|yrs|yr)\s+(?:of\s+)?(?:relevant\s+)?experience",
+        r"experience\s+(?:of\s+)?(\d+)\s*\+?\s*(?:years|year|yrs|yr)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, normalized)
+        if match:
+            return int(match.group(1))
+    return None
+
+
+def extract_candidate_experience_years(text):
+    """Estimate years only when a resume states an explicit duration near experience."""
+    normalized = normalize_text(text)
+    patterns = [
+        r"(\d+)\s*\+?\s*(?:years|year|yrs|yr)\s+(?:of\s+)?(?:professional\s+)?experience",
+        r"(\d+)\s*\+?\s*(?:years|year|yrs|yr)\s+(?:in|with)\s+",
+    ]
+    matches = []
+    for pattern in patterns:
+        matches.extend(int(value) for value in re.findall(pattern, normalized))
+    return max(matches) if matches else None
+
+
+def education_level(text):
+    """Return the highest explicitly mentioned education level, without inferring it."""
+    normalized = normalize_text(text)
+    levels = [
+        (5, ["phd", "doctorate", "doctoral"]),
+        (4, ["master", "masters", "m tech", "mtech", "mba", "msc", "m sc", "ma"]),
+        (3, ["bachelor", "bachelors", "b tech", "btech", "b e", "be ", "bsc", "b sc", "ba ", "bca"]),
+        (2, ["diploma", "associate degree"]),
+        (1, ["high school", "12th", "higher secondary", "intermediate"]),
+    ]
+    for level, terms in levels:
+        if any(term in normalized for term in terms):
+            return level
+    return None
+
+
+def experience_fit_score(job_text, resume_text):
+    """Score explicit experience requirements; unknown requirements stay neutral."""
+    required = extract_required_experience_years(job_text)
+    candidate = extract_candidate_experience_years(resume_text)
+    if required is None:
+        return 100.0, required, candidate
+    if candidate is None:
+        return 50.0, required, candidate
+    return min(100.0, candidate / max(required, 1) * 100), required, candidate
+
+
+def education_fit_score(job_text, resume_text):
+    """Score education only if the job explicitly mentions a qualification level."""
+    required = education_level(job_text)
+    candidate = education_level(resume_text)
+    if required is None:
+        return 100.0, required, candidate
+    if candidate is None:
+        return 50.0, required, candidate
+    return min(100.0, candidate / max(required, 1) * 100), required, candidate
+
 def match_resume_to_jobs(resume_text, jobs):
     """
     Score one resume against a list of job dictionaries in a single AI pass.
@@ -182,18 +247,39 @@ def match_resume_to_jobs(resume_text, jobs):
         required_skills = extract_skills(job_documents[index])
         matched = [skill for skill in required_skills if skill in candidate_skills]
         missing = [skill for skill in required_skills if skill not in candidate_skills]
-        coverage = (len(matched) / len(required_skills) * 100) if required_skills else 0.0
+        coverage = (len(matched) / len(required_skills) * 100) if required_skills else 100.0
         lexical = lexical_scores[index]
+        experience_score, required_years, candidate_years = experience_fit_score(job_documents[index], resume_text)
+        education_score, required_education, candidate_education = education_fit_score(job_documents[index], resume_text)
 
         if semantic_scores is not None:
             semantic = semantic_scores[index]
             score = (
-                0.30 * semantic + 0.20 * lexical + 0.50 * coverage
-                if required_skills else 0.60 * semantic + 0.40 * lexical
+                0.25 * semantic + 0.15 * lexical + 0.40 * coverage
+                + 0.10 * experience_score + 0.10 * education_score
             )
         else:
             semantic = None
-            score = 0.50 * lexical + 0.50 * coverage if required_skills else lexical
+            score = (
+                0.25 * lexical + 0.50 * coverage
+                + 0.15 * experience_score + 0.10 * education_score
+            )
+
+        reasons = []
+        if matched:
+            reasons.append("Matched skills: " + ", ".join(matched[:5]))
+        if required_years is not None:
+            reasons.append(
+                f"Experience: {candidate_years if candidate_years is not None else 'not stated'} / {required_years} required years"
+            )
+        if required_education is not None:
+            reasons.append(
+                f"Education level: {candidate_education if candidate_education is not None else 'not stated'} (job requirement level {required_education})"
+            )
+        if missing:
+            reasons.append("Skills to improve: " + ", ".join(missing[:5]))
+        if not reasons:
+            reasons.append("Text relevance is the main available signal; review the resume manually.")
 
         item = dict(job)
         item.update({
@@ -201,6 +287,13 @@ def match_resume_to_jobs(resume_text, jobs):
             "lexical": round(lexical, 1),
             "semantic": round(semantic, 1) if semantic is not None else None,
             "skill_coverage": round(coverage, 1),
+            "experience_fit": round(experience_score, 1),
+            "required_experience_years": required_years,
+            "candidate_experience_years": candidate_years,
+            "education_fit": round(education_score, 1),
+            "required_education_level": required_education,
+            "candidate_education_level": candidate_education,
+            "reasons": reasons,
             "matched": matched,
             "missing": missing,
             "candidate_skills": sorted(candidate_skills),
