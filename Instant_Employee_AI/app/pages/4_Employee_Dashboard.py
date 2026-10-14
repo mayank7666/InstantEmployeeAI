@@ -146,6 +146,30 @@ html,body,[class*="css"]{font-family:Inter,system-ui,sans-serif}
     background:linear-gradient(100deg,#d6e6ff,#c9ddff)!important;
     border-color:#aec9f7!important;
 }
+/* Streamlit form-submit buttons may not use kind="primary"; target them directly */
+[data-testid="stFormSubmitButton"] button,
+button[data-testid="stFormSubmitButton"],
+[data-testid="stForm"] button[type="submit"]{
+    background:linear-gradient(100deg,#e5efff,#d8e7ff)!important;
+    background-color:#d8e7ff!important;
+    border:1px solid #c6d9fb!important;
+    color:#2456a6!important;
+    -webkit-text-fill-color:#2456a6!important;
+    border-radius:11px!important;
+    font-weight:700!important;
+    box-shadow:0 3px 9px #2456a610!important;
+}
+[data-testid="stFormSubmitButton"] button *,
+button[data-testid="stFormSubmitButton"] *,
+[data-testid="stForm"] button[type="submit"] *{
+    color:#2456a6!important;-webkit-text-fill-color:#2456a6!important;
+}
+[data-testid="stFormSubmitButton"] button:hover,
+button[data-testid="stFormSubmitButton"]:hover,
+[data-testid="stForm"] button[type="submit"]:hover{
+    background:#cfe1ff!important;background-color:#cfe1ff!important;
+    border-color:#aec9f7!important;
+}
 @media(max-width:900px){.auth-feature{min-height:0;padding:22px}.auth-feature h2{font-size:25px}.auth-heading h3{font-size:19px}}
 
 div[data-testid="stMetric"]{background:white;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 4px 15px #263e7008}
