@@ -160,19 +160,18 @@ def extract_candidate_experience_years(text):
 
 def education_level(text):
     """Return the highest explicitly mentioned education level, without inferring it."""
-    normalized = normalize_text(text)
+    normalized = " " + normalize_text(text) + " "
     levels = [
         (5, ["phd", "doctorate", "doctoral"]),
         (4, ["master", "masters", "m tech", "mtech", "mba", "msc", "m sc", "ma"]),
-        (3, ["bachelor", "bachelors", "b tech", "btech", "b e", "be ", "bsc", "b sc", "ba ", "bca"]),
+        (3, ["bachelor", "bachelors", "b tech", "btech", "b e", "be", "bsc", "b sc", "ba", "bca"]),
         (2, ["diploma", "associate degree"]),
         (1, ["high school", "12th", "higher secondary", "intermediate"]),
     ]
     for level, terms in levels:
-        if any(term in normalized for term in terms):
+        if any(" " + term + " " in normalized for term in terms):
             return level
     return None
-
 
 def experience_fit_score(job_text, resume_text):
     """Score explicit experience requirements; unknown requirements stay neutral."""
