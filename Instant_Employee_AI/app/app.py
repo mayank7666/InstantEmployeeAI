@@ -161,6 +161,39 @@ input,textarea,[data-baseweb="input"],[data-baseweb="textarea"]{background:#fff!
 [data-testid="stAlert"]{background:#edf4ff!important;color:#17233b!important;border:1px solid #cbdcf5!important}
 [data-testid="stAlert"] p{color:#34445e!important}
 hr{border-color:var(--line)!important}
+/* Attractive candidate login and create-account forms */
+[data-testid="stTabs"] [data-baseweb="tab-list"]{
+    background:#eaf1ff!important;border:1px solid #d8e4f7!important;
+    border-radius:14px!important;padding:5px!important;gap:6px!important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"]{
+    border-radius:10px!important;padding:10px 18px!important;
+    color:#50627e!important;font-weight:650!important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"]{
+    background:#ffffff!important;color:#2456a6!important;
+    box-shadow:0 2px 8px #203d7012!important;border-bottom-color:transparent!important;
+}
+[data-testid="stForm"]{
+    background:linear-gradient(145deg,#ffffff,#f8faff)!important;
+    border:1px solid #dce6f5!important;border-radius:18px!important;
+    padding:22px!important;box-shadow:0 10px 28px #203d700c!important;
+}
+[data-testid="stForm"] label{font-weight:600!important;color:#34445e!important}
+[data-testid="stForm"] input{
+    border-radius:10px!important;min-height:42px!important;
+}
+[data-testid="stForm"] button[kind="primary"]{
+    background:#e4edff!important;border:1px solid #c9d9ff!important;
+    color:#2456a6!important;border-radius:11px!important;font-weight:700!important;
+}
+[data-testid="stForm"] button[kind="primary"] *{
+    color:#2456a6!important;-webkit-text-fill-color:#2456a6!important;
+}
+[data-testid="stForm"] button[kind="primary"]:hover{
+    background:#d5e3ff!important;border-color:#a9c4ff!important;
+}
+
 a{color:#075fc7!important}
 /* Softer, more polished Apply Now buttons on job cards */
 [class*="st-key-apply_job_card_"] button[kind="primary"]{
