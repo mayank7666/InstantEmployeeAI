@@ -193,7 +193,7 @@ def bulk_create_company_users(data: BulkCompanyUsersIn, admin: User = Depends(re
         if not isinstance(item, dict):
             errors.append({"row": index, "error": "Expected an object with name and email"})
             continue
-        name = str(item.get("name", "")).strip()[:160]
+        name = str(item.get("name") or item.get("full_name") or "").strip()[:160]
         email = str(item.get("email", "")).strip().lower()
         password = str(item.get("password", "")).strip()
         if not name or not email or "@" not in email:
