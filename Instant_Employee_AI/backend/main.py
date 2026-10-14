@@ -52,7 +52,6 @@ class Profile(Base):
     portfolio_url: Mapped[str] = mapped_column(String(500), default="")
     resume_filename: Mapped[str] = mapped_column(String(255), default="")
     picture_data: Mapped[str] = mapped_column(Text, default="")
-    resume_filename: Mapped[str] = mapped_column(String(255), default="")
     resume_text: Mapped[str] = mapped_column(Text, default="")
     resume_data: Mapped[str] = mapped_column(Text, default="")
     user: Mapped["User"] = relationship(back_populates="profile")
