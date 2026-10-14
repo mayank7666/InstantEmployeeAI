@@ -141,6 +141,24 @@ st.markdown(
         color: #14294b !important;
     }
 
+    /* Matching workspace hero: use product UI, not unrelated stock imagery */
+    .matching-hero {
+        display:flex;justify-content:space-between;align-items:center;gap:24px;
+        padding:28px 30px;margin:4px 0 22px;border:1px solid #d8e5f8;
+        border-radius:22px;background:radial-gradient(circle at 92% 10%,#dbeaff 0,transparent 30%),
+        linear-gradient(115deg,#ffffff,#edf4ff);box-shadow:0 10px 28px #203d700b;
+    }
+    .matching-hero .eyebrow{font-size:11px;letter-spacing:1.4px;font-weight:800;color:#2863c7}
+    .matching-hero h1{font-size:clamp(29px,3.4vw,42px);letter-spacing:-1px;line-height:1.15;margin:9px 0;color:#14294b}
+    .matching-hero p{max-width:700px;margin:0;color:#5b6f8c;line-height:1.65;font-size:14px}
+    .matching-visual{min-width:210px;padding:18px;border:1px solid #d6e4fa;border-radius:18px;background:#ffffffb8}
+    .matching-visual .visual-title{font-size:11px;letter-spacing:1px;font-weight:800;color:#607594;margin-bottom:13px}
+    .match-step{display:flex;align-items:center;gap:10px;margin:10px 0;color:#263f65;font-size:13px;font-weight:650}
+    .match-step .step-icon{display:flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:10px;background:#e3edff;color:#2456a6;font-size:15px}
+    .matching-note{margin-top:15px;color:#547092;font-size:12px}
+    @media(max-width:800px){.matching-hero{align-items:stretch;flex-direction:column;padding:22px}.matching-visual{min-width:0}.matching-hero h1{font-size:30px}}
+
+
     /* Resume uploader */
     [data-testid="stFileUploader"] {
         background: #ffffff !important;
@@ -414,10 +432,22 @@ def number(value):
 # -----------------------------------
 # Header
 # -----------------------------------
-st.title("👥 Find Talent")
-st.caption(
-    "Automatically rank every applicant using the resume saved in their candidate profile."
-)
+st.markdown("""
+<div class="matching-hero">
+  <div>
+    <div class="eyebrow">INSTANT EMPLOYEE · AI TALENT INTELLIGENCE</div>
+    <h1>Find the right talent.</h1>
+    <p>Rank applicants against each job, understand skill coverage and review explainable match factors before shortlisting.</p>
+    <div class="matching-note">✦ AI-assisted ranking · Skill coverage · Experience and education fit</div>
+  </div>
+  <div class="matching-visual">
+    <div class="visual-title">MATCHING WORKFLOW</div>
+    <div class="match-step"><span class="step-icon">▤</span> Resume analysis</div>
+    <div class="match-step"><span class="step-icon">⌕</span> Skill comparison</div>
+    <div class="match-step"><span class="step-icon">↗</span> Ranked candidates</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.subheader("Automatic job-wise matching")
 st.caption("Candidates who apply with a saved profile resume are matched automatically. No manual resume upload is needed for these applicants.")
