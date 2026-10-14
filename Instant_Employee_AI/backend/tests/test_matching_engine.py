@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from matching_engine import (
     education_fit_score,
     experience_fit_score,
+    education_level,
     extract_candidate_experience_years,
     extract_required_experience_years,
     match_candidates,
@@ -25,6 +26,7 @@ def test_experience_is_neutral_when_job_has_no_requirement():
 
 
 def test_education_fit_uses_explicit_qualification():
+    assert education_level("Machine Learning Engineer with Python") is None
     score, required, candidate = education_fit_score(
         "Bachelor degree required for this role",
         "B.Tech graduate with Python skills",
