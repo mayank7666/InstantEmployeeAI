@@ -130,6 +130,88 @@ def calculate_semantic_similarity(job_description, resume_texts):
         return None
 
 
+def match_resume_to_jobs(resume_text, jobs):
+    """
+    Score one resume against a list of job dictionaries in a single AI pass.
+    Each job may contain title, description, required_skills and other display fields.
+    Returns job dictionaries with scores, skill gaps and an explainable match summary.
+    """
+    if not isinstance(resume_text, str) or not resume_text.strip():
+        raise ValueError("Resume text cannot be empty.")
+    if not jobs:
+        return []
+
+    job_documents = []
+    for job in jobs:
+        title = str(job.get("title") or job.get("job_title") or "Open role")
+        description = str(job.get("description") or job.get("job_description") or "")
+        required = str(job.get("required_skills") or job.get("skills") or "")
+        job_documents.append(
+            f"{title}. {description}. Required skills: {required}"
+        )
+
+    # Fit one shared vector space so job-to-resume scores are comparable.
+    try:
+        vectorizer = TfidfVectorizer(stop_words="english")
+        matrix = vectorizer.fit_transform([resume_text] + job_documents)
+        lexical_scores = cosine_similarity(matrix[1:], matrix[0:1]).ravel()
+        lexical_scores = [float(score) * 100 for score in lexical_scores]
+    except ValueError:
+        lexical_scores = [0.0] * len(jobs)
+
+    # Optional semantic embeddings; if the model/package is unavailable, use TF-IDF.
+    semantic_scores = None
+    try:
+        from sentence_transformers import SentenceTransformer
+        model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+        vectors = model.encode(
+            [resume_text] + job_documents,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+        )
+        semantic_scores = [
+            max(0.0, min(100.0, float(score) * 100))
+            for score in cosine_similarity(vectors[1:], vectors[0:1]).ravel()
+        ]
+    except Exception:
+        semantic_scores = None
+
+    candidate_skills = set(extract_skills(resume_text))
+    results = []
+    for index, job in enumerate(jobs):
+        required_skills = extract_skills(job_documents[index])
+        matched = [skill for skill in required_skills if skill in candidate_skills]
+        missing = [skill for skill in required_skills if skill not in candidate_skills]
+        coverage = (len(matched) / len(required_skills) * 100) if required_skills else 0.0
+        lexical = lexical_scores[index]
+
+        if semantic_scores is not None:
+            semantic = semantic_scores[index]
+            score = (
+                0.30 * semantic + 0.20 * lexical + 0.50 * coverage
+                if required_skills else 0.60 * semantic + 0.40 * lexical
+            )
+        else:
+            semantic = None
+            score = 0.50 * lexical + 0.50 * coverage if required_skills else lexical
+
+        item = dict(job)
+        item.update({
+            "score": round(max(0.0, min(100.0, score)), 1),
+            "lexical": round(lexical, 1),
+            "semantic": round(semantic, 1) if semantic is not None else None,
+            "skill_coverage": round(coverage, 1),
+            "matched": matched,
+            "missing": missing,
+            "candidate_skills": sorted(candidate_skills),
+            "required_skill_count": len(required_skills),
+        })
+        results.append(item)
+
+    results.sort(key=lambda item: item["score"], reverse=True)
+    return results
+
+
 def match_candidates(job_description, resumes):
     """
     Rank candidates for Instant Employee.
