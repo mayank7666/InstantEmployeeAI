@@ -132,6 +132,20 @@ html,body,[class*="css"]{font-family:Inter,system-ui,sans-serif}
 [data-testid="stForm"] button[kind="primary"]{background:linear-gradient(100deg,#3395ff,#0875ed)!important;border-color:#1682f6!important;color:#fff!important}
 [data-testid="stForm"] button[kind="primary"] *{color:#fff!important;-webkit-text-fill-color:#fff!important}
 [data-testid="stForm"] button[kind="primary"]:hover{background:linear-gradient(100deg,#2584f1,#0564d2)!important}
+/* Soft light-blue login and admin setup buttons */
+[data-testid="stForm"] button[kind="primary"]{
+    background:linear-gradient(100deg,#e5efff,#d8e7ff)!important;
+    border-color:#c6d9fb!important;
+    color:#2456a6!important;
+    box-shadow:0 3px 9px #2456a610!important;
+}
+[data-testid="stForm"] button[kind="primary"] *{
+    color:#2456a6!important;-webkit-text-fill-color:#2456a6!important;
+}
+[data-testid="stForm"] button[kind="primary"]:hover{
+    background:linear-gradient(100deg,#d6e6ff,#c9ddff)!important;
+    border-color:#aec9f7!important;
+}
 @media(max-width:900px){.auth-feature{min-height:0;padding:22px}.auth-feature h2{font-size:25px}.auth-heading h3{font-size:19px}}
 
 div[data-testid="stMetric"]{background:white;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 4px 15px #263e7008}
