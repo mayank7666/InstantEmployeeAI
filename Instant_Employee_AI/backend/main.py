@@ -479,6 +479,21 @@ def job_applications(job_id: int, user: User=Depends(require_role("company")), d
     job=db.get(Job,job_id)
     if not job or job.company_id!=organization_id(user): raise HTTPException(status_code=404,detail="Job not found")
     return [{"id":a.id,"talent_id":a.talent_id,"email":a.talent.email,"full_name":a.talent.profile.full_name if a.talent.profile else "","status":a.status,"applied_at":a.created_at.isoformat(),"resume_filename":a.resume_filename} for a in job.applications]
+@app.get("/applications/{application_id}/resume")
+def download_application_resume(application_id: int, user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
+    """Return a saved PDF only to the company that owns the job application."""
+    application = db.get(Application, application_id)
+    if not application or application.job.company_id != organization_id(user):
+        raise HTTPException(status_code=404, detail="Application not found")
+    profile = application.talent.profile
+    if not profile or not profile.resume_data:
+        raise HTTPException(status_code=404, detail="Candidate has not saved a downloadable resume")
+    return {
+        "filename": profile.resume_filename or "candidate_resume.pdf",
+        "content_type": "application/pdf",
+        "resume_data": profile.resume_data,
+    }
+
 @app.patch("/applications/{application_id}/status")
 def update_status(application_id: int, new_status: str="Under Review", user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     allowed={"Applied","Under Review","Shortlisted","Rejected","Selected"}
