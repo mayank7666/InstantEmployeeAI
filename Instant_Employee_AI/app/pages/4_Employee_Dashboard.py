@@ -180,6 +180,28 @@ if jobs_error:
 if apps_error:
     st.warning("Applications could not be loaded: " + apps_error)
 
+# Legacy jobs are stored in jobs.csv, while dashboard metrics use database jobs.
+# Let the primary company admin import them once; the API prevents duplicates.
+if not me.get("company_id") and not legacy_jobs.empty:
+    with st.expander("Move legacy CSV jobs into your company dashboard", expanded=not bool(jobs)):
+        st.write(f"Found {len(legacy_jobs)} legacy job(s) in jobs.csv. Import them into the database so they appear in Your Active Jobs and Your Job Postings.")
+        if st.button("Import Legacy Jobs to Dashboard", type="primary", use_container_width=True):
+            legacy_payload = legacy_jobs.fillna("").to_dict(orient="records")
+            import_result, import_error = api_request(
+                "POST", "/jobs/import-legacy", token=token, json={"jobs": legacy_payload}
+            )
+            if import_error:
+                st.error("Legacy jobs could not be imported: " + import_error)
+            else:
+                st.success(
+                    f"Imported {import_result.get('imported_count', 0)} job(s). "
+                    f"Skipped {len(import_result.get('skipped', []))} duplicate or invalid job(s)."
+                )
+                if import_result.get("skipped"):
+                    with st.expander("Import details"):
+                        st.dataframe(pd.DataFrame(import_result["skipped"]), use_container_width=True, hide_index=True)
+                st.rerun()
+
 total_applications = len(applications)
 shortlisted_count = sum(1 for row in applications if str(row.get("status", "")).lower() == "shortlisted")
 active_jobs = sum(bool(row.get("is_active", True)) for row in jobs)
