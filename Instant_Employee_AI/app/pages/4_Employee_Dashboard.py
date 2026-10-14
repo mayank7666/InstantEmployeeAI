@@ -72,8 +72,34 @@ html,body,[class*="css"]{font-family:Inter,system-ui,sans-serif}
 [data-testid="stAppViewContainer"],[data-testid="stHeader"]{background:transparent}
 [data-testid="stSidebar"]{background:linear-gradient(180deg,#ffffff,#edf3ff);border-right:1px solid #dce5f2}
 [data-testid="stSidebar"] *{color:#17233b!important}
-[data-testid="stSidebar"] [data-testid="stCaptionContainer"]{color:#52637e!important}
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"]{color:#61728d!important}
 [data-testid="stSidebarNav"]{display:none}
+/* Polished company workspace sidebar navigation */
+[data-testid="stSidebar"] div[data-testid="stPageLink"]{margin:7px 0!important}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a{
+    background:linear-gradient(135deg,#ffffff,#f2f6ff)!important;
+    border:1px solid #d9e4f5!important;
+    border-radius:12px!important;
+    padding:12px 14px!important;
+    min-height:44px!important;
+    color:#263a59!important;
+    font-weight:600!important;
+    transition:background .15s ease,border-color .15s ease,transform .15s ease!important;
+}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a *{
+    color:#263a59!important;-webkit-text-fill-color:#263a59!important;opacity:1!important;
+}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a:hover{
+    background:#e7efff!important;border-color:#bfd1f3!important;transform:translateY(-1px);
+}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a[aria-current="page"]{
+    background:#e2ebff!important;border-color:#b9cdf5!important;color:#1f4f9a!important;
+    box-shadow:inset 3px 0 0 #6795e8!important;
+}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a[aria-current="page"] *{
+    color:#1f4f9a!important;-webkit-text-fill-color:#1f4f9a!important;
+}
+[data-testid="stSidebar"] hr{margin:20px 0!important;border-color:#dce5f2!important}
 .hero{padding:30px 32px;border-radius:22px;border:1px solid #dfe7fb;background:linear-gradient(115deg,#f7f9ff,#eaf0ff);margin-bottom:22px}
 .kicker{font-size:12px;letter-spacing:1.7px;text-transform:uppercase;font-weight:800;color:#2855e8}
 .hero h1{font-size:clamp(32px,4vw,48px);line-height:1.08;letter-spacing:-1.8px;margin:12px 0;color:#101828}
