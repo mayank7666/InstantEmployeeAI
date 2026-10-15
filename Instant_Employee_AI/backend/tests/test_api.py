@@ -95,6 +95,26 @@ def test_talent_profile_and_completion():
     assert profile.status_code == 200
     assert profile.json()["completion_percent"] > 0
 
+def test_partial_profile_update_preserves_saved_resume():
+    headers = signup("talent", unique_email("resume-preservation"))
+    save_test_resume(headers, filename="preserved-resume.pdf")
+
+    update = client.put("/profiles/me", headers=headers, json={
+        "full_name": "Updated Candidate Name",
+        "headline": "Backend Engineer",
+        "skills": "Python, FastAPI",
+        "timezone": "Asia/Kolkata",
+        "availability": "Available",
+        "portfolio_url": "",
+    })
+    assert update.status_code == 200, update.text
+
+    profile = client.get("/profiles/me", headers=headers)
+    assert profile.status_code == 200, profile.text
+    assert profile.json()["resume_filename"] == "preserved-resume.pdf"
+    assert profile.json()["resume_uploaded"] is True
+
+
 def test_company_can_post_job_and_talent_can_apply_once():
     company_headers = signup("company", unique_email("company"))
     talent_headers = signup("talent", unique_email("candidate"))
