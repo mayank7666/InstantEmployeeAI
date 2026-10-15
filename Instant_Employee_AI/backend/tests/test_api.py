@@ -380,6 +380,34 @@ def test_disabled_account_cannot_login():
     })
     assert login.status_code == 401
 
+def test_closed_job_status_cannot_be_changed_by_another_company():
+    owner_headers = signup("company", unique_email("status-owner"))
+    other_headers = signup("company", unique_email("status-other"))
+    created = client.post("/jobs", headers=owner_headers, json={
+        "title": "Ownership Check Engineer",
+        "department": "Engineering",
+        "description": "Validate job status ownership and authorization.",
+        "required_skills": "Testing",
+        "min_budget": 10000,
+        "max_budget": 20000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert created.status_code == 201, created.text
+    job_id = created.json()["id"]
+
+    forbidden = client.patch(
+        f"/jobs/{job_id}/status",
+        headers=other_headers,
+        params={"is_active": False},
+    )
+    assert forbidden.status_code == 404
+
+    owner_view = client.get("/jobs/mine", headers=owner_headers)
+    owned_job = next(job for job in owner_view.json() if job["id"] == job_id)
+    assert owned_job["is_active"] is True
+
+
 def test_closed_job_disappears_from_public_search_and_rejects_applications():
     company_headers = signup("company", unique_email("closed-job-owner"))
     talent_headers = signup("talent", unique_email("closed-job-candidate"))
