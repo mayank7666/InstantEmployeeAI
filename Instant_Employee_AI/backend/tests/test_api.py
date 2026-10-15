@@ -399,7 +399,7 @@ def test_closed_job_disappears_from_public_search_and_rejects_applications():
     job_id = created.json()["id"]
     assert any(job["id"] == job_id for job in client.get("/jobs").json())
 
-    closed = client.patch(f"/jobs/{job_id}/status", headers=company_headers, json={"is_active": False})
+    closed = client.patch(f"/jobs/{job_id}/status", headers=company_headers, params={"is_active": False})
     assert closed.status_code == 200, closed.text
 
     public_jobs = client.get("/jobs")
