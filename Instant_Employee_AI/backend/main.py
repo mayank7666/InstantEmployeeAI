@@ -128,6 +128,10 @@ class BootstrapAdminIn(BaseModel):
     full_name: str = Field(min_length=1, max_length=160)
     setup_key: str = Field(min_length=1, max_length=256)
 
+class AdminPasswordResetIn(BaseModel):
+    email: EmailStr
+    new_password: str = Field(min_length=8, max_length=128)
+
 class BulkCompanyUsersIn(BaseModel):
     employees: list[dict] = Field(min_length=1, max_length=100)
 
@@ -288,6 +292,30 @@ def company_admin_status(
     if not admin:
         return {"admin_exists": False, "email": None}
     return {"admin_exists": True, "email": admin.email}
+
+
+@app.post("/auth/company/reset-password")
+def reset_company_admin_password(
+    data: AdminPasswordResetIn,
+    setup_key: str = Header(default="", alias="X-Admin-Setup-Key"),
+    db: Session = Depends(get_db),
+):
+    """Reset the existing primary company admin password using the private setup key."""
+    expected_key = os.getenv("ADMIN_SETUP_KEY", "")
+    if not expected_key:
+        raise HTTPException(status_code=503, detail="Admin password reset is not configured")
+    if not setup_key or not secrets.compare_digest(setup_key, expected_key):
+        raise HTTPException(status_code=403, detail="Invalid admin setup key")
+    admin = db.query(User).filter(
+        User.role == "company",
+        User.company_id.is_(None),
+        User.email == data.email.lower(),
+    ).first()
+    if not admin:
+        raise HTTPException(status_code=404, detail="Primary company admin not found for this email")
+    admin.password_hash = hash_password(data.new_password)
+    db.commit()
+    return {"status": "password_reset", "email": admin.email}
 
 
 @app.post("/auth/company/bootstrap", response_model=TokenOut, status_code=201)
