@@ -335,3 +335,23 @@ def test_primary_admin_password_reset_requires_setup_key_and_updates_password():
     assert me.status_code == 200, me.text
     assert me.json()["role"] == "company"
 
+def test_disabled_account_cannot_login():
+    email = unique_email("disabled-login")
+    signup_response = client.post("/auth/signup", json={
+        "email": email,
+        "password": "TestPassword123!",
+        "full_name": "Disabled Account",
+    })
+    assert signup_response.status_code == 201, signup_response.text
+
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.email == email).first()
+        assert user is not None
+        user.is_active = False
+        db.commit()
+
+    login = client.post("/auth/login", data={
+        "username": email,
+        "password": "TestPassword123!",
+    })
+    assert login.status_code == 401
