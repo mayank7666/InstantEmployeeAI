@@ -382,7 +382,23 @@ def test_disabled_account_cannot_login():
 
 def test_closed_job_status_cannot_be_changed_by_another_company():
     owner_headers = signup("company", unique_email("status-owner"))
-    other_headers = signup("company", unique_email("status-other"))
+    other_email = unique_email("status-other-root")
+    with SessionLocal() as db:
+        separate_company = User(
+            email=other_email,
+            password_hash=hash_password("TestPassword123!"),
+            role="company",
+            company_id=None,
+        )
+        db.add(separate_company)
+        db.commit()
+    other_login = client.post("/auth/login", data={
+        "username": other_email,
+        "password": "TestPassword123!",
+    })
+    assert other_login.status_code == 200, other_login.text
+    other_headers = {"Authorization": f"Bearer {other_login.json()['access_token']}"}
+
     created = client.post("/jobs", headers=owner_headers, json={
         "title": "Ownership Check Engineer",
         "department": "Engineering",
