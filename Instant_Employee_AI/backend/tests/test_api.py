@@ -622,3 +622,54 @@ def test_company_cannot_change_or_download_another_company_application():
     assert owner_resume.status_code == 200, owner_resume.text
     assert owner_resume.json()["filename"] == "private-candidate.pdf"
 
+def test_company_application_list_isolated_by_organization():
+    owner_headers = signup("company", unique_email("company-list-owner"))
+
+    other_email = unique_email("company-list-other-root")
+    with SessionLocal() as db:
+        separate_company = User(
+            email=other_email,
+            password_hash=hash_password("TestPassword123!"),
+            role="company",
+            company_id=None,
+        )
+        db.add(separate_company)
+        db.commit()
+    other_login = client.post("/auth/login", data={
+        "username": other_email,
+        "password": "TestPassword123!",
+    })
+    assert other_login.status_code == 200, other_login.text
+    other_headers = {"Authorization": f"Bearer {other_login.json()['access_token']}"}
+
+    candidate_headers = signup("talent", unique_email("company-list-candidate"))
+    save_test_resume(candidate_headers, "company-list-candidate.pdf")
+
+    created = client.post("/jobs", headers=owner_headers, json={
+        "title": "Organization Isolation Engineer",
+        "department": "Engineering",
+        "description": "Build and validate organization-scoped hiring workflows.",
+        "required_skills": "Python, FastAPI",
+        "min_budget": 15000,
+        "max_budget": 25000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert created.status_code == 201, created.text
+    job_id = created.json()["id"]
+
+    applied = client.post(
+        f"/jobs/{job_id}/apply",
+        headers=candidate_headers,
+        json={"resume_filename": "company-list-candidate.pdf"},
+    )
+    assert applied.status_code == 201, applied.text
+    application_id = applied.json()["id"]
+
+    owner_applications = client.get("/applications/company", headers=owner_headers)
+    assert owner_applications.status_code == 200, owner_applications.text
+    assert any(item["id"] == application_id for item in owner_applications.json())
+
+    other_applications = client.get("/applications/company", headers=other_headers)
+    assert other_applications.status_code == 200, other_applications.text
+    assert all(item["id"] != application_id for item in other_applications.json())
