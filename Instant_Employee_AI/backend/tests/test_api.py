@@ -673,3 +673,45 @@ def test_company_application_list_isolated_by_organization():
     other_applications = client.get("/applications/company", headers=other_headers)
     assert other_applications.status_code == 200, other_applications.text
     assert all(item["id"] != application_id for item in other_applications.json())
+
+def test_candidate_must_upload_readable_resume_before_applying():
+    company_headers = signup("company", unique_email("resume-required-owner"))
+    candidate_headers = signup("talent", unique_email("resume-required-candidate"))
+
+    created = client.post("/jobs", headers=company_headers, json={
+        "title": "Resume Required Engineer",
+        "department": "Engineering",
+        "description": "Build reliable APIs and review backend integrations.",
+        "required_skills": "Python, FastAPI",
+        "min_budget": 12000,
+        "max_budget": 22000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert created.status_code == 201, created.text
+    job_id = created.json()["id"]
+
+    missing_resume = client.post(
+        f"/jobs/{job_id}/apply",
+        headers=candidate_headers,
+        json={"resume_filename": "missing.pdf"},
+    )
+    assert missing_resume.status_code == 400
+    assert "Upload a resume" in missing_resume.json()["detail"]
+
+    save_test_resume(candidate_headers, filename="verified-resume.pdf")
+    applied = client.post(
+        f"/jobs/{job_id}/apply",
+        headers=candidate_headers,
+        json={"resume_filename": "verified-resume.pdf"},
+    )
+    assert applied.status_code == 201, applied.text
+
+    company_applications = client.get("/applications/company", headers=company_headers)
+    assert company_applications.status_code == 200, company_applications.text
+    saved = next(
+        item for item in company_applications.json()
+        if item["id"] == applied.json()["id"]
+    )
+    assert saved["resume_filename"] == "verified-resume.pdf"
+    assert "FastAPI" in saved["resume_text"]
