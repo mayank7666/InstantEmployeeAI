@@ -380,6 +380,57 @@ def test_disabled_account_cannot_login():
     })
     assert login.status_code == 401
 
+def test_closed_job_disappears_from_public_search_and_rejects_applications():
+    company_headers = signup("company", unique_email("closed-job-owner"))
+    talent_headers = signup("talent", unique_email("closed-job-candidate"))
+    save_test_resume(talent_headers)
+
+    created = client.post("/jobs", headers=company_headers, json={
+        "title": "Temporary QA Engineer",
+        "department": "Engineering",
+        "description": "Test and validate application releases.",
+        "required_skills": "Python, Testing",
+        "min_budget": 10000,
+        "max_budget": 20000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert created.status_code == 201, created.text
+    job_id = created.json()["id"]
+    assert any(job["id"] == job_id for job in client.get("/jobs").json())
+
+    closed = client.patch(f"/jobs/{job_id}/status", headers=company_headers, json={"is_active": False})
+    assert closed.status_code == 200, closed.text
+
+    public_jobs = client.get("/jobs")
+    assert public_jobs.status_code == 200
+    assert all(job["id"] != job_id for job in public_jobs.json())
+
+    application = client.post(
+        f"/jobs/{job_id}/apply",
+        headers=talent_headers,
+        json={"resume_filename": "test-resume.pdf"},
+    )
+    assert application.status_code == 404
+    assert application.json()["detail"] == "Active job not found"
+
+
+def test_job_creation_rejects_minimum_budget_above_maximum():
+    company_headers = signup("company", unique_email("invalid-budget-owner"))
+    response = client.post("/jobs", headers=company_headers, json={
+        "title": "Budget Validation Engineer",
+        "department": "Engineering",
+        "description": "Validate job posting budget boundaries.",
+        "required_skills": "Testing",
+        "min_budget": 50000,
+        "max_budget": 30000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Minimum budget cannot exceed maximum budget"
+
+
 def test_company_job_update_close_reopen_and_ownership():
     owner = signup("company", unique_email("job-owner"))
     other_email = unique_email("separate-org")
