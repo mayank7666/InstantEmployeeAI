@@ -1,11 +1,19 @@
 
 import re
+from functools import lru_cache
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
 # Common technical skills and alternative names
+@lru_cache(maxsize=1)
+def _get_sentence_transformer_model():
+    """Load the optional embedding model once per app process, not on every match."""
+    from sentence_transformers import SentenceTransformer
+    return SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
+
 SKILL_CATALOG = {
     "Python": ["python"],
     "Machine Learning": ["machine learning", "ml"],
@@ -100,11 +108,7 @@ def calculate_semantic_similarity(job_description, resume_texts):
         return []
 
     try:
-        from sentence_transformers import SentenceTransformer
-
-        model = SentenceTransformer(
-            "sentence-transformers/all-MiniLM-L6-v2"
-        )
+        model = _get_sentence_transformer_model()
 
         embeddings = model.encode(
             [job_description] + resume_texts,
@@ -226,8 +230,7 @@ def match_resume_to_jobs(resume_text, jobs):
     # Optional semantic embeddings; if the model/package is unavailable, use TF-IDF.
     semantic_scores = None
     try:
-        from sentence_transformers import SentenceTransformer
-        model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+        model = _get_sentence_transformer_model()
         vectors = model.encode(
             [resume_text] + job_documents,
             normalize_embeddings=True,
