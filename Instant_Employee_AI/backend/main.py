@@ -400,6 +400,43 @@ def my_jobs(user: User=Depends(require_role("company")), db: Session=Depends(get
     jobs=db.query(Job).filter(Job.company_id==organization_id(user)).order_by(Job.created_at.desc()).all()
     return [{"id":j.id,"title":j.title,"department":j.department,"applications_count":len(j.applications),"is_active":j.is_active} for j in jobs]
 
+@app.put("/jobs/{job_id}")
+def update_job(job_id: int, data: JobIn, user: User = Depends(require_role("company")), db: Session = Depends(get_db)):
+    """Update a job owned by the authenticated company organization."""
+    if data.max_budget and data.min_budget > data.max_budget:
+        raise HTTPException(status_code=422, detail="Minimum budget cannot exceed maximum budget")
+    job = db.get(Job, job_id)
+    if not job or job.company_id != organization_id(user):
+        raise HTTPException(status_code=404, detail="Job not found")
+    for field, value in data.model_dump().items():
+        setattr(job, field, value)
+    db.commit()
+    db.refresh(job)
+    return {"id": job.id, "title": job.title, "status": "active" if job.is_active else "closed"}
+
+
+@app.patch("/jobs/{job_id}/status")
+def update_job_status(job_id: int, is_active: bool, user: User = Depends(require_role("company")), db: Session = Depends(get_db)):
+    """Activate or close a job without deleting its application history."""
+    job = db.get(Job, job_id)
+    if not job or job.company_id != organization_id(user):
+        raise HTTPException(status_code=404, detail="Job not found")
+    job.is_active = is_active
+    db.commit()
+    return {"id": job.id, "is_active": job.is_active, "status": "active" if job.is_active else "closed"}
+
+
+@app.delete("/jobs/{job_id}", status_code=200)
+def close_job(job_id: int, user: User = Depends(require_role("company")), db: Session = Depends(get_db)):
+    """Soft-delete a job by closing it, preserving application history."""
+    job = db.get(Job, job_id)
+    if not job or job.company_id != organization_id(user):
+        raise HTTPException(status_code=404, detail="Job not found")
+    job.is_active = False
+    db.commit()
+    return {"id": job.id, "status": "closed"}
+
+
 @app.post("/jobs/import-legacy")
 def import_legacy_jobs(data: LegacyJobsImportIn, user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     """Import legacy CSV jobs into the signed-in primary company's database account."""
