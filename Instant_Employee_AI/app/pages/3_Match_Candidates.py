@@ -1,4 +1,5 @@
 
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -41,7 +42,7 @@ if not st.session_state.get("company_logged_in") or not st.session_state.get("co
         st.switch_page("pages/4_Employee_Dashboard.py")
     st.stop()
 
-API_BASE_URL = "https://instant-employee-api.onrender.com"
+API_BASE_URL = os.getenv("INSTANT_EMPLOYEE_API_BASE_URL", "https://instant-employee-api.onrender.com").rstrip("/")
 
 def api_get(path):
     try:
