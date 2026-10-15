@@ -355,3 +355,49 @@ def test_disabled_account_cannot_login():
         "password": "TestPassword123!",
     })
     assert login.status_code == 401
+
+def test_company_job_update_close_reopen_and_ownership():
+    owner = signup("company", unique_email("job-owner"))
+    other = signup("company", unique_email("job-other"))
+
+    create = client.post("/jobs", headers=owner, json={
+        "title": "Original API Engineer",
+        "department": "Engineering",
+        "description": "Build reliable API services for customers.",
+        "required_skills": "Python, FastAPI",
+        "min_budget": 20000,
+        "max_budget": 40000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert create.status_code == 201, create.text
+    job_id = create.json()["id"]
+
+    update_payload = {
+        "title": "Senior API Engineer",
+        "department": "Engineering",
+        "description": "Build and maintain secure production API services.",
+        "required_skills": "Python, FastAPI, PostgreSQL",
+        "min_budget": 30000,
+        "max_budget": 60000,
+        "work_mode": "Hybrid",
+        "timezone": "Asia/Kolkata",
+    }
+    update = client.put(f"/jobs/{job_id}", headers=owner, json=update_payload)
+    assert update.status_code == 200, update.text
+    assert update.json()["title"] == "Senior API Engineer"
+
+    forbidden_update = client.put(f"/jobs/{job_id}", headers=other, json=update_payload)
+    assert forbidden_update.status_code == 404
+
+    close = client.delete(f"/jobs/{job_id}", headers=owner)
+    assert close.status_code == 200, close.text
+    assert close.json()["status"] == "closed"
+    public_ids = {row["id"] for row in client.get("/jobs").json()}
+    assert job_id not in public_ids
+
+    reopen = client.patch(f"/jobs/{job_id}/status?is_active=true", headers=owner)
+    assert reopen.status_code == 200, reopen.text
+    assert reopen.json()["is_active"] is True
+    public_ids = {row["id"] for row in client.get("/jobs").json()}
+    assert job_id in public_ids
