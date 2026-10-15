@@ -1,6 +1,7 @@
 from pathlib import Path
 import base64
 import html
+import os
 import sys
 import time
 import pandas as pd
@@ -17,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 JOBS_FILE = DATA / "jobs.csv"
 SHORTLIST_FILE = DATA / "shortlist.csv"
-API_BASE_URL = "https://instant-employee-api.onrender.com"
+API_BASE_URL = os.getenv("INSTANT_EMPLOYEE_API_BASE_URL", "https://instant-employee-api.onrender.com").rstrip("/")
 
 
 def api_request(method, path, token=None, **kwargs):
