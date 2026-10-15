@@ -68,6 +68,14 @@ def test_health_endpoint():
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
+def test_database_health_endpoint():
+    response = client.get("/health/database")
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["status"] == "connected"
+    assert payload["required_tables_present"] is True
+    assert payload["database_dialect"] in {"sqlite", "postgresql"}
+
 def test_talent_profile_and_completion():
     email = unique_email("talent")
     headers = signup("talent", email)
