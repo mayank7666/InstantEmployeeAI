@@ -5,6 +5,7 @@ on:
     paths:
       - "Instant_Employee_AI/backend/**"
       - "Instant_Employee_AI/app/**"
+      - "Instant_Employee_AI/src/**"
       - ".github/workflows/backend-tests.yml"
   pull_request:
     paths:
