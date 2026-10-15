@@ -36,6 +36,11 @@ def test_education_fit_uses_explicit_qualification():
     assert score == 100.0
 
 
+def test_common_words_do_not_inflate_detected_education_level():
+    assert education_level("I would be happy to contribute to the team.") is None
+    assert education_level("The candidate may be available next month.") is None
+
+
 def test_resume_to_jobs_returns_explainable_ranked_results():
     resume = "B.Tech graduate with 2 years of experience. Python SQL machine learning project work."
     jobs = [
