@@ -288,3 +288,50 @@ def test_admin_bootstrap_requires_private_setup_key():
         "setup_key": "incorrect-key",
     })
     assert response.status_code == 403
+
+
+def test_primary_admin_password_reset_requires_setup_key_and_updates_password():
+    # Use only the isolated test database and the primary admin created by this test suite.
+    with SessionLocal() as db:
+        admin = db.query(User).filter(
+            User.role == "company",
+            User.company_id.is_(None),
+        ).first()
+        if admin is None:
+            admin_email = unique_email("reset-test-admin")
+            created = client.post("/auth/company/bootstrap", json={
+                "email": admin_email,
+                "password": "OldTestPassword123!",
+                "full_name": "Reset Test Admin",
+                "setup_key": TEST_SETUP_KEY,
+            })
+            assert created.status_code == 201, created.text
+        else:
+            admin_email = admin.email
+
+    invalid_key = client.post(
+        "/auth/company/reset-password",
+        headers={"X-Admin-Setup-Key": "wrong-key"},
+        json={"email": admin_email, "new_password": "NewTestPassword123!"},
+    )
+    assert invalid_key.status_code == 403
+
+    reset = client.post(
+        "/auth/company/reset-password",
+        headers={"X-Admin-Setup-Key": TEST_SETUP_KEY},
+        json={"email": admin_email, "new_password": "NewTestPassword123!"},
+    )
+    assert reset.status_code == 200, reset.text
+    assert reset.json()["status"] == "password_reset"
+
+    login = client.post("/auth/login", data={
+        "username": admin_email,
+        "password": "NewTestPassword123!",
+    })
+    assert login.status_code == 200, login.text
+    me = client.get("/me", headers={
+        "Authorization": f"Bearer {login.json()['access_token']}"
+    })
+    assert me.status_code == 200, me.text
+    assert me.json()["role"] == "company"
+
