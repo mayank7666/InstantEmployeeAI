@@ -389,6 +389,27 @@ def match_candidates(job_description, resumes):
     ):
         lexical_score = lexical_scores[index] * 100
 
+        # A missing or unreadable resume must not receive a positive score
+        # from neutral experience/education defaults.
+        if not resume.strip():
+            results.append({
+                "name": name,
+                "similarity": 0.0,
+                "semantic_similarity": None,
+                "skill_coverage": 0.0,
+                "experience_fit": 0.0,
+                "required_experience_years": extract_required_experience_years(job_description),
+                "candidate_experience_years": None,
+                "education_fit": 0.0,
+                "required_education_level": education_level(job_description),
+                "candidate_education_level": None,
+                "reasons": ["No readable resume text was provided."],
+                "final_score": 0.0,
+                "matched_skills": [],
+                "missing_skills": required_skills,
+            })
+            continue
+
         candidate_skills = extract_skills(resume)
 
         matched_skills = [
