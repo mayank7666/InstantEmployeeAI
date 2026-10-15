@@ -191,8 +191,8 @@ def education_level(text):
     normalized = " " + normalize_text(text) + " "
     levels = [
         (5, ["phd", "doctorate", "doctoral"]),
-        (4, ["master", "masters", "m tech", "mtech", "mba", "msc", "m sc", "ma"]),
-        (3, ["bachelor", "bachelors", "b tech", "btech", "b e", "be", "bsc", "b sc", "ba", "bca"]),
+        (4, ["master", "masters", "m tech", "mtech", "mba", "msc", "m sc", "m a"]),
+        (3, ["bachelor", "bachelors", "b tech", "btech", "b e", "bsc", "b sc", "ba", "bca"]),
         (2, ["diploma", "associate degree"]),
         (1, ["high school", "12th", "higher secondary", "intermediate"]),
     ]
