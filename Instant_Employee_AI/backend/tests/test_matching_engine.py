@@ -64,6 +64,22 @@ def test_resume_to_jobs_returns_explainable_ranked_results():
     assert results[0]["reasons"]
 
 
+def test_empty_resume_never_receives_a_positive_match_score(monkeypatch):
+    import matching_engine
+
+    monkeypatch.setattr(matching_engine, "calculate_semantic_similarity", lambda *_: None)
+    results = matching_engine.match_candidates(
+        "Python engineer with 3 years of experience and bachelor degree required.",
+        {"Empty candidate": "   "},
+    )
+
+    assert len(results) == 1
+    assert results[0]["final_score"] == 0.0
+    assert results[0]["experience_fit"] == 0.0
+    assert results[0]["education_fit"] == 0.0
+    assert results[0]["reasons"] == ["No readable resume text was provided."]
+
+
 def test_candidate_ranking_contains_skill_and_explanation_fields():
     results = match_candidates(
         "Python Machine Learning SQL. 2 years of experience. Bachelor degree required.",
