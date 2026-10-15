@@ -398,7 +398,19 @@ def create_job(data: JobIn, user: User=Depends(require_role("company")), db: Ses
 @app.get("/jobs/mine")
 def my_jobs(user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
     jobs=db.query(Job).filter(Job.company_id==organization_id(user)).order_by(Job.created_at.desc()).all()
-    return [{"id":j.id,"title":j.title,"department":j.department,"applications_count":len(j.applications),"is_active":j.is_active} for j in jobs]
+    return [{
+        "id": j.id,
+        "title": j.title,
+        "department": j.department,
+        "description": j.description,
+        "required_skills": j.required_skills,
+        "min_budget": j.min_budget,
+        "max_budget": j.max_budget,
+        "work_mode": j.work_mode,
+        "timezone": j.timezone,
+        "applications_count": len(j.applications),
+        "is_active": j.is_active,
+    } for j in jobs]
 
 @app.put("/jobs/{job_id}")
 def update_job(job_id: int, data: JobIn, user: User = Depends(require_role("company")), db: Session = Depends(get_db)):
