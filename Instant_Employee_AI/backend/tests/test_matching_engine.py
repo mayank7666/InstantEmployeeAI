@@ -72,3 +72,18 @@ def test_candidate_ranking_contains_skill_and_explanation_fields():
     assert "experience_fit" in results[0]
     assert "education_fit" in results[0]
     assert results[0]["reasons"]
+
+
+def test_expanded_catalog_recognizes_common_backend_data_and_ai_skills():
+    from matching_engine import extract_skills
+
+    found = extract_skills(
+        "Built REST APIs with Django, Node.js, MongoDB, Redis, "
+        "Apache Spark, Airflow, Snowflake, XGBoost, Hugging Face and LangChain."
+    )
+    expected = {
+        "REST API", "Django", "Node.js", "MongoDB", "Redis",
+        "Apache Spark", "Airflow", "Snowflake", "XGBoost",
+        "Hugging Face", "LangChain",
+    }
+    assert expected.issubset(set(found))
