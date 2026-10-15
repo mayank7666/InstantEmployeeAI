@@ -1,7 +1,7 @@
 import os
 import uuid
 from fastapi.testclient import TestClient
-from main import app, SessionLocal, User
+from main import app, SessionLocal, User, hash_password
 
 client = TestClient(app)
 TEST_SETUP_KEY = "test-only-setup-key"
@@ -358,7 +358,22 @@ def test_disabled_account_cannot_login():
 
 def test_company_job_update_close_reopen_and_ownership():
     owner = signup("company", unique_email("job-owner"))
-    other = signup("company", unique_email("job-other"))
+    other_email = unique_email("separate-org")
+    with SessionLocal() as db:
+        separate_company = User(
+            email=other_email,
+            password_hash=hash_password("TestPassword123!"),
+            role="company",
+            company_id=None,
+        )
+        db.add(separate_company)
+        db.commit()
+    other_login = client.post("/auth/login", data={
+        "username": other_email,
+        "password": "TestPassword123!",
+    })
+    assert other_login.status_code == 200, other_login.text
+    other = {"Authorization": f"Bearer {other_login.json()['access_token']}"}
 
     create = client.post("/jobs", headers=owner, json={
         "title": "Original API Engineer",
