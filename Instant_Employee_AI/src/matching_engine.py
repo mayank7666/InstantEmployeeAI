@@ -41,7 +41,7 @@ SKILL_CATALOG = {
     "Django": ["django"],
     "Node.js": ["node.js", "node js", "nodejs"],
     "Express.js": ["express.js", "express js", "expressjs"],
-    "REST API": ["rest api", "restful api", "restful services"],
+    "REST API": ["rest api", "rest apis", "restful api", "restful apis", "restful services"],
     "GraphQL": ["graphql"],
     "MongoDB": ["mongodb", "mongo db"],
     "Redis": ["redis"],
