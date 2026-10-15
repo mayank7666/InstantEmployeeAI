@@ -241,6 +241,38 @@ def bulk_create_company_users(data: BulkCompanyUsersIn, admin: User = Depends(re
 
 @app.get("/health")
 def health(): return {"status":"ok","service":"instant-employee-api","version":"0.1.0"}
+
+@app.get("/health/database")
+def database_health():
+    """Check database connectivity and required schema without exposing credentials or data."""
+    required_tables = {"users", "profiles", "jobs", "applications"}
+    try:
+        with engine.connect() as connection:
+            connection.execute(sql_text("SELECT 1"))
+        existing_tables = set(inspect(engine).get_table_names())
+        missing_tables = sorted(required_tables - existing_tables)
+        if missing_tables:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "status": "schema_incomplete",
+                    "database_dialect": engine.dialect.name,
+                    "missing_required_tables": missing_tables,
+                },
+            )
+        return {
+            "status": "connected",
+            "database_dialect": engine.dialect.name,
+            "required_tables_present": True,
+        }
+    except HTTPException:
+        raise
+    except Exception:
+        # Do not return database URLs, usernames, passwords, or raw driver errors.
+        raise HTTPException(
+            status_code=503,
+            detail={"status": "connection_failed", "message": "Database connection check failed"},
+        )
 @app.post("/auth/company/status")
 def company_admin_status(
     setup_key: str = Header(default="", alias="X-Admin-Setup-Key"),
