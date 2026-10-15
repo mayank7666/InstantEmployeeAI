@@ -440,3 +440,51 @@ def test_company_job_update_close_reopen_and_ownership():
     assert reopen.json()["is_active"] is True
     public_ids = {row["id"] for row in client.get("/jobs").json()}
     assert job_id in public_ids
+
+def test_company_cannot_change_or_download_another_company_application():
+    owner_headers = signup("company", unique_email("application-owner"))
+    other_headers = signup("company", unique_email("application-other-owner"))
+    candidate_headers = signup("talent", unique_email("application-owner-candidate"))
+    save_test_resume(candidate_headers, "private-candidate.pdf")
+
+    created = client.post("/jobs", headers=owner_headers, json={
+        "title": "Private Backend Role",
+        "department": "Engineering",
+        "description": "Build secure backend services and APIs.",
+        "required_skills": "Python, FastAPI",
+        "min_budget": 10000,
+        "max_budget": 20000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert created.status_code == 201, created.text
+    job_id = created.json()["id"]
+
+    applied = client.post(
+        f"/jobs/{job_id}/apply",
+        headers=candidate_headers,
+        json={"resume_filename": "private-candidate.pdf"},
+    )
+    assert applied.status_code == 201, applied.text
+    application_id = applied.json()["id"]
+
+    forbidden_status = client.patch(
+        f"/applications/{application_id}/status",
+        headers=other_headers,
+        params={"new_status": "Shortlisted"},
+    )
+    assert forbidden_status.status_code == 404
+
+    forbidden_resume = client.get(
+        f"/applications/{application_id}/resume",
+        headers=other_headers,
+    )
+    assert forbidden_resume.status_code == 404
+
+    owner_resume = client.get(
+        f"/applications/{application_id}/resume",
+        headers=owner_headers,
+    )
+    assert owner_resume.status_code == 200, owner_resume.text
+    assert owner_resume.json()["filename"] == "private-candidate.pdf"
+
