@@ -354,9 +354,11 @@ def signup(data: SignupIn, db: Session = Depends(get_db)):
     return {"access_token": make_token(user)}
 @app.post("/auth/login", response_model=TokenOut)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user=db.query(User).filter(User.email==form.username.lower()).first()
-    if not user or not verify_password(form.password,user.password_hash): raise HTTPException(status_code=401,detail="Incorrect email or password")
-    return {"access_token":make_token(user)}
+    user = db.query(User).filter(User.email == form.username.strip().lower()).first()
+    # Disabled accounts must not receive fresh access tokens.
+    if not user or not user.is_active or not verify_password(form.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+    return {"access_token": make_token(user)}
 @app.get("/me")
 def me(user: User = Depends(current_user), db: Session = Depends(get_db)):
     p=db.query(Profile).filter(Profile.user_id==user.id).first()
