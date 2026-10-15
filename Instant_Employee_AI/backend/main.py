@@ -18,7 +18,13 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = "postgresql+psycopg://" + DATABASE_URL[len("postgres://"):]
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = "postgresql+psycopg://" + DATABASE_URL[len("postgresql://"):]
-SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_THIS_SECRET_KEY_BEFORE_DEPLOYING")
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    # Never allow a known signing key in production. Local development gets an
+    # ephemeral key; configure SECRET_KEY in the hosting environment for stable sessions.
+    if os.getenv("RENDER", "").lower() == "true" or os.getenv("ENVIRONMENT", "").lower() == "production":
+        raise RuntimeError("SECRET_KEY must be configured in the production environment")
+    SECRET_KEY = secrets.token_urlsafe(48)
 ALGORITHM = "HS256"
 TOKEN_MINUTES = 720
 engine_options = {"pool_pre_ping": True}
