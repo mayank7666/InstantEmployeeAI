@@ -132,6 +132,30 @@ def test_company_can_post_job_and_talent_can_apply_once():
     assert history.status_code == 200
     assert any(item["job_id"] == job_id for item in history.json())
 
+    # Company can update the saved application status and the candidate sees it.
+    application_id = applied.json()["id"]
+    shortlisted = client.patch(
+        f"/applications/{application_id}/status",
+        headers=company_headers,
+        params={"new_status": "Shortlisted"},
+    )
+    assert shortlisted.status_code == 200, shortlisted.text
+    assert shortlisted.json()["status"] == "Shortlisted"
+
+    updated_history = client.get("/applications/me", headers=talent_headers)
+    assert updated_history.status_code == 200
+    saved_application = next(
+        item for item in updated_history.json() if item["job_id"] == job_id
+    )
+    assert saved_application["status"] == "Shortlisted"
+
+    invalid_status = client.patch(
+        f"/applications/{application_id}/status",
+        headers=company_headers,
+        params={"new_status": "HiredMaybe"},
+    )
+    assert invalid_status.status_code == 422
+
 def test_csv_job_applications_are_persisted_and_duplicates_blocked():
     talent_headers = signup("talent", unique_email("csv-candidate"))
     save_test_resume(talent_headers, "candidate-resume.pdf")
