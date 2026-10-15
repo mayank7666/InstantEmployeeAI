@@ -443,7 +443,26 @@ def test_company_job_update_close_reopen_and_ownership():
 
 def test_company_cannot_change_or_download_another_company_application():
     owner_headers = signup("company", unique_email("application-owner"))
-    other_headers = signup("company", unique_email("application-other-owner"))
+
+    # Create a separate root company so this checks cross-organization isolation,
+    # not two employee accounts belonging to the same organization.
+    other_email = unique_email("application-other-owner")
+    with SessionLocal() as db:
+        separate_company = User(
+            email=other_email,
+            password_hash=hash_password("TestPassword123!"),
+            role="company",
+            company_id=None,
+        )
+        db.add(separate_company)
+        db.commit()
+    other_login = client.post("/auth/login", data={
+        "username": other_email,
+        "password": "TestPassword123!",
+    })
+    assert other_login.status_code == 200, other_login.text
+    other_headers = {"Authorization": f"Bearer {other_login.json()['access_token']}"}
+
     candidate_headers = signup("talent", unique_email("application-owner-candidate"))
     save_test_resume(candidate_headers, "private-candidate.pdf")
 
