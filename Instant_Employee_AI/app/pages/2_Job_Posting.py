@@ -1,5 +1,6 @@
 
 from pathlib import Path
+import os
 from datetime import date
 import uuid
 import requests
@@ -13,7 +14,7 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
 JOBS_FILE = DATA_DIR / "jobs.csv"
-API_BASE_URL = "https://instant-employee-api.onrender.com"
+API_BASE_URL = os.getenv("INSTANT_EMPLOYEE_API_BASE_URL", "https://instant-employee-api.onrender.com").rstrip("/")
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
