@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import html
 import re
 import sys
@@ -14,7 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 DATA = ROOT / "data"
 JOBS_FILE = DATA / "jobs.csv"
-API_BASE_URL = "https://instant-employee-api.onrender.com"
+API_BASE_URL = os.getenv("INSTANT_EMPLOYEE_API_BASE_URL", "https://instant-employee-api.onrender.com").rstrip("/")
 
 
 def api_request(method, path, *, token=None, **kwargs):
