@@ -783,7 +783,7 @@ if view == "home":
         with company_cards[company_index]:
             rating_html = (f'<div class="company-job-rating">★ {company["rating"]} <span>|</span> {company["reviews"]}</div>' if company.get("rating") else f'<div class="company-job-count">{company["count"]} open jobs</div>')
             logo_domain = company.get("domain", "")
-            logo_url = f"https://logo.clearbit.com/{logo_domain}" if logo_domain else ""
+            logo_url = f"https://www.google.com/s2/favicons?domain={logo_domain}&sz=128" if logo_domain else ""
             logo_html = (
                 f'<img class="company-brand-logo" src="{logo_url}" alt="{html.escape(company_name)} logo" '
                 f'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
