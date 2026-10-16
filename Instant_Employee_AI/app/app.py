@@ -420,6 +420,31 @@ img, svg, video, iframe {
 
 
 
+/* Candidate portal footer inspired by the provided Naukri reference */
+.candidate-site-footer{
+    margin-top:56px;padding:42px 0 24px;border-top:1px solid #e2e8f3;
+    background:#fff;color:#111827;width:100%;
+}
+.candidate-footer-grid{
+    display:grid;grid-template-columns:1.45fr 1fr 1.15fr 1fr;gap:34px;
+    max-width:1180px;margin:0 auto;padding:0 22px;
+}
+.candidate-footer-brand{display:flex;align-items:center;gap:10px;color:#2458ed;font-size:28px;font-weight:850;letter-spacing:-.8px;margin-bottom:46px}
+.candidate-footer-mark{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:#315df5;color:#fff;font-size:28px}
+.candidate-footer-title{font-size:16px;font-weight:750;color:#18243a;margin-bottom:14px}
+.candidate-footer-links{display:flex;flex-direction:column;gap:15px}
+.candidate-footer-links a{color:#283349!important;text-decoration:none!important;font-size:14px;line-height:1.4}
+.candidate-footer-links a:hover{color:#2458ed!important}
+.candidate-footer-social{display:flex;flex-wrap:wrap;gap:13px;margin-top:17px}
+.candidate-footer-social a{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;background:#8497bb;color:#fff!important;border-radius:3px;text-decoration:none!important;font-size:14px;font-weight:800}
+.candidate-footer-bottom{max-width:1180px;margin:38px auto 0;padding:17px 22px 0;border-top:1px solid #e2e8f3;color:#718096;font-size:12px}
+@media(max-width:760px){
+ .candidate-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 20px;padding:0 12px}
+ .candidate-footer-brand{font-size:22px;margin-bottom:20px}
+ .candidate-footer-mark{width:38px;height:38px}
+ .candidate-footer-bottom{margin-top:25px;padding-left:12px;padding-right:12px}
+}
+
 /* Naukri-inspired top navigation for candidate portal */
 .stApp .st-key-candidate_top_nav{
     background:#ffffff!important;border:1px solid #edf0f6;border-radius:0!important;
@@ -907,6 +932,44 @@ if view == "home":
         with box:
             st.markdown(f"<div class='step'><div class='stepnum'>{number}</div><h4>{title}</h4><div class='smallmuted'>{desc}</div></div>", unsafe_allow_html=True)
     st.caption("Candidate accounts and the company workspace are separate.")
+
+    # Site footer directly below the homepage content, modeled on the user's reference.
+    st.markdown("""
+    <footer class="candidate-site-footer">
+      <div class="candidate-footer-grid">
+        <div>
+          <div class="candidate-footer-brand"><span class="candidate-footer-mark">✦</span><span>Instant Employee</span></div>
+          <div class="candidate-footer-title">Connect with us</div>
+          <div class="candidate-footer-social">
+            <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook">f</a>
+            <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram">◎</a>
+            <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn">in</a>
+            <a href="https://x.com/" target="_blank" aria-label="X">𝕏</a>
+          </div>
+        </div>
+        <div class="candidate-footer-links">
+          <a href="#about">About us</a>
+          <a href="#careers">Careers</a>
+          <a href="#employer-home">Employer home</a>
+          <a href="#sitemap">Sitemap</a>
+          <a href="#credits">Credits</a>
+        </div>
+        <div class="candidate-footer-links">
+          <a href="#help">Help center</a>
+          <a href="#notices">Announcements / Notices</a>
+          <a href="#grievances">Grievances</a>
+          <a href="#report-issue">Report issue</a>
+        </div>
+        <div class="candidate-footer-links">
+          <a href="#privacy">Privacy policy</a>
+          <a href="#terms">Terms &amp; conditions</a>
+          <a href="#fraud-alert">Fraud alert</a>
+          <a href="#trust-safety">Trust &amp; safety</a>
+        </div>
+      </div>
+      <div class="candidate-footer-bottom">© 2026 Instant Employee AI · AI-powered talent platform</div>
+    </footer>
+    """, unsafe_allow_html=True)
 
 elif view == "all_jobs":
     st.markdown("## All available jobs")
