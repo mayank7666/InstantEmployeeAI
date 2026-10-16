@@ -710,6 +710,12 @@ if view == "home":
         modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()}) if work_mode_col and not jobs.empty else []
         selected_mode = st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
 
+    # Keep the available-jobs summary visible under the search filters, outside View All.
+    available_jobs_col, _ = st.columns([1, 2])
+    with available_jobs_col:
+        st.metric("Available jobs", len(jobs))
+
+
 
 
     # Recommended jobs carousel-style section, followed by real employer cards.
@@ -845,12 +851,8 @@ if view == "home":
                 filtered_jobs[work_mode_col].astype(str).str.casefold() == str(selected_mode).casefold()
             ]
     
-        count_a, count_b = st.columns([3, 1])
-        with count_a:
-            st.markdown("### Latest opportunities")
-            st.caption("Open a job to read the full description and apply.")
-        with count_b:
-            st.metric("Available jobs", len(filtered_jobs))
+        st.markdown("### Latest opportunities")
+        st.caption("Open a job to read the full description and apply.")
     
         if filtered_jobs.empty:
             st.info(
