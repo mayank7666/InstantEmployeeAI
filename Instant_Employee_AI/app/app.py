@@ -686,40 +686,6 @@ if view == "home":
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
     # Recommended jobs carousel-style section, followed by real employer cards.
-    heading_col, view_all_col = st.columns([5, 1])
-    with heading_col:
-        st.markdown('<div class="market-section-heading"><h3>Recommended jobs for you</h3></div>', unsafe_allow_html=True)
-    with view_all_col:
-        if st.button("View all ↓", key="recommended_view_all", use_container_width=True):
-            st.session_state["home_show_all_jobs"] = True
-            st.rerun()
-    if not jobs.empty:
-        recommended_source = jobs.head(3)
-        recommended_cols = st.columns(3, gap="small")
-        for rec_index, (_, rec_job) in enumerate(recommended_source.iterrows()):
-            rec_title_col = next((col for col in jobs.columns if str(col).strip().lower() in {"job title", "title", "job_title"}), None)
-            rec_company_col = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
-            rec_mode_col = next((col for col in jobs.columns if str(col).strip().lower() in {"work mode", "work_mode", "mode"}), None)
-            rec_title = str(rec_job.get(rec_title_col, "Open role")) if rec_title_col else "Open role"
-            rec_company = str(rec_job.get(rec_company_col, "")).strip() if rec_company_col else ""
-            if "@" in rec_company:
-                rec_company = "Hiring team"
-            rec_mode = str(rec_job.get(rec_mode_col, "Remote")) if rec_mode_col else "Remote"
-            with recommended_cols[rec_index]:
-                st.markdown(f"""
-                <div class="recommended-job-card">
-                  <div class="recommended-job-logo">{html.escape((rec_company[:1] or rec_title[:1]).upper())}</div>
-                  <div class="recommended-job-age">Open role</div>
-                  <div class="recommended-job-title">{html.escape(rec_title)}</div>
-                  <div class="recommended-job-company">{html.escape(rec_company or "Instant Employee")}</div>
-                  <div class="recommended-job-mode">⌖ {html.escape(rec_mode)}</div>
-                </div>
-                """, unsafe_allow_html=True)
-                if st.button("View job  →", key=f"recommended_view_{rec_index}", use_container_width=True):
-                    st.session_state.selected_job_index = rec_job.name
-                    st.session_state.view = "job_details"
-                    st.rerun()
-
     company_col_name = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
     employer_names = []
     if company_col_name and not jobs.empty:
@@ -755,6 +721,41 @@ if view == "home":
             st.rerun()
     else:
         st.caption("Company names will appear here when employers add their company profile details.")
+
+
+    heading_col, view_all_col = st.columns([5, 1])
+    with heading_col:
+        st.markdown('<div class="market-section-heading"><h3>Recommended jobs for you</h3></div>', unsafe_allow_html=True)
+    with view_all_col:
+        if st.button("View all ↓", key="recommended_view_all", use_container_width=True):
+            st.session_state["home_show_all_jobs"] = True
+            st.rerun()
+    if not jobs.empty:
+        recommended_source = jobs.head(3)
+        recommended_cols = st.columns(3, gap="small")
+        for rec_index, (_, rec_job) in enumerate(recommended_source.iterrows()):
+            rec_title_col = next((col for col in jobs.columns if str(col).strip().lower() in {"job title", "title", "job_title"}), None)
+            rec_company_col = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
+            rec_mode_col = next((col for col in jobs.columns if str(col).strip().lower() in {"work mode", "work_mode", "mode"}), None)
+            rec_title = str(rec_job.get(rec_title_col, "Open role")) if rec_title_col else "Open role"
+            rec_company = str(rec_job.get(rec_company_col, "")).strip() if rec_company_col else ""
+            if "@" in rec_company:
+                rec_company = "Hiring team"
+            rec_mode = str(rec_job.get(rec_mode_col, "Remote")) if rec_mode_col else "Remote"
+            with recommended_cols[rec_index]:
+                st.markdown(f"""
+                <div class="recommended-job-card">
+                  <div class="recommended-job-logo">{html.escape((rec_company[:1] or rec_title[:1]).upper())}</div>
+                  <div class="recommended-job-age">Open role</div>
+                  <div class="recommended-job-title">{html.escape(rec_title)}</div>
+                  <div class="recommended-job-company">{html.escape(rec_company or "Instant Employee")}</div>
+                  <div class="recommended-job-mode">⌖ {html.escape(rec_mode)}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("View job  →", key=f"recommended_view_{rec_index}", use_container_width=True):
+                    st.session_state.selected_job_index = rec_job.name
+                    st.session_state.view = "job_details"
+                    st.rerun()
 
     if st.session_state.get("home_show_all_jobs", False):
         # Job search controls
