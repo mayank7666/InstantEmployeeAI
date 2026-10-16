@@ -420,6 +420,36 @@ img, svg, video, iframe {
 
 
 
+/* Naukri-inspired top navigation for candidate portal */
+.stApp .st-key-candidate_top_nav{
+    background:#ffffff!important;border:1px solid #edf0f6;border-radius:0!important;
+    padding:10px 14px!important;margin:-10px -12px 22px!important;
+    box-shadow:0 2px 12px rgba(27,45,84,.04)!important;
+}
+.candidate-nav-brand{display:flex;align-items:center;gap:9px;white-space:nowrap;color:#2458ed;font-size:22px;font-weight:850;letter-spacing:-.7px;min-height:42px}
+.candidate-nav-mark{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:#2f5df5;color:#fff;font-size:22px}
+.candidate-nav-blue{color:#172b52;margin-left:4px}
+.candidate-nav-link{display:flex;align-items:center;justify-content:center;min-height:42px;color:#33415e;font-size:14px;font-weight:550;white-space:nowrap}
+.stApp .st-key-candidate_top_nav [data-testid="stButton"] button{
+    min-height:40px!important;border-radius:22px!important;background:#fff!important;
+    border:1px solid transparent!important;color:#33415e!important;font-weight:550!important;
+    padding:0 10px!important;white-space:nowrap!important;box-shadow:none!important
+}
+.stApp .st-key-candidate_top_nav [data-testid="stButton"] button:hover{
+    background:#f3f6ff!important;border-color:#dce5ff!important;color:#2458ed!important
+}
+.stApp .st-key-candidate_top_nav [data-testid="stButton"] button[kind="primary"]{
+    background:#e93612!important;border-color:#e93612!important;color:#fff!important;
+    -webkit-text-fill-color:#fff!important;font-weight:700!important
+}
+.stApp .st-key-candidate_top_nav [data-testid="stButton"] button[kind="primary"]:hover{background:#cc2e10!important}
+@media(max-width:900px){
+ .stApp .st-key-candidate_top_nav{padding:8px!important;margin:0 0 16px!important}
+ .candidate-nav-brand{font-size:17px}.candidate-nav-mark{width:31px;height:31px}
+ .candidate-nav-link{font-size:12px}
+ .stApp .st-key-candidate_top_nav [data-testid="stButton"] button{font-size:12px!important;padding:0 5px!important}
+}
+
 /* Reference-style recommendation and employer discovery cards */
 .market-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 12px}
 .market-section-heading h3{margin:0;font-size:21px;font-weight:750;color:#17233b}
@@ -703,11 +733,34 @@ with st.sidebar:
 view = st.session_state.view
 
 if view == "home":
+    # Naukri-inspired candidate navigation: keep login and registration easy to find.
+    with st.container(key="candidate_top_nav"):
+        nav_logo, nav_jobs, nav_companies, nav_services, nav_login, nav_register, nav_employer = st.columns(
+            [2.1, 0.62, 1.0, 0.75, 0.72, 0.85, 1.25], gap="small", vertical_alignment="center"
+        )
+        with nav_logo:
+            st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span>Instant<span class='candidate-nav-blue'>Employee</span></span></div>", unsafe_allow_html=True)
+        with nav_jobs:
+            if st.button("Jobs", key="top_nav_jobs", use_container_width=True):
+                st.session_state.view = "all_jobs"; st.rerun()
+        with nav_companies:
+            if st.button("Companies", key="top_nav_companies", use_container_width=True):
+                st.session_state.view = "all_jobs"; st.rerun()
+        with nav_services:
+            st.markdown("<div class='candidate-nav-link'>Services</div>", unsafe_allow_html=True)
+        with nav_login:
+            if st.button("Login", key="top_nav_login", use_container_width=True):
+                st.session_state.candidate_auth_mode = "login"
+                st.session_state.view = "candidate_auth"; st.rerun()
+        with nav_register:
+            if st.button("Register", key="top_nav_register", type="primary", use_container_width=True):
+                st.session_state.candidate_auth_mode = "register"
+                st.session_state.view = "candidate_auth"; st.rerun()
+        with nav_employer:
+            if st.button("For employers  ⌄", key="top_nav_employer", use_container_width=True):
+                st.session_state.view = "employee"; st.rerun()
+
     st.markdown("""
-    <div class="landing-nav">
-      <div class="landing-brand">✦ Instant <span>Employee</span></div>
-      <div class="landing-nav-note">AI-POWERED TALENT PLATFORM</div>
-    </div>
     <div class="landing-hero">
       <div>
         <div class="eyebrow">BUILD YOUR TEAM WITH VERIFIED TALENT</div>
