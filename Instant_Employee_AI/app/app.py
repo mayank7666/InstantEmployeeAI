@@ -437,9 +437,36 @@ img, svg, video, iframe {
 
 
 
-/* Display company brand logos in clean white logo tiles */
-.stApp .company-logo-wrap{width:66px;height:66px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #e1e8f3;border-radius:15px;overflow:hidden;box-shadow:0 4px 12px rgba(25,55,110,.07)}
-.stApp .company-brand-logo{display:block;width:54px;height:54px;object-fit:contain;padding:5px;border-radius:10px;background:#fff}
+/* Compact, stable four-column employer grid: isolate it from global responsive column wrapping. */
+.stApp .st-key-company_showcase_grid{width:100%;min-width:0}
+.stApp .st-key-company_showcase_grid [data-testid="stHorizontalBlock"]{
+    display:flex!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:14px!important;
+}
+.stApp .st-key-company_showcase_grid [data-testid="column"]{
+    flex:1 1 0!important;width:0!important;min-width:0!important;max-width:25%!important;
+}
+.stApp .st-key-company_showcase_grid .company-job-card{
+    width:100%;box-sizing:border-box;min-height:168px!important;height:168px!important;
+    padding:16px 8px 12px!important;gap:8px!important;
+}
+.stApp .company-logo-wrap{
+    width:64px;height:58px;display:flex;align-items:center;justify-content:center;
+    flex:0 0 auto;background:#fff;border:1px solid #e1e8f3;border-radius:14px;
+    overflow:hidden;box-shadow:0 4px 12px rgba(25,55,110,.07)
+}
+.stApp .brand-mark{display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:5px;box-sizing:border-box;font-weight:850;line-height:1;white-space:nowrap}
+.stApp .brand-tcs{font-size:19px;letter-spacing:-.8px;color:#3156a6}
+.stApp .brand-infosys{font-size:15px;letter-spacing:-.8px;color:#007cc3}
+.stApp .brand-wipro{font-size:18px;letter-spacing:-1px;color:#3b62c4}
+.stApp .brand-hcl{font-size:15px;letter-spacing:-.7px;color:#2763e9}
+.stApp .brand-generic{font-size:19px;color:#2454f5}
+.stApp .st-key-company_showcase_grid .company-job-name{font-size:14px!important}
+.stApp .st-key-company_showcase_grid [data-testid="stButton"] button{min-height:40px!important;margin-top:2px!important}
+@media(max-width:700px){
+    .stApp .st-key-company_showcase_grid [data-testid="stHorizontalBlock"]{flex-wrap:wrap!important;gap:10px!important}
+    .stApp .st-key-company_showcase_grid [data-testid="column"]{flex:1 1 calc(50% - 10px)!important;width:auto!important;max-width:calc(50% - 5px)!important}
+    .stApp .st-key-company_showcase_grid .company-job-card{height:156px!important;min-height:156px!important}
+}
 
 /* Attractive employer showcase with polished cards and hover states */
 .market-section-heading{margin:24px 0 14px!important}
@@ -777,31 +804,35 @@ if view == "home":
             {"name": "Wipro", "full_name": "Wipro", "domain": "wipro.com", "count": 5, "rating": "", "reviews": "", "demo": True},
             {"name": "HCLTech", "full_name": "HCLTech", "domain": "hcltech.com", "count": 4, "rating": "", "reviews": "", "demo": True},
         ]
-    company_cards = st.columns(4, gap="small")
-    for company_index, company in enumerate(showcase):
-        company_name = company["name"]
-        with company_cards[company_index]:
-            rating_html = (f'<div class="company-job-rating">★ {company["rating"]} <span>|</span> {company["reviews"]}</div>' if company.get("rating") else f'<div class="company-job-count">{company["count"]} open jobs</div>')
-            logo_domain = company.get("domain", "")
-            logo_url = f"https://www.google.com/s2/favicons?domain={logo_domain}&sz=128" if logo_domain else ""
-            logo_html = (
-                f'<img class="company-brand-logo" src="{logo_url}" alt="{html.escape(company_name)} logo" '
-                f'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
-                f'<div class="company-logo-placeholder" style="display:none">{html.escape(company_name[:1].upper())}</div>'
-                if logo_url else f'<div class="company-logo-placeholder">{html.escape(company_name[:1].upper())}</div>'
-            )
-            st.markdown(f"""
-            <div class="company-job-card">
-              <div class="company-logo-wrap">{logo_html}</div>
-              <div class="company-job-name">{html.escape(company_name)}</div>
-              {rating_html}
-              {('<div class="company-demo-note">Example</div>' if company.get("demo") else '')}
-            </div>
-            """, unsafe_allow_html=True)
-            if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
-                st.session_state["home_company_filter"] = company_name if not company.get("demo") else "All companies"
-                st.session_state["home_show_all_jobs"] = True
-                st.rerun()
+    with st.container(key="company_showcase_grid"):
+        company_cards = st.columns(4, gap="small")
+        for company_index, company in enumerate(showcase):
+            company_name = company["name"]
+            with company_cards[company_index]:
+                rating_html = (f'<div class="company-job-rating">★ {company["rating"]} <span>|</span> {company["reviews"]}</div>' if company.get("rating") else f'<div class="company-job-count">{company["count"]} open jobs</div>')
+                # Use crisp typographic brand marks instead of low-resolution generic favicons.
+                brand_marks = {
+                    "TCS": '<span class="brand-mark brand-tcs">TCS</span>',
+                    "Infosys": '<span class="brand-mark brand-infosys">Infosys</span>',
+                    "Wipro": '<span class="brand-mark brand-wipro">wipro</span>',
+                    "HCLTech": '<span class="brand-mark brand-hcl">HCLTech</span>',
+                }
+                logo_html = brand_marks.get(
+                    company_name,
+                    f'<span class="brand-mark brand-generic">{html.escape(company_name[:2].upper())}</span>'
+                )
+                st.markdown(f"""
+                <div class="company-job-card">
+                  <div class="company-logo-wrap">{logo_html}</div>
+                  <div class="company-job-name">{html.escape(company_name)}</div>
+                  {rating_html}
+                  {('<div class="company-demo-note">Example</div>' if company.get("demo") else '')}
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
+                    st.session_state["home_company_filter"] = company_name if not company.get("demo") else "All companies"
+                    st.session_state["home_show_all_jobs"] = True
+                    st.rerun()
     if st.button("View all companies & jobs  →", key="view_all_companies_jobs"):
         st.session_state["home_company_filter"] = "All companies"
         st.session_state["home_show_all_jobs"] = True
