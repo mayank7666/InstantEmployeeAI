@@ -416,6 +416,33 @@ img, svg, video, iframe {
     .candidate-auth-feature { min-height: 0 !important; }
     [data-testid="stMetric"] { padding: 12px !important; }
 }
+
+/* Blueprint-inspired public landing page */
+.landing-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 2px 18px;border-bottom:1px solid #dce6f5;margin-bottom:20px}
+.landing-brand{font-size:22px;font-weight:900;letter-spacing:-.6px;color:#14294b}
+.landing-brand span{color:#1764ff}
+.landing-nav-note{font-size:12px;font-weight:750;letter-spacing:1px;color:#526987}
+.landing-hero{display:grid;grid-template-columns:1.25fr .75fr;gap:24px;align-items:center;padding:34px;border:1px solid #d6e4fa;border-radius:24px;background:radial-gradient(circle at 95% 5%,#d7e6ff 0,transparent 34%),linear-gradient(120deg,#fff,#eaf2ff);box-shadow:0 14px 35px #203d7010;margin-bottom:20px}
+.landing-hero .eyebrow{font-size:11px;font-weight:850;letter-spacing:1.5px;color:#1764ff}
+.landing-hero h1{font-size:clamp(32px,4vw,53px);letter-spacing:-1.7px;line-height:1.07;color:#14294b;margin:13px 0}
+.landing-hero h1 span{color:#1764ff}
+.landing-hero p{font-size:15px;line-height:1.75;color:#526987;max-width:620px}
+.landing-visual{min-height:235px;border-radius:20px;padding:20px;background:linear-gradient(145deg,#d9e8ff,#f8fbff);border:1px solid #d2e2fa;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.landing-visual-card{background:#ffffffdc;border:1px solid #d5e4f7;border-radius:13px;padding:12px 14px;color:#243d63;font-weight:700;box-shadow:0 4px 12px #203d7008}
+.landing-visual-card small{display:block;font-size:11px;color:#647792;font-weight:500;margin-top:3px}
+.landing-trust{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 0}
+.landing-trust span{padding:7px 10px;border:1px solid #d6e4fa;border-radius:30px;background:#ffffffb8;font-size:11px;font-weight:700;color:#31527e}
+.role-card{height:100%;padding:22px;border:1px solid #d7e4f7;border-radius:18px;background:linear-gradient(145deg,#fff,#f4f8ff);box-shadow:0 6px 20px #203d7008}
+.role-card.talent{background:linear-gradient(145deg,#fff,#f5f0ff);border-color:#e1d7fb}
+.role-icon{font-size:30px;margin-bottom:8px}
+.role-card h3{margin:0 0 7px;color:#172e55;font-size:19px}
+.role-card p{font-size:13px;line-height:1.6;color:#5d708b;min-height:62px}
+.feature-card{padding:16px;border:1px solid #dce6f5;border-radius:14px;background:#fff;height:100%}
+.feature-card b{display:block;color:#243d63;margin:7px 0}
+.feature-card small{color:#647792;line-height:1.5}
+.section-kicker{font-size:11px;font-weight:850;letter-spacing:1.2px;color:#2863c7}
+@media(max-width:800px){.landing-hero{grid-template-columns:1fr;padding:22px}.landing-visual{min-height:0}.landing-hero h1{font-size:34px}.landing-nav-note{display:none}}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -515,10 +542,51 @@ with st.sidebar:
 view = st.session_state.view
 
 if view == "home":
-    st.markdown("<div style='font-size:23px;font-weight:900'>✦ Instant Employee <span style='font-size:12px;color:#a8b8d0;font-weight:500;margin-left:8px'>AI CAREER PLATFORM</span></div>", unsafe_allow_html=True)
-    st.markdown("""<div class="hero"><div class="kicker">YOUR NEXT OPPORTUNITY STARTS HERE</div>
-    <h1>Find work that fits<br> <span>your skills.</span></h1>
-    <p>Explore opportunities, discover roles that match your experience, and use AI-assisted resume matching to find your next career move.</p></div>""", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="landing-nav">
+      <div class="landing-brand">✦ Instant <span>Employee</span></div>
+      <div class="landing-nav-note">AI-POWERED TALENT PLATFORM</div>
+    </div>
+    <div class="landing-hero">
+      <div>
+        <div class="eyebrow">BUILD YOUR TEAM WITH VERIFIED TALENT</div>
+        <h1>Build Your Global Team with <span>Verified Talent</span></h1>
+        <p>Hire skilled virtual IT and tech professionals for your startup or business. Discover relevant opportunities, manage hiring in one place, and find the right fit with AI-assisted matching.</p>
+        <div class="landing-trust"><span>✓ Verified talent workflows</span><span>♙ Secure & confidential</span><span>◎ Flexible hiring</span><span>✦ AI-assisted matching</span></div>
+      </div>
+      <div class="landing-visual">
+        <div class="landing-visual-card">✦ AI Matching <small>Skills, role and experience signals</small></div>
+        <div class="landing-visual-card">✓ Talent-first hiring <small>Profiles, applications and shortlist workflows</small></div>
+        <div class="landing-visual-card">🌐 Global reach <small>Remote, hybrid and timezone-aware roles</small></div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    role_company, role_talent = st.columns(2, gap="large")
+    with role_company:
+        st.markdown('<div class="role-card"><div class="role-icon">▦</div><h3>For Companies</h3><p>Post roles, review applications, discover candidates and manage your hiring workflow from one workspace.</p></div>', unsafe_allow_html=True)
+        if st.button("Company Dashboard  →", key="landing_company_login", type="primary", use_container_width=True):
+            st.session_state.view = "employee"
+            st.rerun()
+    with role_talent:
+        st.markdown('<div class="role-card talent"><div class="role-icon">♙</div><h3>For Talent</h3><p>Create your profile, upload your resume, find suitable jobs and track your applications.</p></div>', unsafe_allow_html=True)
+        if st.button("Find Jobs  →", key="landing_find_jobs", use_container_width=True):
+            st.session_state.view = "candidate_auth" if not st.session_state.get("candidate_logged_in") else "candidate_dashboard"
+            st.rerun()
+
+    st.markdown("### Everything you need to hire and grow")
+    feature_columns = st.columns(4, gap="medium")
+    landing_features = [
+        ("✦", "AI-assisted matching", "Find relevant jobs and candidates using skills and role details."),
+        ("▤", "Simple job posting", "Create roles with requirements, budgets and work modes."),
+        ("☏", "Clear workflows", "Keep profiles, applications and hiring progress organized."),
+        ("♧", "Built for trust", "Separate company and talent access with authenticated workflows."),
+    ]
+    for feature_col, (symbol, title, description) in zip(feature_columns, landing_features):
+        with feature_col:
+            st.markdown(f'<div class="feature-card"><div style="font-size:23px;color:#1764ff">{symbol}</div><b>{title}</b><small>{description}</small></div>', unsafe_allow_html=True)
+
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
     # Job search controls
     st.markdown("### Find your next role")
