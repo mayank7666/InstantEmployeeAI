@@ -499,7 +499,28 @@ img, svg, video, iframe {
     width:108px!important;min-width:108px!important;height:53px!important;min-height:53px!important;
     padding:0 10px!important;border:1px solid #e2e6ef!important;border-radius:29px!important;
     background:#fff!important;color:#8b9abc!important;font-size:21px!important;gap:8px!important;
-    box-shadow:none!important;white-space:nowrap!important;
+    box-shadow:none!important;white-space:nowrap!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button span,
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button p{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::before{
+    content:"";position:absolute;left:12px;top:17px;width:18px;height:18px;
+    background-repeat:no-repeat;background-position:center;background-size:contain;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M3 5h14M3 10h14M3 15h14' stroke='%238b9abc' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button{
+    font-size:0!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::after{
+    content:"2";position:absolute;right:-1px;top:0;width:19px;height:19px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
+    font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::after{z-index:3;}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button .profile-avatar-circle{
+    width:30px;height:30px;border-radius:50%;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::after{
     content:"2";position:absolute;right:-1px;top:0;width:19px;height:19px;border-radius:50%;
