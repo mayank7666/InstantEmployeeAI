@@ -831,7 +831,7 @@ if view == "home":
             st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed")
         with nav_actions:
             with st.container(key="candidate_nav_actions"):
-                nav_bell_col, nav_profile_col = st.columns([0.34, 1.18], gap="small", vertical_alignment="center", wrap=False)
+                nav_bell_col, nav_profile_col = st.columns([0.28, 1.00], gap="small", vertical_alignment="center", wrap=False)
                 with nav_bell_col:
                     if st.button("🔔", key="top_nav_alerts", help="View applied jobs", use_container_width=True):
                         st.session_state.view = "applied_jobs" if st.session_state.get("candidate_logged_in") else "candidate_auth"
@@ -1540,10 +1540,10 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 }
 .stApp .st-key-candidate_nav_actions [data-testid="stHorizontalBlock"]{
     display:flex!important;flex-flow:row nowrap!important;align-items:center!important;
-    justify-content:flex-end!important;gap:8px!important;width:100%!important;margin:0!important;
+    justify-content:flex-end!important;gap:4px!important;width:100%!important;margin:0!important;
 }
 .stApp .st-key-candidate_nav_actions [data-testid="column"]{min-width:0!important;flex-shrink:0!important;padding:0!important}
-.stApp .st-key-candidate_nav_actions [data-testid="column"]:nth-child(1){flex:0 0 42px!important;width:42px!important;max-width:42px!important}
+.stApp .st-key-candidate_nav_actions [data-testid="column"]:nth-child(1){flex:0 0 38px!important;width:38px!important;max-width:38px!important}
 .stApp .st-key-candidate_nav_actions [data-testid="column"]:nth-child(2){flex:0 0 150px!important;width:150px!important;max-width:150px!important}
 .stApp .st-key-candidate_nav_actions [class*="st-key-top_nav_alerts"] button,
 .stApp .st-key-candidate_nav_actions [class*="st-key-top_nav_alerts"] button:hover,
