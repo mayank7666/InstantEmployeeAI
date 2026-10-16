@@ -483,7 +483,7 @@ img, svg, video, iframe {
     color:#6f7fa6!important;font-family:Arial,sans-serif!important;font-size:0!important;padding:0!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6) [data-testid="stButton"] button::before{
-    content:"♧";font-size:28px!important;line-height:1!important;color:#7180a6!important;
+    content:"🔔";font-size:23px!important;line-height:1!important;color:#7180a6!important;
     filter:grayscale(1)!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6) [data-testid="stButton"] button::after{
