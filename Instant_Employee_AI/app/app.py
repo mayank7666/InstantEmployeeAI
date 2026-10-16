@@ -1374,7 +1374,41 @@ elif view == "candidate_dashboard":
             width:38px; height:38px; font-size:18px; position:absolute; inset:0;
         }
         [class*="st-key-profile_avatar"] [data-testid="stFileUploader"] section {cursor:pointer;}
-        </style>
+        /* Force the profile/menu pill to stay visibly highlighted (override global button rules) */
+div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-testid="stButton"] > button,
+div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-testid="stButton"] > button:hover,
+div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-testid="stButton"] > button:focus,
+div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-testid="stButton"] > button:active {
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    box-sizing:border-box!important;
+    width:160px!important;
+    min-width:160px!important;
+    max-width:160px!important;
+    height:53px!important;
+    min-height:53px!important;
+    padding:0 10px!important;
+    border:1px solid #d8e2ff!important;
+    border-radius:29px!important;
+    background:#f2f6ff!important;
+    box-shadow:0 0 0 1px #edf2ff inset!important;
+    color:#8b9abc!important;
+    overflow:visible!important;
+}
+div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-testid="stButton"] > button::before {
+    content:""!important;
+    position:absolute!important;
+    left:58px!important;
+    top:17px!important;
+    width:18px!important;
+    height:18px!important;
+    background-repeat:no-repeat!important;
+    background-position:center!important;
+    background-size:contain!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M3 5h14M3 10h14M3 15h14' stroke='%238b9abc' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+</style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
         with avatar_col:
