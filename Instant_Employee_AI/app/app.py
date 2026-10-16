@@ -1036,8 +1036,12 @@ elif view == "candidate_auth":
         "<p>Sign in to manage your profile, save your resume and discover opportunities matched to your skills.</p></div>",
         unsafe_allow_html=True,
     )
-    login, signup = st.tabs(["Login", "Create account"])
-    with login:
+    auth_mode = st.segmented_control(
+        "Choose account action", options=["Login", "Register"],
+        default="Register" if st.session_state.get("candidate_auth_mode") == "register" else "Login",
+        key="candidate_auth_mode_selector", width="stretch",
+    )
+    if auth_mode == "Login":
         form_col, feature_col = st.columns([1.05, 0.95], gap="large")
         with form_col:
             st.markdown(
@@ -1079,7 +1083,7 @@ elif view == "candidate_auth":
                     else:
                         st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"
                         st.rerun()
-    with signup:
+    else:
         form_col, feature_col = st.columns([1.05, 0.95], gap="large")
         with form_col:
             st.markdown(
