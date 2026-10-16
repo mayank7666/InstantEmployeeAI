@@ -766,243 +766,244 @@ if view == "home":
                 st.session_state["home_company_filter"] = "All companies"
                 st.rerun()
         if st.session_state.get("home_show_all_jobs", False):
-        # Search/filter controls stay visible; only the full job results are behind View all.
-        # Job search controls
-        st.markdown("### Find your next role")
-        search_col, dept_col, mode_col = st.columns([2, 1, 1])
-        with search_col:
-            search_text = st.text_input("Search jobs", placeholder="Job title, skill, or keyword", key="home_job_search")
-        title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
-        desc_col = next((c for c in jobs.columns if str(c).strip().lower() in {"description", "job description", "job_description"}), None)
-        skills_col = next((c for c in jobs.columns if str(c).strip().lower() in {"required skills", "required_skills", "skills"}), None)
-        dept_col_name = next((c for c in jobs.columns if str(c).strip().lower() in {"department", "category", "job category"}), None)
-        work_mode_col = next((c for c in jobs.columns if str(c).strip().lower() in {"work mode", "work_mode", "mode"}), None)
-        with dept_col:
-            departments = sorted({str(x).strip() for x in jobs[dept_col_name].tolist() if str(x).strip()}) if dept_col_name and not jobs.empty else []
-            category_options = ["All categories"] + departments
-            selected_department = st.selectbox(
-                "Category",
-                category_options,
-                index=0,
-                key="home_category_filter",
-                help="Choose a category from the jobs currently posted.",
-            )
-        with mode_col:
-            modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()}) if work_mode_col and not jobs.empty else []
-            selected_mode = st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
+            # Search/filter controls stay visible; only the full job results are behind View all.
+            # Job search controls
+            st.markdown("### Find your next role")
+            search_col, dept_col, mode_col = st.columns([2, 1, 1])
+            with search_col:
+                search_text = st.text_input("Search jobs", placeholder="Job title, skill, or keyword", key="home_job_search")
+            title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
+            desc_col = next((c for c in jobs.columns if str(c).strip().lower() in {"description", "job description", "job_description"}), None)
+            skills_col = next((c for c in jobs.columns if str(c).strip().lower() in {"required skills", "required_skills", "skills"}), None)
+            dept_col_name = next((c for c in jobs.columns if str(c).strip().lower() in {"department", "category", "job category"}), None)
+            work_mode_col = next((c for c in jobs.columns if str(c).strip().lower() in {"work mode", "work_mode", "mode"}), None)
+            with dept_col:
+                departments = sorted({str(x).strip() for x in jobs[dept_col_name].tolist() if str(x).strip()}) if dept_col_name and not jobs.empty else []
+                category_options = ["All categories"] + departments
+                selected_department = st.selectbox(
+                    "Category",
+                    category_options,
+                    index=0,
+                    key="home_category_filter",
+                    help="Choose a category from the jobs currently posted.",
+                )
+            with mode_col:
+                modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()}) if work_mode_col and not jobs.empty else []
+                selected_mode = st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
     
-        # Keep the available-jobs summary visible under the search filters, outside View All.
-        available_jobs_col, _ = st.columns([1, 2])
-        with available_jobs_col:
-            st.metric("Available jobs", len(jobs))
-    
-    
+            # Keep the available-jobs summary visible under the search filters, outside View All.
+            available_jobs_col, _ = st.columns([1, 2])
+            with available_jobs_col:
+                st.metric("Available jobs", len(jobs))
     
     
-        # Company showcase: use real employer names when available, otherwise show clearly labeled UI examples.
-        company_col_name = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
-        employer_names = []
-        if company_col_name and not jobs.empty:
-            employer_names = sorted({
-                str(value).strip() for value in jobs[company_col_name].tolist()
-                if str(value).strip()
-                and str(value).strip().lower() not in {"company", "nan", "none"}
-                and "@" not in str(value)
-            })
-        st.markdown('<div class="market-section-heading"><h3>Explore jobs by top companies</h3></div>', unsafe_allow_html=True)
-        if employer_names:
-            showcase = [{"name": name, "count": int((jobs[company_col_name].astype(str).str.strip() == name).sum()), "rating": "", "reviews": "", "demo": False} for name in employer_names[:4]]
-        else:
-            # UI examples only: current backend jobs expose company email, not a public company display name.
-            showcase = [
-                {"name": "TCS", "full_name": "Tata Consultancy Services", "domain": "tcs.com", "count": 8, "rating": "", "reviews": "", "demo": True},
-                {"name": "Infosys", "full_name": "Infosys", "domain": "infosys.com", "count": 6, "rating": "", "reviews": "", "demo": True},
-                {"name": "Wipro", "full_name": "Wipro", "domain": "wipro.com", "count": 5, "rating": "", "reviews": "", "demo": True},
-                {"name": "HCLTech", "full_name": "HCLTech", "domain": "hcltech.com", "count": 4, "rating": "", "reviews": "", "demo": True},
-            ]
-        with st.container(key="company_showcase_grid"):
-            company_cards = st.columns(4, gap="small")
-            for company_index, company in enumerate(showcase):
-                company_name = company["name"]
-                with company_cards[company_index]:
-                    rating_html = (f'<div class="company-job-rating">★ {company["rating"]} <span>|</span> {company["reviews"]}</div>' if company.get("rating") else f'<div class="company-job-count">{company["count"]} open jobs</div>')
-                    # Use crisp typographic brand marks instead of low-resolution generic favicons.
-                    brand_marks = {
-                        "TCS": '<span class="brand-mark brand-tcs">TCS</span>',
-                        "Infosys": '<span class="brand-mark brand-infosys">Infosys</span>',
-                        "Wipro": '<span class="brand-mark brand-wipro">wipro</span>',
-                        "HCLTech": '<span class="brand-mark brand-hcl">HCLTech</span>',
-                    }
-                    logo_html = brand_marks.get(
-                        company_name,
-                        f'<span class="brand-mark brand-generic">{html.escape(company_name[:2].upper())}</span>'
+    
+    
+            # Company showcase: use real employer names when available, otherwise show clearly labeled UI examples.
+            company_col_name = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
+            employer_names = []
+            if company_col_name and not jobs.empty:
+                employer_names = sorted({
+                    str(value).strip() for value in jobs[company_col_name].tolist()
+                    if str(value).strip()
+                    and str(value).strip().lower() not in {"company", "nan", "none"}
+                    and "@" not in str(value)
+                })
+            st.markdown('<div class="market-section-heading"><h3>Explore jobs by top companies</h3></div>', unsafe_allow_html=True)
+            if employer_names:
+                showcase = [{"name": name, "count": int((jobs[company_col_name].astype(str).str.strip() == name).sum()), "rating": "", "reviews": "", "demo": False} for name in employer_names[:4]]
+            else:
+                # UI examples only: current backend jobs expose company email, not a public company display name.
+                showcase = [
+                    {"name": "TCS", "full_name": "Tata Consultancy Services", "domain": "tcs.com", "count": 8, "rating": "", "reviews": "", "demo": True},
+                    {"name": "Infosys", "full_name": "Infosys", "domain": "infosys.com", "count": 6, "rating": "", "reviews": "", "demo": True},
+                    {"name": "Wipro", "full_name": "Wipro", "domain": "wipro.com", "count": 5, "rating": "", "reviews": "", "demo": True},
+                    {"name": "HCLTech", "full_name": "HCLTech", "domain": "hcltech.com", "count": 4, "rating": "", "reviews": "", "demo": True},
+                ]
+            with st.container(key="company_showcase_grid"):
+                company_cards = st.columns(4, gap="small")
+                for company_index, company in enumerate(showcase):
+                    company_name = company["name"]
+                    with company_cards[company_index]:
+                        rating_html = (f'<div class="company-job-rating">★ {company["rating"]} <span>|</span> {company["reviews"]}</div>' if company.get("rating") else f'<div class="company-job-count">{company["count"]} open jobs</div>')
+                        # Use crisp typographic brand marks instead of low-resolution generic favicons.
+                        brand_marks = {
+                            "TCS": '<span class="brand-mark brand-tcs">TCS</span>',
+                            "Infosys": '<span class="brand-mark brand-infosys">Infosys</span>',
+                            "Wipro": '<span class="brand-mark brand-wipro">wipro</span>',
+                            "HCLTech": '<span class="brand-mark brand-hcl">HCLTech</span>',
+                        }
+                        logo_html = brand_marks.get(
+                            company_name,
+                            f'<span class="brand-mark brand-generic">{html.escape(company_name[:2].upper())}</span>'
+                        )
+                        st.markdown(f"""
+                        <div class="company-job-card">
+                          <div class="company-logo-wrap">{logo_html}</div>
+                          <div class="company-job-name">{html.escape(company_name)}</div>
+                          {rating_html}
+                          {('<div class="company-demo-note">Example</div>' if company.get("demo") else '')}
+                        </div>
+                        """, unsafe_allow_html=True)
+                        if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
+                            st.session_state["home_company_filter"] = company_name if not company.get("demo") else "All companies"
+                            st.session_state["home_show_all_jobs"] = True
+                            st.rerun()
+            heading_col, view_all_col = st.columns([5, 1])
+            with heading_col:
+                st.markdown('<div class="market-section-heading"><h3>Recommended jobs for you</h3></div>', unsafe_allow_html=True)
+            with view_all_col:
+                if st.button("View all ↓", key="recommended_view_all", use_container_width=True):
+                    st.session_state["home_show_all_jobs"] = True
+                    st.rerun()
+            if not jobs.empty:
+                recommended_source = jobs.head(3)
+                recommended_cols = st.columns(3, gap="small")
+                for rec_index, (_, rec_job) in enumerate(recommended_source.iterrows()):
+                    rec_title_col = next((col for col in jobs.columns if str(col).strip().lower() in {"job title", "title", "job_title"}), None)
+                    rec_company_col = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
+                    rec_mode_col = next((col for col in jobs.columns if str(col).strip().lower() in {"work mode", "work_mode", "mode"}), None)
+                    rec_title = str(rec_job.get(rec_title_col, "Open role")) if rec_title_col else "Open role"
+                    rec_company = str(rec_job.get(rec_company_col, "")).strip() if rec_company_col else ""
+                    if "@" in rec_company:
+                        rec_company = "Hiring team"
+                    rec_mode = str(rec_job.get(rec_mode_col, "Remote")) if rec_mode_col else "Remote"
+                    with recommended_cols[rec_index]:
+                        st.markdown(f"""
+                        <div class="recommended-job-card">
+                          <div class="recommended-job-logo">{html.escape((rec_company[:1] or rec_title[:1]).upper())}</div>
+                          <div class="recommended-job-age">Open role</div>
+                          <div class="recommended-job-title">{html.escape(rec_title)}</div>
+                          <div class="recommended-job-company">{html.escape(rec_company or "Instant Employee")}</div>
+                          <div class="recommended-job-mode">⌖ {html.escape(rec_mode)}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        if st.button("View job  →", key=f"recommended_view_{rec_index}", use_container_width=True):
+                            st.session_state.selected_job_index = rec_job.name
+                            st.session_state.view = "job_details"
+                            st.rerun()
+    
+    
+            filtered_jobs = jobs.copy()
+            selected_company = st.session_state.get("home_company_filter", "All companies")
+            if selected_company != "All companies" and company_col_name and not filtered_jobs.empty:
+                filtered_jobs = filtered_jobs[
+                    filtered_jobs[company_col_name].astype(str).str.strip() == str(selected_company).strip()
+                ]
+                st.caption(f"Showing jobs from {selected_company}.")
+                if st.button("← Show all jobs", key="clear_company_filter"):
+                    st.session_state["home_company_filter"] = "All companies"
+                    st.rerun()
+            if search_text.strip() and not filtered_jobs.empty:
+                searchable_cols = [c for c in [title_col, desc_col, skills_col, dept_col_name] if c]
+                if searchable_cols:
+                    # Match individual query terms across title, skills, category and description.
+                    # Then rank exact/strong title matches above weaker description matches.
+                    query = search_text.strip()
+                    terms = [term for term in query.split() if term]
+                    searchable_text = filtered_jobs[searchable_cols].astype(str).apply(
+                        lambda row: " ".join(row.values), axis=1
                     )
-                    st.markdown(f"""
-                    <div class="company-job-card">
-                      <div class="company-logo-wrap">{logo_html}</div>
-                      <div class="company-job-name">{html.escape(company_name)}</div>
-                      {rating_html}
-                      {('<div class="company-demo-note">Example</div>' if company.get("demo") else '')}
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
-                        st.session_state["home_company_filter"] = company_name if not company.get("demo") else "All companies"
-                        st.session_state["home_show_all_jobs"] = True
-                        st.rerun()
-        heading_col, view_all_col = st.columns([5, 1])
-        with heading_col:
-            st.markdown('<div class="market-section-heading"><h3>Recommended jobs for you</h3></div>', unsafe_allow_html=True)
-        with view_all_col:
-            if st.button("View all ↓", key="recommended_view_all", use_container_width=True):
-                st.session_state["home_show_all_jobs"] = True
-                st.rerun()
-        if not jobs.empty:
-            recommended_source = jobs.head(3)
-            recommended_cols = st.columns(3, gap="small")
-            for rec_index, (_, rec_job) in enumerate(recommended_source.iterrows()):
-                rec_title_col = next((col for col in jobs.columns if str(col).strip().lower() in {"job title", "title", "job_title"}), None)
-                rec_company_col = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
-                rec_mode_col = next((col for col in jobs.columns if str(col).strip().lower() in {"work mode", "work_mode", "mode"}), None)
-                rec_title = str(rec_job.get(rec_title_col, "Open role")) if rec_title_col else "Open role"
-                rec_company = str(rec_job.get(rec_company_col, "")).strip() if rec_company_col else ""
-                if "@" in rec_company:
-                    rec_company = "Hiring team"
-                rec_mode = str(rec_job.get(rec_mode_col, "Remote")) if rec_mode_col else "Remote"
-                with recommended_cols[rec_index]:
-                    st.markdown(f"""
-                    <div class="recommended-job-card">
-                      <div class="recommended-job-logo">{html.escape((rec_company[:1] or rec_title[:1]).upper())}</div>
-                      <div class="recommended-job-age">Open role</div>
-                      <div class="recommended-job-title">{html.escape(rec_title)}</div>
-                      <div class="recommended-job-company">{html.escape(rec_company or "Instant Employee")}</div>
-                      <div class="recommended-job-mode">⌖ {html.escape(rec_mode)}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("View job  →", key=f"recommended_view_{rec_index}", use_container_width=True):
-                        st.session_state.selected_job_index = rec_job.name
-                        st.session_state.view = "job_details"
-                        st.rerun()
+                    term_mask = searchable_text.apply(
+                        lambda value: all(term.casefold() in value.casefold() for term in terms)
+                    )
+                    filtered_jobs = filtered_jobs[term_mask].copy()
     
+                    if not filtered_jobs.empty:
+                        def _job_relevance(row):
+                            title = str(row.get(title_col, "")) if title_col else ""
+                            skills = str(row.get(skills_col, "")) if skills_col else ""
+                            category = str(row.get(dept_col_name, "")) if dept_col_name else ""
+                            description = str(row.get(desc_col, "")) if desc_col else ""
+                            q = query.casefold()
+                            score = 0
+                            if title.casefold() == q:
+                                score += 100
+                            if q in title.casefold():
+                                score += 60
+                            score += sum(12 for term in terms if term.casefold() in title.casefold())
+                            score += sum(8 for term in terms if term.casefold() in skills.casefold())
+                            score += sum(5 for term in terms if term.casefold() in category.casefold())
+                            score += sum(2 for term in terms if term.casefold() in description.casefold())
+                            return score
     
-        filtered_jobs = jobs.copy()
-        selected_company = st.session_state.get("home_company_filter", "All companies")
-        if selected_company != "All companies" and company_col_name and not filtered_jobs.empty:
-            filtered_jobs = filtered_jobs[
-                filtered_jobs[company_col_name].astype(str).str.strip() == str(selected_company).strip()
-            ]
-            st.caption(f"Showing jobs from {selected_company}.")
-            if st.button("← Show all jobs", key="clear_company_filter"):
-                st.session_state["home_company_filter"] = "All companies"
-                st.rerun()
-        if search_text.strip() and not filtered_jobs.empty:
-            searchable_cols = [c for c in [title_col, desc_col, skills_col, dept_col_name] if c]
-            if searchable_cols:
-                # Match individual query terms across title, skills, category and description.
-                # Then rank exact/strong title matches above weaker description matches.
-                query = search_text.strip()
-                terms = [term for term in query.split() if term]
-                searchable_text = filtered_jobs[searchable_cols].astype(str).apply(
-                    lambda row: " ".join(row.values), axis=1
+                        filtered_jobs["_search_relevance"] = filtered_jobs.apply(_job_relevance, axis=1)
+                        filtered_jobs = filtered_jobs.sort_values(
+                            "_search_relevance", ascending=False, kind="stable"
+                        ).drop(columns=["_search_relevance"])
+    
+            # Category dropdown filters only categories that actually exist in jobs.csv.
+            if selected_department != "All categories" and dept_col_name:
+                filtered_jobs = filtered_jobs[
+                    filtered_jobs[dept_col_name].astype(str).str.casefold()
+                    == str(selected_department).casefold()
+                ]
+    
+            if selected_mode != "All modes" and work_mode_col:
+                filtered_jobs = filtered_jobs[
+                    filtered_jobs[work_mode_col].astype(str).str.casefold() == str(selected_mode).casefold()
+                ]
+    
+            st.markdown("### Latest opportunities")
+            st.caption("Open a job to read the full description and apply.")
+    
+            if filtered_jobs.empty:
+                st.info(
+                    "No jobs match these filters yet. Try another keyword, choose All categories / All modes, "
+                    "or check back after new jobs are posted."
                 )
-                term_mask = searchable_text.apply(
-                    lambda value: all(term.casefold() in value.casefold() for term in terms)
-                )
-                filtered_jobs = filtered_jobs[term_mask].copy()
+            else:
+                # Marketplace grid: compact job tiles, similar to the small cards in the reference.
+                job_grid = st.columns(3, gap="medium")
+                for display_index, (row_index, job) in enumerate(filtered_jobs.iterrows()):
+                    card_col = job_grid[display_index % 3]
+                    with card_col:
+                        title = str(job.get(title_col, "Open role")) if title_col else "Open role"
+                        department = str(job.get(dept_col_name, "Technology")) if dept_col_name else "Technology"
+                        description = str(job.get(desc_col, "")) if desc_col else ""
+                        skills = str(job.get(skills_col, "Skills listed in job description")) if skills_col else "Skills listed in job description"
+                        mode = str(job.get(work_mode_col, "Not specified")) if work_mode_col else "Not specified"
+                        low_col = next((c for c in jobs.columns if str(c).strip().lower() in {"minimum budget", "min budget", "minimum_budget"}), None)
+                        high_col = next((c for c in jobs.columns if str(c).strip().lower() in {"maximum budget", "max budget", "maximum_budget"}), None)
+                        low = str(job.get(low_col, "")) if low_col else ""
+                        high = str(job.get(high_col, "")) if high_col else ""
+                        budget = f"₹{low or '—'} – ₹{high or '—'}" if low or high else "Budget discussed"
+                        short_description = description[:105] + ("…" if len(description) > 105 else "")
+                        short_skills = skills[:75] + ("…" if len(skills) > 75 else "")
+                        st.markdown(f"""
+                        <div class="jobcard job-tile">
+                          <div class="job-tile-head">
+                            <div class="job-tile-logo">✦</div>
+                            <span class="job-mode-pill">{html.escape(mode)}</span>
+                          </div>
+                          <div class="job-tile-department">{html.escape(department)}</div>
+                          <h3 class="job-tile-title">{html.escape(title)}</h3>
+                          <p class="job-tile-description">{html.escape(short_description or "Open this role to view the complete job description.")}</p>
+                          <div class="job-tile-skills"><b>Skills</b><br>{html.escape(short_skills)}</div>
+                          <div class="job-tile-budget">{html.escape(budget)}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        if st.button("View details", key=f"view_job_{row_index}", use_container_width=True):
+                            st.session_state.selected_job_index = row_index
+                            st.session_state.view = "job_details"
+                            st.rerun()
+                        if st.button("Apply now", key=f"apply_job_card_{row_index}", type="primary", use_container_width=True):
+                            st.session_state.apply_job_index = row_index
+                            st.session_state.pop("application_submitted", None)
+                            if st.session_state.get("candidate_logged_in"):
+                                st.session_state.view = "apply_resume"
+                            else:
+                                st.session_state.view = "candidate_auth"
+                            st.rerun()
     
-                if not filtered_jobs.empty:
-                    def _job_relevance(row):
-                        title = str(row.get(title_col, "")) if title_col else ""
-                        skills = str(row.get(skills_col, "")) if skills_col else ""
-                        category = str(row.get(dept_col_name, "")) if dept_col_name else ""
-                        description = str(row.get(desc_col, "")) if desc_col else ""
-                        q = query.casefold()
-                        score = 0
-                        if title.casefold() == q:
-                            score += 100
-                        if q in title.casefold():
-                            score += 60
-                        score += sum(12 for term in terms if term.casefold() in title.casefold())
-                        score += sum(8 for term in terms if term.casefold() in skills.casefold())
-                        score += sum(5 for term in terms if term.casefold() in category.casefold())
-                        score += sum(2 for term in terms if term.casefold() in description.casefold())
-                        return score
-    
-                    filtered_jobs["_search_relevance"] = filtered_jobs.apply(_job_relevance, axis=1)
-                    filtered_jobs = filtered_jobs.sort_values(
-                        "_search_relevance", ascending=False, kind="stable"
-                    ).drop(columns=["_search_relevance"])
-    
-        # Category dropdown filters only categories that actually exist in jobs.csv.
-        if selected_department != "All categories" and dept_col_name:
-            filtered_jobs = filtered_jobs[
-                filtered_jobs[dept_col_name].astype(str).str.casefold()
-                == str(selected_department).casefold()
-            ]
-    
-        if selected_mode != "All modes" and work_mode_col:
-            filtered_jobs = filtered_jobs[
-                filtered_jobs[work_mode_col].astype(str).str.casefold() == str(selected_mode).casefold()
-            ]
-    
-        st.markdown("### Latest opportunities")
-        st.caption("Open a job to read the full description and apply.")
-    
-        if filtered_jobs.empty:
-            st.info(
-                "No jobs match these filters yet. Try another keyword, choose All categories / All modes, "
-                "or check back after new jobs are posted."
-            )
-        else:
-            # Marketplace grid: compact job tiles, similar to the small cards in the reference.
-            job_grid = st.columns(3, gap="medium")
-            for display_index, (row_index, job) in enumerate(filtered_jobs.iterrows()):
-                card_col = job_grid[display_index % 3]
-                with card_col:
-                    title = str(job.get(title_col, "Open role")) if title_col else "Open role"
-                    department = str(job.get(dept_col_name, "Technology")) if dept_col_name else "Technology"
-                    description = str(job.get(desc_col, "")) if desc_col else ""
-                    skills = str(job.get(skills_col, "Skills listed in job description")) if skills_col else "Skills listed in job description"
-                    mode = str(job.get(work_mode_col, "Not specified")) if work_mode_col else "Not specified"
-                    low_col = next((c for c in jobs.columns if str(c).strip().lower() in {"minimum budget", "min budget", "minimum_budget"}), None)
-                    high_col = next((c for c in jobs.columns if str(c).strip().lower() in {"maximum budget", "max budget", "maximum_budget"}), None)
-                    low = str(job.get(low_col, "")) if low_col else ""
-                    high = str(job.get(high_col, "")) if high_col else ""
-                    budget = f"₹{low or '—'} – ₹{high or '—'}" if low or high else "Budget discussed"
-                    short_description = description[:105] + ("…" if len(description) > 105 else "")
-                    short_skills = skills[:75] + ("…" if len(skills) > 75 else "")
-                    st.markdown(f"""
-                    <div class="jobcard job-tile">
-                      <div class="job-tile-head">
-                        <div class="job-tile-logo">✦</div>
-                        <span class="job-mode-pill">{html.escape(mode)}</span>
-                      </div>
-                      <div class="job-tile-department">{html.escape(department)}</div>
-                      <h3 class="job-tile-title">{html.escape(title)}</h3>
-                      <p class="job-tile-description">{html.escape(short_description or "Open this role to view the complete job description.")}</p>
-                      <div class="job-tile-skills"><b>Skills</b><br>{html.escape(short_skills)}</div>
-                      <div class="job-tile-budget">{html.escape(budget)}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("View details", key=f"view_job_{row_index}", use_container_width=True):
-                        st.session_state.selected_job_index = row_index
-                        st.session_state.view = "job_details"
-                        st.rerun()
-                    if st.button("Apply now", key=f"apply_job_card_{row_index}", type="primary", use_container_width=True):
-                        st.session_state.apply_job_index = row_index
-                        st.session_state.pop("application_submitted", None)
-                        if st.session_state.get("candidate_logged_in"):
-                            st.session_state.view = "apply_resume"
-                        else:
-                            st.session_state.view = "candidate_auth"
-                        st.rerun()
-    
-        st.markdown("### How it works")
-        columns = st.columns(4)
-        steps = [("01", "Explore jobs", "Search roles and review job details."), ("02", "Create account", "Sign in when you are ready to apply."), ("03", "Upload resume", "Share a readable PDF resume."), ("04", "AI job matching", "Review relevant skills and match estimates.")]
-        for box, (number, title, desc) in zip(columns, steps):
-            with box:
-                st.markdown(f"<div class='step'><div class='stepnum'>{number}</div><h4>{title}</h4><div class='smallmuted'>{desc}</div></div>", unsafe_allow_html=True)
-        st.caption("Candidate accounts and the company workspace are separate.")
+            st.markdown("### How it works")
+            columns = st.columns(4)
+            steps = [("01", "Explore jobs", "Search roles and review job details."), ("02", "Create account", "Sign in when you are ready to apply."), ("03", "Upload resume", "Share a readable PDF resume."), ("04", "AI job matching", "Review relevant skills and match estimates.")]
+            for box, (number, title, desc) in zip(columns, steps):
+                with box:
+                    st.markdown(f"<div class='step'><div class='stepnum'>{number}</div><h4>{title}</h4><div class='smallmuted'>{desc}</div></div>", unsafe_allow_html=True)
+            st.caption("Candidate accounts and the company workspace are separate.")
+
         else:
             st.info("Click **View all jobs** to open the company cards, recommended roles, filters, and all available jobs inside this card.")
 elif view == "job_details":
