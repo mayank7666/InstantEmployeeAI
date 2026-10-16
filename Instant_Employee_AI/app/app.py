@@ -1408,6 +1408,57 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     background-size:contain!important;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M3 5h14M3 10h14M3 15h14' stroke='%238b9abc' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")!important;
 }
+/* Direct key-based styling: the profile pill stays highlighted without hover */
+.stApp [class*="st-key-top_nav_profile"] button,
+.stApp [class*="st-key-top_nav_profile"] button:hover,
+.stApp [class*="st-key-top_nav_profile"] button:focus,
+.stApp [class*="st-key-top_nav_profile"] button:active {
+    position:relative!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    box-sizing:border-box!important;
+    width:160px!important;
+    min-width:160px!important;
+    max-width:160px!important;
+    height:53px!important;
+    min-height:53px!important;
+    padding:0!important;
+    border:1px solid #d8e2ff!important;
+    border-radius:29px!important;
+    background-color:#f2f6ff!important;
+    background-image:none!important;
+    box-shadow:0 0 0 1px #edf2ff inset!important;
+    color:transparent!important;
+    -webkit-text-fill-color:transparent!important;
+    font-size:0!important;
+    outline:none!important;
+}
+.stApp [class*="st-key-top_nav_profile"] button::before {
+    content:""!important;
+    position:absolute!important;
+    left:58px!important;
+    top:17px!important;
+    width:18px!important;
+    height:18px!important;
+    background-repeat:no-repeat!important;
+    background-position:center!important;
+    background-size:contain!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M3 5h14M3 10h14M3 15h14' stroke='%238b9abc' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.stApp [class*="st-key-top_nav_profile"] button::after {
+    content:""!important;
+    position:absolute!important;
+    right:10px!important;
+    top:10px!important;
+    width:32px!important;
+    height:32px!important;
+    border-radius:50%!important;
+    background-repeat:no-repeat!important;
+    background-position:center!important;
+    background-size:32px 32px!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='32' height='32' fill='%23e9d6c7'/%3E%3Cpath d='M1 32c1-8 6-12 15-12s14 4 15 12' fill='%234a6a8d'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23f1c9ad'/%3E%3Cpath d='M9 12c0-7 3-10 8-9 5 1 7 5 6 10l-2-4c-4 1-7-1-9-3l-3 6Z' fill='%234a342e'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23e2e6ef'/%3E%3C/svg%3E")!important;
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
