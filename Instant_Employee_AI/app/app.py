@@ -451,29 +451,45 @@ img, svg, video, iframe {
 
 /* Naukri-inspired top navigation for candidate portal */
 .stApp .st-key-candidate_top_nav{
-    background:#ffffff!important;border:0!important;border-bottom:1px solid #edf0f6!important;border-radius:0!important;
+    background:#fff!important;border:0!important;border-bottom:1px solid #edf0f6!important;border-radius:0!important;
     padding:8px 12px!important;margin:-10px -12px 22px!important;
-    box-shadow:0 2px 12px rgba(27,45,84,.035)!important;
+    box-shadow:0 2px 12px rgba(27,45,84,.035)!important;overflow:visible!important;
 }
+.stApp .st-key-candidate_top_nav [data-testid="stHorizontalBlock"]{
+    display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:clamp(5px,1.2vw,18px)!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]{min-width:0!important;flex-shrink:1!important;padding:0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(1){flex:1.65 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(2){flex:.65 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(3){flex:.88 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(4){flex:1.05 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(5){flex:1.65 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){flex:.28 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){flex:.42 1 0!important}
 .candidate-nav-brand{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#2458ed;font-size:22px;font-weight:850;letter-spacing:-.7px;min-height:42px}
-.candidate-nav-mark{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border-radius:50%;background:#2f5df5;color:#fff;font-size:19px}
+.candidate-nav-mark{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border-radius:50%;background:#2f5df5;color:#fff;font-size:19px;flex-shrink:0}
 .candidate-nav-blue{color:#2458ed}.candidate-nav-orange{color:#f05a28;margin-left:3px}
+.stApp .st-key-candidate_top_nav [data-testid="stButton"]{width:100%!important}
 .stApp .st-key-candidate_top_nav [data-testid="stButton"] button{
-    min-height:40px!important;border-radius:22px!important;background:transparent!important;
+    width:100%!important;min-width:0!important;min-height:40px!important;border-radius:22px!important;background:transparent!important;
     border:1px solid transparent!important;color:#35415e!important;font-weight:500!important;
-    padding:0 7px!important;white-space:nowrap!important;box-shadow:none!important;font-size:14px!important
+    padding:0 4px!important;white-space:nowrap!important;box-shadow:none!important;font-size:clamp(11px,.85vw,14px)!important
 }
 .stApp .st-key-candidate_top_nav [data-testid="stButton"] button:hover{
     background:#f3f6ff!important;border-color:#dce5ff!important;color:#2458ed!important
 }
+.stApp .st-key-candidate_top_nav [data-testid="stTextInput"]{min-width:0!important}
 .stApp .st-key-candidate_top_nav [data-testid="stTextInput"] input{
-    min-height:42px!important;border-radius:24px!important;border:1px solid #e0e6f0!important;
-    padding-left:16px!important;background:#fff!important;box-shadow:0 3px 12px #182b4b0a!important
+    box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:42px!important;
+    border-radius:24px!important;border:1px solid #e0e6f0!important;padding:0 16px!important;
+    background:#fff!important;color:#33415e!important;box-shadow:0 3px 12px #182b4b0a!important;outline:none!important;
 }
+.stApp .st-key-candidate_top_nav [data-testid="stTextInput"] input::placeholder{color:#7b879e!important;opacity:1!important}
+.stApp .st-key-candidate_top_nav [data-testid="stTextInput"] [data-baseweb="base-input"]{border:0!important;box-shadow:none!important;background:transparent!important}
 @media(max-width:900px){
- .stApp .st-key-candidate_top_nav{padding:8px!important;margin:0 0 16px!important}
- .candidate-nav-brand{font-size:16px}.candidate-nav-mark{width:28px;height:28px}
- .stApp .st-key-candidate_top_nav [data-testid="stButton"] button{font-size:11px!important;padding:0 3px!important}
+ .stApp .st-key-candidate_top_nav{padding:8px 5px!important;margin:0 0 16px!important}
+ .candidate-nav-brand{font-size:14px;gap:4px}.candidate-nav-mark{width:26px;height:26px}
+ .stApp .st-key-candidate_top_nav [data-testid="stButton"] button{font-size:10px!important;padding:0 2px!important}
 }
 
 /* Reference-style recommendation and employer discovery cards */
@@ -740,7 +756,7 @@ if view == "home":
     # Campus-style compact header inspired by the user's reference screenshot.
     with st.container(key="candidate_top_nav"):
         nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_alerts, nav_profile = st.columns(
-            [1.9, 0.72, 1.0, 1.15, 2.0, 0.42, 0.62], gap="small", vertical_alignment="center"
+            [1.65, 0.65, 0.88, 1.05, 1.65, 0.28, 0.42], gap="small", vertical_alignment="center"
         )
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
