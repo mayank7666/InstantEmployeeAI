@@ -465,9 +465,9 @@ img, svg, video, iframe {
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(3){flex:.92 1 0!important}
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(4){flex:1.02 1 0!important}
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(5){flex:1.95 1 0!important;max-width:285px!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){flex:0.12 0 10px!important;max-width:10px!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){flex:0 0 44px!important;max-width:44px!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8){flex:0 0 160px!important;max-width:160px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){flex:0 0 2px!important;max-width:2px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){flex:0 0 40px!important;max-width:40px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8){flex:0 0 150px!important;max-width:150px!important}
 .candidate-nav-brand{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#2458ed;font-size:22px;font-weight:850;letter-spacing:-.7px;min-height:42px}
 .candidate-nav-mark{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border-radius:50%;background:#2f5df5;color:#fff;font-size:19px;flex-shrink:0}
 .candidate-nav-blue{color:#2458ed}.candidate-nav-orange{color:#f05a28;margin-left:3px}
@@ -499,7 +499,7 @@ img, svg, video, iframe {
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button:focus,
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button:active{
     position:relative!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
-    width:160px!important;min-width:160px!important;height:53px!important;min-height:53px!important;
+    width:150px!important;min-width:150px!important;height:53px!important;min-height:53px!important;
     padding:0 10px!important;border:1px solid #d8e2ff!important;border-radius:29px!important;
     background-color:#f2f6ff!important;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='32' height='32' fill='%23e9d6c7'/%3E%3Cpath d='M1 32c1-8 6-12 15-12s14 4 15 12' fill='%234a6a8d'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23f1c9ad'/%3E%3Cpath d='M9 12c0-7 3-10 8-9 5 1 7 5 6 10l-2-4c-4 1-7-1-9-3l-3 6Z' fill='%234a342e'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23e2e6ef'/%3E%3C/svg%3E")!important;
@@ -812,7 +812,7 @@ if view == "home":
     # Campus-style compact header inspired by the user's reference screenshot.
     with st.container(key="candidate_top_nav"):
         nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_spacer, nav_alerts, nav_profile = st.columns(
-            [1.75, 0.72, 0.92, 1.02, 1.95, 0.12, 0.34, 0.72], gap="small", vertical_alignment="center", wrap=False
+            [1.75, 0.72, 0.92, 1.02, 1.95, 0.02, 0.30, 0.62], gap="small", vertical_alignment="center", wrap=False
         )
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
@@ -1384,9 +1384,9 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     align-items:center!important;
     justify-content:space-between!important;
     box-sizing:border-box!important;
-    width:160px!important;
-    min-width:160px!important;
-    max-width:160px!important;
+    width:150px!important;
+    min-width:150px!important;
+    max-width:150px!important;
     height:53px!important;
     min-height:53px!important;
     padding:0 10px!important;
@@ -1400,7 +1400,7 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-testid="stButton"] > button::before {
     content:""!important;
     position:absolute!important;
-    left:58px!important;
+    left:52px!important;
     top:17px!important;
     width:18px!important;
     height:18px!important;
@@ -1419,8 +1419,8 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     align-items:center!important;
     justify-content:flex-start!important;
     box-sizing:border-box!important;
-    width:160px!important;
-    min-width:160px!important;
+    width:150px!important;
+    min-width:150px!important;
     max-width:160px!important;
     height:53px!important;
     min-height:53px!important;
@@ -1438,7 +1438,7 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 .stApp [class*="st-key-top_nav_profile"] button::before {
     content:""!important;
     position:absolute!important;
-    left:58px!important;
+    left:52px!important;
     top:17px!important;
     width:18px!important;
     height:18px!important;
