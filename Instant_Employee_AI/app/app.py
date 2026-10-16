@@ -465,9 +465,9 @@ img, svg, video, iframe {
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(3){flex:.92 1 0!important}
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(4){flex:1.02 1 0!important}
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(5){flex:1.95 1 0!important;max-width:285px!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){flex:1.65 1 0!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){flex:.34 1 0!important;max-width:46px!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8){flex:.72 1 0!important;max-width:110px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){flex:0.12 0 10px!important;max-width:10px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){flex:0 0 44px!important;max-width:44px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8){flex:0 0 110px!important;max-width:110px!important}
 .candidate-nav-brand{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#2458ed;font-size:22px;font-weight:850;letter-spacing:-.7px;min-height:42px}
 .candidate-nav-mark{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border-radius:50%;background:#2f5df5;color:#fff;font-size:19px;flex-shrink:0}
 .candidate-nav-blue{color:#2458ed}.candidate-nav-orange{color:#f05a28;margin-left:3px}
@@ -789,7 +789,7 @@ if view == "home":
     # Campus-style compact header inspired by the user's reference screenshot.
     with st.container(key="candidate_top_nav"):
         nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_spacer, nav_alerts, nav_profile = st.columns(
-            [1.75, 0.72, 0.92, 1.02, 1.95, 1.65, 0.34, 0.72], gap="small", vertical_alignment="center", wrap=False
+            [1.75, 0.72, 0.92, 1.02, 1.95, 0.12, 0.34, 0.72], gap="small", vertical_alignment="center", wrap=False
         )
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
