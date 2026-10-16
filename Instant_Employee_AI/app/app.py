@@ -435,6 +435,17 @@ img, svg, video, iframe {
 .company-job-name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:750;color:#17233b}
 .company-job-count{font-size:12px;color:#71809a}
 
+
+/* Four-company showcase cards based on the provided UI reference */
+.stApp .company-job-card{min-height:160px!important;padding:14px 8px!important;gap:7px!important;border-radius:17px!important}
+.stApp .company-logo-placeholder{width:46px!important;height:46px!important;border-radius:12px!important;font-size:17px!important}
+.stApp .company-job-name{font-size:14px!important;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stApp .company-job-rating{font-size:11px;color:#697995;white-space:nowrap}
+.stApp .company-job-rating:first-letter{color:#f5a623}
+.stApp .company-job-rating span{padding:0 4px;color:#c4ccda}
+.stApp .company-demo-note{font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:#8b98ad}
+@media(max-width:800px){.stApp .company-job-card{min-height:140px!important;padding:10px 5px!important}.stApp .company-job-name{font-size:12px!important}}
+
 /* Company discovery cards matching the compact marketplace reference */
 .company-job-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;min-height:150px;padding:16px 12px;background:#fff;border:1px solid #dce5f2;border-radius:18px;box-shadow:0 4px 16px #1b315008}
 .company-logo-placeholder{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:1px solid #e1e8f3;border-radius:13px;background:#f8faff;color:#2454f5;font-size:22px;font-weight:900}
@@ -718,7 +729,7 @@ if view == "home":
 
 
 
-    # Recommended jobs carousel-style section, followed by real employer cards.
+    # Company showcase: use real employer names when available, otherwise show clearly labeled UI examples.
     company_col_name = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
     employer_names = []
     if company_col_name and not jobs.empty:
@@ -735,25 +746,36 @@ if view == "home":
     </div>
     """, unsafe_allow_html=True)
     if employer_names:
-        company_cards = st.columns(3, gap="small")
-        for company_index, company_name in enumerate(employer_names[:3]):
-            company_count = int((jobs[company_col_name].astype(str).str.strip() == company_name).sum())
-            with company_cards[company_index]:
-                st.markdown(f"""
-                <div class="company-job-card">
-                  <div class="company-logo-placeholder">{html.escape(company_name[:1].upper())}</div>
-                  <div class="company-job-name">{html.escape(company_name)}</div>
-                  <div class="company-job-count">{company_count} open job{"s" if company_count != 1 else ""}</div>
-                </div>
-                """, unsafe_allow_html=True)
-                if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
-                    st.session_state["home_company_filter"] = company_name
-                    st.rerun()
-        if st.button("View all companies & jobs  →", key="view_all_companies_jobs"):
-            st.session_state["home_company_filter"] = "All companies"
-            st.rerun()
+        showcase = [{"name": name, "count": int((jobs[company_col_name].astype(str).str.strip() == name).sum()), "rating": "", "reviews": "", "demo": False} for name in employer_names[:4]]
     else:
-        st.caption("Company names will appear here when employers add their company profile details.")
+        # UI examples only: current backend jobs expose company email, not a public company display name.
+        showcase = [
+            {"name": "TaskUs", "count": 8, "rating": "2.9", "reviews": "2.9K+ reviews", "demo": True},
+            {"name": "Narayana Health", "count": 6, "rating": "4.0", "reviews": "2.3K+ reviews", "demo": True},
+            {"name": "Morgan Stanley", "count": 5, "rating": "3.5", "reviews": "2.2K+ reviews", "demo": True},
+            {"name": "GE Vernova", "count": 4, "rating": "4.1", "reviews": "1.8K+ reviews", "demo": True},
+        ]
+    company_cards = st.columns(4, gap="small")
+    for company_index, company in enumerate(showcase):
+        company_name = company["name"]
+        with company_cards[company_index]:
+            rating_html = (f'<div class="company-job-rating">★ {company["rating"]} <span>|</span> {company["reviews"]}</div>' if company.get("rating") else f'<div class="company-job-count">{company["count"]} open jobs</div>')
+            st.markdown(f"""
+            <div class="company-job-card">
+              <div class="company-logo-placeholder">{html.escape(company_name[:1].upper())}</div>
+              <div class="company-job-name">{html.escape(company_name)}</div>
+              {rating_html}
+              {('<div class="company-demo-note">Example</div>' if company.get("demo") else '')}
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
+                st.session_state["home_company_filter"] = company_name if not company.get("demo") else "All companies"
+                st.session_state["home_show_all_jobs"] = True
+                st.rerun()
+    if st.button("View all companies & jobs  →", key="view_all_companies_jobs"):
+        st.session_state["home_company_filter"] = "All companies"
+        st.session_state["home_show_all_jobs"] = True
+        st.rerun()
 
 
     heading_col, view_all_col = st.columns([5, 1])
