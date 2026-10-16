@@ -436,6 +436,11 @@ img, svg, video, iframe {
 .company-job-count{font-size:12px;color:#71809a}
 
 
+
+/* Display company brand logos in clean white logo tiles */
+.stApp .company-logo-wrap{width:66px;height:66px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #e1e8f3;border-radius:15px;overflow:hidden;box-shadow:0 4px 12px rgba(25,55,110,.07)}
+.stApp .company-brand-logo{display:block;width:54px;height:54px;object-fit:contain;padding:5px;border-radius:10px;background:#fff}
+
 /* Attractive employer showcase with polished cards and hover states */
 .market-section-heading{margin:24px 0 14px!important}
 .market-section-heading h3{font-size:23px!important;letter-spacing:-.45px}
@@ -767,19 +772,27 @@ if view == "home":
     else:
         # UI examples only: current backend jobs expose company email, not a public company display name.
         showcase = [
-            {"name": "Tata Consultancy Services", "count": 8, "rating": "", "reviews": "", "demo": True},
-            {"name": "Infosys", "count": 6, "rating": "", "reviews": "", "demo": True},
-            {"name": "Wipro", "count": 5, "rating": "", "reviews": "", "demo": True},
-            {"name": "HCLTech", "count": 4, "rating": "", "reviews": "", "demo": True},
+            {"name": "TCS", "full_name": "Tata Consultancy Services", "domain": "tcs.com", "count": 8, "rating": "", "reviews": "", "demo": True},
+            {"name": "Infosys", "full_name": "Infosys", "domain": "infosys.com", "count": 6, "rating": "", "reviews": "", "demo": True},
+            {"name": "Wipro", "full_name": "Wipro", "domain": "wipro.com", "count": 5, "rating": "", "reviews": "", "demo": True},
+            {"name": "HCLTech", "full_name": "HCLTech", "domain": "hcltech.com", "count": 4, "rating": "", "reviews": "", "demo": True},
         ]
     company_cards = st.columns(4, gap="small")
     for company_index, company in enumerate(showcase):
         company_name = company["name"]
         with company_cards[company_index]:
             rating_html = (f'<div class="company-job-rating">★ {company["rating"]} <span>|</span> {company["reviews"]}</div>' if company.get("rating") else f'<div class="company-job-count">{company["count"]} open jobs</div>')
+            logo_domain = company.get("domain", "")
+            logo_url = f"https://logo.clearbit.com/{logo_domain}" if logo_domain else ""
+            logo_html = (
+                f'<img class="company-brand-logo" src="{logo_url}" alt="{html.escape(company_name)} logo" '
+                f'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+                f'<div class="company-logo-placeholder" style="display:none">{html.escape(company_name[:1].upper())}</div>'
+                if logo_url else f'<div class="company-logo-placeholder">{html.escape(company_name[:1].upper())}</div>'
+            )
             st.markdown(f"""
             <div class="company-job-card">
-              <div class="company-logo-placeholder">{html.escape(company_name[:1].upper())}</div>
+              <div class="company-logo-wrap">{logo_html}</div>
               <div class="company-job-name">{html.escape(company_name)}</div>
               {rating_html}
               {('<div class="company-demo-note">Example</div>' if company.get("demo") else '')}
