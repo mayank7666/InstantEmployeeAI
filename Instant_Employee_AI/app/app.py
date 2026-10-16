@@ -420,6 +420,21 @@ img, svg, video, iframe {
 
 
 
+/* Reference-style recommendation and employer discovery cards */
+.market-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 12px}
+.market-section-heading h3{margin:0;font-size:21px;font-weight:750;color:#17233b}
+.market-section-heading span{color:#245cff;font-weight:650;font-size:14px}
+.recommended-job-card{position:relative;min-height:174px;padding:14px;border:1px solid #e0e6f0;border-radius:18px;background:#fff;box-shadow:0 4px 14px #203d7008}
+.recommended-job-logo{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #e2e8f2;border-radius:9px;background:#f8faff;color:#7854f7;font-size:22px;font-weight:750}
+.recommended-job-age{position:absolute;right:13px;top:15px;font-size:11px;color:#8090aa}
+.recommended-job-title{margin-top:12px;font-size:15px;font-weight:750;color:#17233b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recommended-job-company{margin-top:3px;font-size:12px;color:#586783;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recommended-job-mode{margin-top:9px;font-size:12px;color:#7586a2}
+.company-job-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;min-height:155px;padding:15px 10px;background:#fff;border:1px solid #e0e6f0;border-radius:18px;box-shadow:0 4px 14px #203d7008}
+.company-logo-placeholder{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:1px solid #e2e8f2;border-radius:12px;background:#fff;color:#2454f5;font-size:19px;font-weight:850}
+.company-job-name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:750;color:#17233b}
+.company-job-count{font-size:12px;color:#71809a}
+
 /* Company discovery cards matching the compact marketplace reference */
 .company-job-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;min-height:150px;padding:16px 12px;background:#fff;border:1px solid #dce5f2;border-radius:18px;box-shadow:0 4px 16px #1b315008}
 .company-logo-placeholder{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:1px solid #e1e8f3;border-radius:13px;background:#f8faff;color:#2454f5;font-size:22px;font-weight:900}
@@ -670,36 +685,77 @@ if view == "home":
 
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
-    # Company discovery strip: browse employers and filter their open roles.
+    # Recommended jobs carousel-style section, followed by real employer cards.
+    if not jobs.empty and title_col if False else False:
+        pass
+    st.markdown("""
+    <div class="market-section-heading">
+      <h3>Recommended jobs for you</h3>
+      <span>View all ↓</span>
+    </div>
+    """, unsafe_allow_html=True)
+    if not jobs.empty:
+        recommended_cols = st.columns(3, gap="small")
+        for rec_index, (_, rec_job) in enumerate(jobs.head(3).iterrows()):
+            rec_title_col = next((col for col in jobs.columns if str(col).strip().lower() in {"job title", "title", "job_title"}), None)
+            rec_company_col = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
+            rec_mode_col = next((col for col in jobs.columns if str(col).strip().lower() in {"work mode", "work_mode", "mode"}), None)
+            rec_title = str(rec_job.get(rec_title_col, "Open role")) if rec_title_col else "Open role"
+            rec_company = str(rec_job.get(rec_company_col, "")).strip() if rec_company_col else ""
+            if "@" in rec_company:
+                rec_company = "Hiring team"
+            rec_mode = str(rec_job.get(rec_mode_col, "Remote")) if rec_mode_col else "Remote"
+            with recommended_cols[rec_index]:
+                st.markdown(f"""
+                <div class="recommended-job-card">
+                  <div class="recommended-job-logo">{html.escape((rec_company[:1] or rec_title[:1]).upper())}</div>
+                  <div class="recommended-job-age">Open role</div>
+                  <div class="recommended-job-title">{html.escape(rec_title)}</div>
+                  <div class="recommended-job-company">{html.escape(rec_company or "Instant Employee")}</div>
+                  <div class="recommended-job-mode">⌖ {html.escape(rec_mode)}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("View job  →", key=f"recommended_view_{rec_index}", use_container_width=True):
+                    st.session_state.selected_job_index = rec_job.name
+                    st.session_state.view = "job_details"
+                    st.rerun()
+
     company_col_name = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
+    employer_names = []
     if company_col_name and not jobs.empty:
-        company_names = sorted({
+        employer_names = sorted({
             str(value).strip() for value in jobs[company_col_name].tolist()
-            if str(value).strip() and str(value).strip().lower() not in {"company", "nan", "none"}
+            if str(value).strip()
+            and str(value).strip().lower() not in {"company", "nan", "none"}
+            and "@" not in str(value)
         })
-        st.markdown("""
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px">
-          <div style="font-size:22px;font-weight:750;color:#17233b">Explore jobs by top companies</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if company_names:
-            company_cards = st.columns(3, gap="medium")
-            for company_index, company_name in enumerate(company_names[:3]):
-                company_count = int((jobs[company_col_name].astype(str).str.strip() == company_name).sum())
-                with company_cards[company_index]:
-                    st.markdown(f"""
-                    <div class="company-job-card">
-                      <div class="company-logo-placeholder">✦</div>
-                      <div class="company-job-name">{html.escape(company_name)}</div>
-                      <div class="company-job-count">{company_count} open job{"s" if company_count != 1 else ""}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
-                        st.session_state["home_company_filter"] = company_name
-                        st.rerun()
-            if st.button("View all companies & jobs  →", key="view_all_companies_jobs"):
-                st.session_state["home_company_filter"] = "All companies"
-                st.rerun()
+    st.markdown("""
+    <div class="market-section-heading">
+      <h3>Explore jobs by top companies</h3>
+      <span>View all ↓</span>
+    </div>
+    """, unsafe_allow_html=True)
+    if employer_names:
+        company_cards = st.columns(3, gap="small")
+        for company_index, company_name in enumerate(employer_names[:3]):
+            company_count = int((jobs[company_col_name].astype(str).str.strip() == company_name).sum())
+            with company_cards[company_index]:
+                st.markdown(f"""
+                <div class="company-job-card">
+                  <div class="company-logo-placeholder">{html.escape(company_name[:1].upper())}</div>
+                  <div class="company-job-name">{html.escape(company_name)}</div>
+                  <div class="company-job-count">{company_count} open job{"s" if company_count != 1 else ""}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
+                    st.session_state["home_company_filter"] = company_name
+                    st.rerun()
+        if st.button("View all companies & jobs  →", key="view_all_companies_jobs"):
+            st.session_state["home_company_filter"] = "All companies"
+            st.rerun()
+    else:
+        st.caption("Company names will appear here when employers add their company profile details.")
+
     # Job search controls
     st.markdown("### Find your next role")
     search_col, dept_col, mode_col = st.columns([2, 1, 1])
