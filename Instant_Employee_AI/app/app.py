@@ -685,6 +685,33 @@ if view == "home":
 
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
+    # Search/filter controls stay visible; only the full job results are behind View all.
+    # Job search controls
+    st.markdown("### Find your next role")
+    search_col, dept_col, mode_col = st.columns([2, 1, 1])
+    with search_col:
+        search_text = st.text_input("Search jobs", placeholder="Job title, skill, or keyword", key="home_job_search")
+    title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
+    desc_col = next((c for c in jobs.columns if str(c).strip().lower() in {"description", "job description", "job_description"}), None)
+    skills_col = next((c for c in jobs.columns if str(c).strip().lower() in {"required skills", "required_skills", "skills"}), None)
+    dept_col_name = next((c for c in jobs.columns if str(c).strip().lower() in {"department", "category", "job category"}), None)
+    work_mode_col = next((c for c in jobs.columns if str(c).strip().lower() in {"work mode", "work_mode", "mode"}), None)
+    with dept_col:
+        departments = sorted({str(x).strip() for x in jobs[dept_col_name].tolist() if str(x).strip()}) if dept_col_name and not jobs.empty else []
+        category_options = ["All categories"] + departments
+        selected_department = st.selectbox(
+            "Category",
+            category_options,
+            index=0,
+            key="home_category_filter",
+            help="Choose a category from the jobs currently posted.",
+        )
+    with mode_col:
+        modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()}) if work_mode_col and not jobs.empty else []
+        selected_mode = st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
+
+
+
     # Recommended jobs carousel-style section, followed by real employer cards.
     company_col_name = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
     employer_names = []
@@ -758,30 +785,6 @@ if view == "home":
                     st.rerun()
 
     if st.session_state.get("home_show_all_jobs", False):
-        # Job search controls
-        st.markdown("### Find your next role")
-        search_col, dept_col, mode_col = st.columns([2, 1, 1])
-        with search_col:
-            search_text = st.text_input("Search jobs", placeholder="Job title, skill, or keyword", key="home_job_search")
-        title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
-        desc_col = next((c for c in jobs.columns if str(c).strip().lower() in {"description", "job description", "job_description"}), None)
-        skills_col = next((c for c in jobs.columns if str(c).strip().lower() in {"required skills", "required_skills", "skills"}), None)
-        dept_col_name = next((c for c in jobs.columns if str(c).strip().lower() in {"department", "category", "job category"}), None)
-        work_mode_col = next((c for c in jobs.columns if str(c).strip().lower() in {"work mode", "work_mode", "mode"}), None)
-        with dept_col:
-            departments = sorted({str(x).strip() for x in jobs[dept_col_name].tolist() if str(x).strip()}) if dept_col_name and not jobs.empty else []
-            category_options = ["All categories"] + departments
-            selected_department = st.selectbox(
-                "Category",
-                category_options,
-                index=0,
-                key="home_category_filter",
-                help="Choose a category from the jobs currently posted.",
-            )
-        with mode_col:
-            modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()}) if work_mode_col and not jobs.empty else []
-            selected_mode = st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
-    
         filtered_jobs = jobs.copy()
         selected_company = st.session_state.get("home_company_filter", "All companies")
         if selected_company != "All companies" and company_col_name and not filtered_jobs.empty:
