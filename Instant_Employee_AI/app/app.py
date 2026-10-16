@@ -476,6 +476,35 @@ img, svg, video, iframe {
     border:1px solid transparent!important;color:#35415e!important;font-weight:500!important;
     padding:0 4px!important;white-space:nowrap!important;box-shadow:none!important;font-size:clamp(11px,.85vw,14px)!important
 }
+/* Notification bell + compact profile pill styled like the supplied reference */
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6) [data-testid="stButton"] button{
+    position:relative!important;width:44px!important;height:44px!important;min-height:44px!important;
+    border:0!important;border-radius:50%!important;background:transparent!important;
+    color:#6f7fa6!important;font-family:Arial,sans-serif!important;font-size:0!important;padding:0!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6) [data-testid="stButton"] button::before{
+    content:"♧";font-size:28px!important;line-height:1!important;color:#7180a6!important;
+    filter:grayscale(1)!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6) [data-testid="stButton"] button::after{
+    content:"4";position:absolute;right:-1px;top:-3px;width:19px;height:19px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
+    font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7) [data-testid="stButton"] button{
+    position:relative!important;display:flex!important;align-items:center!important;justify-content:space-evenly!important;
+    width:104px!important;min-width:104px!important;height:48px!important;min-height:48px!important;
+    padding:0 8px!important;border:1px solid #e3e7ef!important;border-radius:28px!important;
+    background:#fff!important;color:#8b9abc!important;font-size:21px!important;gap:9px!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7) [data-testid="stButton"] button::after{
+    content:"2";position:absolute;right:17px;top:-4px;width:19px;height:19px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
+    font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7) [data-testid="stButton"] button:hover{
+    border-color:#e3e7ef!important;background:#fff!important;color:#7180a6!important;
+}
 .stApp .st-key-candidate_top_nav [data-testid="stButton"] button:hover{
     background:#f3f6ff!important;border-color:#dce5ff!important;color:#2458ed!important
 }
@@ -775,11 +804,11 @@ if view == "home":
         with nav_search:
             st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed")
         with nav_alerts:
-            if st.button("🔔", key="top_nav_alerts", help="View applied jobs"):
+            if st.button("♧", key="top_nav_alerts", help="View applied jobs"):
                 st.session_state.view = "applied_jobs" if st.session_state.get("candidate_logged_in") else "candidate_auth"
                 st.rerun()
         with nav_profile:
-            if st.button("☰  ☻", key="top_nav_profile", help="Open candidate profile or login", use_container_width=True):
+            if st.button("☰  👤", key="top_nav_profile", help="Open candidate profile or login", use_container_width=True):
                 st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
                 st.rerun()
 
