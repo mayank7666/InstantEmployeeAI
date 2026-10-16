@@ -477,33 +477,37 @@ img, svg, video, iframe {
     border:1px solid transparent!important;color:#35415e!important;font-weight:500!important;
     padding:0 4px!important;white-space:nowrap!important;box-shadow:none!important;font-size:clamp(11px,.85vw,14px)!important
 }
-/* Notification bell + compact profile pill styled like the supplied reference */
+/* Notification bell and profile pill: match the supplied reference */
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7) [data-testid="stButton"] button{
-    position:relative!important;width:44px!important;height:44px!important;min-height:44px!important;
+    position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    width:44px!important;min-width:44px!important;height:48px!important;min-height:48px!important;
     border:0!important;border-radius:50%!important;background:transparent!important;
-    color:#6f7fa6!important;font-family:Arial,sans-serif!important;font-size:0!important;padding:0!important;
+    color:transparent!important;font-size:0!important;padding:0!important;box-shadow:none!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7) [data-testid="stButton"] button::before{
-    content:"🔔";font-size:23px!important;line-height:1!important;color:#7180a6!important;filter:grayscale(1)!important;
+    content:"";display:block!important;width:29px!important;height:32px!important;flex:0 0 29px!important;
+    background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='34' viewBox='0 0 30 34' fill='none'%3E%3Cpath d='M15 4.5c-5.1 0-8.1 3.9-8.1 9.1v4.1c0 1.9-.7 3.3-2 4.7L3 24.5c-.8 1-.2 2.1 1 2.1h22c1.2 0 1.8-1.1 1-2.1l-1.9-2.1c-1.3-1.4-2-2.8-2-4.7v-4.1c0-5.2-3-9.1-8.1-9.1Z' stroke='%23717FA6' stroke-width='1.45' stroke-linejoin='round'/%3E%3Cpath d='M11.5 29c.6 1.8 1.8 2.7 3.5 2.7s2.9-.9 3.5-2.7' stroke='%23717FA6' stroke-width='1.45' stroke-linecap='round'/%3E%3Cpath d='M13 3.2c.2-1 1-1.7 2-1.7s1.8.7 2 1.7' stroke='%23717FA6' stroke-width='1.45' stroke-linecap='round'/%3E%3C/svg%3E")!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7) [data-testid="stButton"] button::after{
-    content:"4";position:absolute;right:-1px;top:-3px;width:19px;height:19px;border-radius:50%;
+    content:"4";position:absolute;right:0;top:0;width:19px;height:19px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
     font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button{
-    position:relative!important;display:flex!important;align-items:center!important;justify-content:space-evenly!important;
-    width:104px!important;min-width:104px!important;height:48px!important;min-height:48px!important;
-    padding:0 8px!important;border:1px solid #e3e7ef!important;border-radius:28px!important;
-    background:#fff!important;color:#8b9abc!important;font-size:21px!important;gap:9px!important;
+    position:relative!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
+    width:108px!important;min-width:108px!important;height:53px!important;min-height:53px!important;
+    padding:0 10px!important;border:1px solid #e2e6ef!important;border-radius:29px!important;
+    background:#fff!important;color:#8b9abc!important;font-size:21px!important;gap:8px!important;
+    box-shadow:none!important;white-space:nowrap!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::after{
-    content:"2";position:absolute;right:17px;top:-4px;width:19px;height:19px;border-radius:50%;
+    content:"2";position:absolute;right:-1px;top:0;width:19px;height:19px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
     font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button:hover{
-    border-color:#e3e7ef!important;background:#fff!important;color:#7180a6!important;
+    border-color:#e2e6ef!important;background:#fff!important;color:#7180a6!important;
 }.stApp .st-key-candidate_top_nav [data-testid="stButton"] button:hover{
     background:#f3f6ff!important;border-color:#dce5ff!important;color:#2458ed!important
 }
