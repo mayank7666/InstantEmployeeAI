@@ -319,6 +319,14 @@ img, svg, video, iframe {
     .candidate-auth-feature { min-height: 0 !important; }
     [data-testid="stMetric"] { padding: 12px !important; }
 }
+
+/* Blueprint-aligned job posting workspace */
+.job-blueprint-hero{padding:30px 32px;border:1px solid #d8e5f8;border-radius:22px;background:linear-gradient(115deg,#fff,#edf4ff);margin:6px 0 22px}
+[data-testid="stForm"]{background:#fff!important;border:1px solid #dce6f5!important;border-radius:17px!important;box-shadow:0 7px 22px #203d7008!important;padding:22px!important}
+[data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-testid="stNumberInput"] input,[data-baseweb="select"]>div{border-radius:10px!important;border-color:#cbd9ed!important}
+[data-testid="stButton"] button,[data-testid="stFormSubmitButton"] button{border-radius:11px!important;font-weight:700!important}
+[data-testid="stMetric"]{background:#fff!important;border:1px solid #dce6f5!important;border-radius:15px!important;padding:16px!important}
+
 </style>
 """, unsafe_allow_html=True)
 
