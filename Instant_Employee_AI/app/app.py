@@ -686,8 +686,6 @@ if view == "home":
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
     # Recommended jobs carousel-style section, followed by real employer cards.
-    if not jobs.empty and title_col if False else False:
-        pass
     st.markdown("""
     <div class="market-section-heading">
       <h3>Recommended jobs for you</h3>
