@@ -417,6 +417,14 @@ img, svg, video, iframe {
     [data-testid="stMetric"] { padding: 12px !important; }
 }
 
+
+/* Compact public job cards: show more opportunities above the fold */
+.jobcard{padding:14px 18px!important;margin:8px 0 6px!important;border-radius:13px!important;box-shadow:0 3px 12px #203d7007!important}
+.jobcard h3{font-size:19px!important;line-height:1.25!important;margin:4px 0 7px!important}
+.jobcard p{font-size:13px!important;line-height:1.45!important;margin:5px 0!important}
+.jobcard .kicker{font-size:10px!important;letter-spacing:1.25px!important}
+.jobcard [style*="border-radius:20px"]{padding:4px 9px!important;font-size:11px!important}
+
 /* Final screenshot polish: keep primary button text readable over blue fills */
 .stApp [data-testid="stButton"] button[kind="primary"],
 .stApp [data-testid="stFormSubmitButton"] button[kind="primary"],
