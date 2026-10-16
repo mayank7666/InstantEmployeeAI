@@ -1535,15 +1535,15 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 
 /* Keep notification and candidate profile physically adjacent in one actions group */
 .stApp .st-key-candidate_nav_actions{
-    width:220px!important;min-width:220px!important;max-width:220px!important;
+    width:200px!important;min-width:200px!important;max-width:200px!important;
     margin:0!important;padding:0!important;background:transparent!important;border:0!important;
 }
 .stApp .st-key-candidate_nav_actions [data-testid="stHorizontalBlock"]{
     display:flex!important;flex-flow:row nowrap!important;align-items:center!important;
-    justify-content:flex-end!important;gap:4px!important;width:100%!important;margin:0!important;
+    justify-content:flex-start!important;gap:4px!important;width:200px!important;min-width:200px!important;max-width:200px!important;margin:0!important;
 }
 .stApp .st-key-candidate_nav_actions [data-testid="column"]{min-width:0!important;flex-shrink:0!important;padding:0!important}
-.stApp .st-key-candidate_nav_actions [data-testid="column"]:nth-child(1){flex:0 0 38px!important;width:38px!important;max-width:38px!important}
+.stApp .st-key-candidate_nav_actions [data-testid="column"]:nth-child(1){flex:0 0 42px!important;width:42px!important;max-width:42px!important}
 .stApp .st-key-candidate_nav_actions [data-testid="column"]:nth-child(2){flex:0 0 150px!important;width:150px!important;max-width:150px!important}
 .stApp .st-key-candidate_nav_actions [class*="st-key-top_nav_alerts"] button,
 .stApp .st-key-candidate_nav_actions [class*="st-key-top_nav_alerts"] button:hover,
