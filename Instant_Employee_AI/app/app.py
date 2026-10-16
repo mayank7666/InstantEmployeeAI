@@ -494,11 +494,14 @@ img, svg, video, iframe {
     display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
     font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
 }
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button{
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button,
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button:hover,
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button:focus,
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button:active{
     position:relative!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
     width:160px!important;min-width:160px!important;height:53px!important;min-height:53px!important;
-    padding:0 10px!important;border:1px solid #e2e6ef!important;border-radius:29px!important;
-    background-color:#fff!important;
+    padding:0 10px!important;border:1px solid #d8e2ff!important;border-radius:29px!important;
+    background-color:#f2f6ff!important;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='32' height='32' fill='%23e9d6c7'/%3E%3Cpath d='M1 32c1-8 6-12 15-12s14 4 15 12' fill='%234a6a8d'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23f1c9ad'/%3E%3Cpath d='M9 12c0-7 3-10 8-9 5 1 7 5 6 10l-2-4c-4 1-7-1-9-3l-3 6Z' fill='%234a342e'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23e2e6ef'/%3E%3C/svg%3E")!important;
     background-repeat:no-repeat!important;background-position:right 10px center!important;background-size:32px 32px!important;
     color:#8b9abc!important;font-size:21px!important;gap:8px!important;
