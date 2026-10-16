@@ -418,12 +418,27 @@ img, svg, video, iframe {
 }
 
 
-/* Compact public job cards: show more opportunities above the fold */
-.jobcard{padding:14px 18px!important;margin:8px 0 6px!important;border-radius:13px!important;box-shadow:0 3px 12px #203d7007!important}
-.jobcard h3{font-size:19px!important;line-height:1.25!important;margin:4px 0 7px!important}
-.jobcard p{font-size:13px!important;line-height:1.45!important;margin:5px 0!important}
-.jobcard .kicker{font-size:10px!important;letter-spacing:1.25px!important}
-.jobcard [style*="border-radius:20px"]{padding:4px 9px!important;font-size:11px!important}
+/* Compact public job cards: strong height reduction so more jobs fit per screen */
+.stApp .jobcard{
+    padding:10px 14px!important;
+    margin:5px 0 4px!important;
+    border-radius:12px!important;
+    box-shadow:0 2px 8px #203d7006!important;
+}
+.stApp .jobcard h3{
+    font-size:17px!important;
+    line-height:1.2!important;
+    margin:2px 0 3px!important;
+}
+.stApp .jobcard p{
+    font-size:12px!important;
+    line-height:1.3!important;
+    margin:3px 0!important;
+}
+.stApp .jobcard .kicker{font-size:9px!important;letter-spacing:1px!important}
+.stApp .jobcard span[style*="border-radius:20px"]{padding:3px 8px!important;font-size:10px!important}
+.stApp .jobcard b{font-weight:700!important}
+
 
 /* Final screenshot polish: keep primary button text readable over blue fills */
 .stApp [data-testid="stButton"] button[kind="primary"],
