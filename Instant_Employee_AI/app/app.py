@@ -417,6 +417,34 @@ img, svg, video, iframe {
     [data-testid="stMetric"] { padding: 12px !important; }
 }
 
+/* Final screenshot polish: keep primary button text readable over blue fills */
+.stApp [data-testid="stButton"] button[kind="primary"],
+.stApp [data-testid="stFormSubmitButton"] button[kind="primary"],
+.stApp button[kind="primary"]{
+    background:#1764ff!important;
+    background-color:#1764ff!important;
+    border:1px solid #1764ff!important;
+    color:#ffffff!important;
+    -webkit-text-fill-color:#ffffff!important;
+    font-weight:750!important;
+    opacity:1!important;
+}
+.stApp [data-testid="stButton"] button[kind="primary"] *,
+.stApp [data-testid="stFormSubmitButton"] button[kind="primary"] *,
+.stApp button[kind="primary"] *{
+    color:#ffffff!important;
+    -webkit-text-fill-color:#ffffff!important;
+    opacity:1!important;
+}
+.stApp [data-testid="stButton"] button[kind="primary"]:hover{
+    background:#104fd0!important;
+    border-color:#104fd0!important;
+    color:#ffffff!important;
+}
+.landing-hero{box-shadow:0 12px 30px #203d700b}
+.role-card{display:flex;flex-direction:column;min-height:230px}
+.role-card p{min-height:62px}
+
 /* Blueprint-inspired public landing page */
 .landing-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 2px 18px;border-bottom:1px solid #dce6f5;margin-bottom:20px}
 .landing-brand{font-size:22px;font-weight:900;letter-spacing:-.6px;color:#14294b}
