@@ -446,9 +446,13 @@ img, svg, video, iframe {
     flex:1 1 0!important;width:0!important;min-width:0!important;max-width:25%!important;
 }
 .stApp .st-key-company_showcase_grid .company-job-card{
-    width:100%;box-sizing:border-box;min-height:168px!important;height:168px!important;
-    padding:16px 8px 12px!important;gap:8px!important;
+    width:100%;box-sizing:border-box;min-height:190px!important;height:190px!important;
+    padding:17px 8px 14px!important;gap:8px!important;overflow:hidden;
 }
+.stApp .st-key-company_showcase_grid .company-logo-wrap{height:58px!important;flex-shrink:0}
+.stApp .st-key-company_showcase_grid .company-job-name{display:block;line-height:1.35!important;min-height:20px;overflow:visible;text-overflow:clip}
+.stApp .st-key-company_showcase_grid .company-job-count{line-height:1.35!important;white-space:nowrap}
+.stApp .st-key-company_showcase_grid .company-demo-note{line-height:1.3!important;min-height:12px}
 .stApp .company-logo-wrap{
     width:64px;height:58px;display:flex;align-items:center;justify-content:center;
     flex:0 0 auto;background:#fff;border:1px solid #e1e8f3;border-radius:14px;
@@ -465,7 +469,7 @@ img, svg, video, iframe {
 @media(max-width:700px){
     .stApp .st-key-company_showcase_grid [data-testid="stHorizontalBlock"]{flex-wrap:wrap!important;gap:10px!important}
     .stApp .st-key-company_showcase_grid [data-testid="column"]{flex:1 1 calc(50% - 10px)!important;width:auto!important;max-width:calc(50% - 5px)!important}
-    .stApp .st-key-company_showcase_grid .company-job-card{height:156px!important;min-height:156px!important}
+    .stApp .st-key-company_showcase_grid .company-job-card{height:176px!important;min-height:176px!important}
 }
 
 /* Attractive employer showcase with polished cards and hover states */
@@ -788,12 +792,14 @@ if view == "home":
             and str(value).strip().lower() not in {"company", "nan", "none"}
             and "@" not in str(value)
         })
-    st.markdown("""
-    <div class="market-section-heading">
-      <h3>Explore jobs by top companies</h3>
-      <span>View all ↓</span>
-    </div>
-    """, unsafe_allow_html=True)
+    company_heading_col, company_view_all_col = st.columns([5, 1], gap="small")
+    with company_heading_col:
+        st.markdown('<div class="market-section-heading"><h3>Explore jobs by top companies</h3></div>', unsafe_allow_html=True)
+    with company_view_all_col:
+        if st.button("View all ↓", key="company_showcase_view_all", use_container_width=True):
+            st.session_state["home_company_filter"] = "All companies"
+            st.session_state["home_show_all_jobs"] = True
+            st.rerun()
     if employer_names:
         showcase = [{"name": name, "count": int((jobs[company_col_name].astype(str).str.strip() == name).sum()), "rating": "", "reviews": "", "demo": False} for name in employer_names[:4]]
     else:
@@ -833,12 +839,6 @@ if view == "home":
                     st.session_state["home_company_filter"] = company_name if not company.get("demo") else "All companies"
                     st.session_state["home_show_all_jobs"] = True
                     st.rerun()
-    if st.button("View all companies & jobs  →", key="view_all_companies_jobs"):
-        st.session_state["home_company_filter"] = "All companies"
-        st.session_state["home_show_all_jobs"] = True
-        st.rerun()
-
-
     heading_col, view_all_col = st.columns([5, 1])
     with heading_col:
         st.markdown('<div class="market-section-heading"><h3>Recommended jobs for you</h3></div>', unsafe_allow_html=True)
