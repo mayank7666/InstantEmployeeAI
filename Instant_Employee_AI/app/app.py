@@ -467,7 +467,7 @@ img, svg, video, iframe {
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(5){flex:1.95 1 0!important;max-width:285px!important}
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){flex:0.12 0 10px!important;max-width:10px!important}
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){flex:0 0 44px!important;max-width:44px!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8){flex:0 0 110px!important;max-width:110px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8){flex:0 0 160px!important;max-width:160px!important}
 .candidate-nav-brand{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#2458ed;font-size:22px;font-weight:850;letter-spacing:-.7px;min-height:42px}
 .candidate-nav-mark{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border-radius:50%;background:#2f5df5;color:#fff;font-size:19px;flex-shrink:0}
 .candidate-nav-blue{color:#2458ed}.candidate-nav-orange{color:#f05a28;margin-left:3px}
@@ -496,11 +496,11 @@ img, svg, video, iframe {
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button{
     position:relative!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
-    width:108px!important;min-width:108px!important;height:53px!important;min-height:53px!important;
+    width:160px!important;min-width:160px!important;height:53px!important;min-height:53px!important;
     padding:0 10px!important;border:1px solid #e2e6ef!important;border-radius:29px!important;
     background-color:#fff!important;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='32' height='32' fill='%23e9d6c7'/%3E%3Cpath d='M1 32c1-8 6-12 15-12s14 4 15 12' fill='%234a6a8d'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23f1c9ad'/%3E%3Cpath d='M9 12c0-7 3-10 8-9 5 1 7 5 6 10l-2-4c-4 1-7-1-9-3l-3 6Z' fill='%234a342e'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23e2e6ef'/%3E%3C/svg%3E")!important;
-    background-repeat:no-repeat!important;background-position:right 8px center!important;background-size:32px 32px!important;
+    background-repeat:no-repeat!important;background-position:right 10px center!important;background-size:32px 32px!important;
     color:#8b9abc!important;font-size:21px!important;gap:8px!important;
     box-shadow:none!important;white-space:nowrap!important;overflow:visible!important;
 }
@@ -509,18 +509,14 @@ img, svg, video, iframe {
     display:inline-flex!important;align-items:center!important;justify-content:center!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::before{
-    content:"";position:absolute;left:12px;top:17px;width:18px;height:18px;
+    content:"";position:absolute;left:58px;top:17px;width:18px;height:18px;
     background-repeat:no-repeat;background-position:center;background-size:contain;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M3 5h14M3 10h14M3 15h14' stroke='%238b9abc' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button{
     font-size:0!important;
 }
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::after{
-    content:"2";position:absolute;right:-1px;top:0;width:19px;height:19px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
-    font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
-}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::after{content:none!important;display:none!important;}
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::after{z-index:3;}
 .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button .profile-avatar-circle{
     width:30px;height:30px;border-radius:50%;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;
