@@ -767,10 +767,10 @@ if view == "home":
     else:
         # UI examples only: current backend jobs expose company email, not a public company display name.
         showcase = [
-            {"name": "TaskUs", "count": 8, "rating": "2.9", "reviews": "2.9K+ reviews", "demo": True},
-            {"name": "Narayana Health", "count": 6, "rating": "4.0", "reviews": "2.3K+ reviews", "demo": True},
-            {"name": "Morgan Stanley", "count": 5, "rating": "3.5", "reviews": "2.2K+ reviews", "demo": True},
-            {"name": "GE Vernova", "count": 4, "rating": "4.1", "reviews": "1.8K+ reviews", "demo": True},
+            {"name": "Tata Consultancy Services", "count": 8, "rating": "", "reviews": "", "demo": True},
+            {"name": "Infosys", "count": 6, "rating": "", "reviews": "", "demo": True},
+            {"name": "Wipro", "count": 5, "rating": "", "reviews": "", "demo": True},
+            {"name": "HCLTech", "count": 4, "rating": "", "reviews": "", "demo": True},
         ]
     company_cards = st.columns(4, gap="small")
     for company_index, company in enumerate(showcase):
