@@ -775,7 +775,7 @@ if view == "home":
         with nav_search:
             st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed")
         with nav_alerts:
-            if st.button("♧", key="top_nav_alerts", help="View applied jobs"):
+            if st.button("🔔", key="top_nav_alerts", help="View applied jobs"):
                 st.session_state.view = "applied_jobs" if st.session_state.get("candidate_logged_in") else "candidate_auth"
                 st.rerun()
         with nav_profile:
