@@ -300,6 +300,20 @@ img, svg, video, iframe {
     .candidate-auth-feature { min-height: 0 !important; }
     [data-testid="stMetric"] { padding: 12px !important; }
 }
+
+/* Blueprint alignment: company dashboard cards, metrics and actions */
+.company-blueprint-kicker{font-size:11px;letter-spacing:1.7px;text-transform:uppercase;font-weight:850;color:#2855e8}
+[data-testid="stMetric"]{background:#fff!important;border:1px solid #dce6f5!important;border-radius:16px!important;padding:18px 20px!important;box-shadow:0 5px 18px #203d7008!important;min-height:112px}
+[data-testid="stMetricLabel"]{color:#61728d!important;font-size:13px!important;font-weight:650!important}
+[data-testid="stMetricValue"]{color:#18365f!important;font-size:34px!important;font-weight:850!important;letter-spacing:-1px!important}
+.jobcard{background:#fff;border:1px solid #dce6f5;border-radius:16px;padding:20px 22px;margin:10px 0 8px;box-shadow:0 5px 18px #203d7008}
+.jobcard h4{color:#172e55!important;font-size:19px!important;margin:0 0 9px!important}
+.jobcard p{font-size:13px;color:#526987!important;margin:5px 0}
+.pill{display:inline-block;border:1px solid #b8efd4;border-radius:30px;padding:4px 10px;background:#dff9eb;color:#087b50;font-size:11px;font-weight:800;margin-left:5px}
+[data-testid="stExpander"]{border:1px solid #dce6f5!important;border-radius:12px!important;background:#fff!important}
+[data-testid="stButton"] button,[data-testid="stPageLink"] a{border-radius:11px!important}
+[data-testid="stPageLink"] a{border:1px solid #dce6f5!important;background:#f8faff!important}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -433,7 +447,7 @@ applications = applications if isinstance(applications, list) else []
 legacy_jobs = read_csv(JOBS_FILE)
 shortlist = read_csv(SHORTLIST_FILE)
 
-st.markdown(f"<div class='hero'><div class='kicker'>Company workspace · Signed in as {safe(me.get('email'))}</div><h1>Your hiring <span>overview</span></h1><p>Manage your own vacancies, monitor candidate applications, and move from job posting to shortlist in one workspace.</p></div>", unsafe_allow_html=True)
+st.markdown(f"<div class='hero'><div class='kicker'>✦ COMPANY WORKSPACE · SIGNED IN AS {safe(me.get('email')).upper()}</div><h1>Your hiring <span>overview</span></h1><p>Manage your own vacancies, monitor candidate applications, and move from job posting to shortlist in one workspace.</p><div style='display:flex;gap:9px;flex-wrap:wrap;margin-top:16px'><span style='padding:7px 11px;border:1px solid #d4e2fa;border-radius:30px;background:#ffffffb8;color:#31527e;font-size:12px;font-weight:700'>✓ Secure company workspace</span><span style='padding:7px 11px;border:1px solid #d4e2fa;border-radius:30px;background:#ffffffb8;color:#31527e;font-size:12px;font-weight:700'>✦ AI-assisted matching</span></div></div>", unsafe_allow_html=True)
 
 if jobs_error:
     st.warning("Database jobs could not be loaded: " + jobs_error)
