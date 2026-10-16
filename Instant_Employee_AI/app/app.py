@@ -420,6 +420,12 @@ img, svg, video, iframe {
 
 
 
+/* Company discovery cards matching the compact marketplace reference */
+.company-job-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;min-height:150px;padding:16px 12px;background:#fff;border:1px solid #dce5f2;border-radius:18px;box-shadow:0 4px 16px #1b315008}
+.company-logo-placeholder{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:1px solid #e1e8f3;border-radius:13px;background:#f8faff;color:#2454f5;font-size:22px;font-weight:900}
+.company-job-name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px;font-weight:750;color:#17233b}
+.company-job-count{font-size:12px;color:#71809a}
+
 /* Three-column job marketplace cards, compact by design */
 .stApp .job-tile{padding:14px!important;margin:0 0 8px!important;border-radius:15px!important;background:#fff!important;border:1px solid #dce6f5!important;min-height:285px!important;display:flex;flex-direction:column}
 .stApp .job-tile .job-tile-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
@@ -664,6 +670,36 @@ if view == "home":
 
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
+    # Company discovery strip: browse employers and filter their open roles.
+    company_col_name = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
+    if company_col_name and not jobs.empty:
+        company_names = sorted({
+            str(value).strip() for value in jobs[company_col_name].tolist()
+            if str(value).strip() and str(value).strip().lower() not in {"company", "nan", "none"}
+        })
+        st.markdown("""
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px">
+          <div style="font-size:22px;font-weight:750;color:#17233b">Explore jobs by top companies</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if company_names:
+            company_cards = st.columns(3, gap="medium")
+            for company_index, company_name in enumerate(company_names[:3]):
+                company_count = int((jobs[company_col_name].astype(str).str.strip() == company_name).sum())
+                with company_cards[company_index]:
+                    st.markdown(f"""
+                    <div class="company-job-card">
+                      <div class="company-logo-placeholder">✦</div>
+                      <div class="company-job-name">{html.escape(company_name)}</div>
+                      <div class="company-job-count">{company_count} open job{"s" if company_count != 1 else ""}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
+                        st.session_state["home_company_filter"] = company_name
+                        st.rerun()
+            if st.button("View all companies & jobs  →", key="view_all_companies_jobs"):
+                st.session_state["home_company_filter"] = "All companies"
+                st.rerun()
     # Job search controls
     st.markdown("### Find your next role")
     search_col, dept_col, mode_col = st.columns([2, 1, 1])
@@ -689,6 +725,15 @@ if view == "home":
         selected_mode = st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
 
     filtered_jobs = jobs.copy()
+    selected_company = st.session_state.get("home_company_filter", "All companies")
+    if selected_company != "All companies" and company_col_name and not filtered_jobs.empty:
+        filtered_jobs = filtered_jobs[
+            filtered_jobs[company_col_name].astype(str).str.strip() == str(selected_company).strip()
+        ]
+        st.caption(f"Showing jobs from {selected_company}.")
+        if st.button("← Show all jobs", key="clear_company_filter"):
+            st.session_state["home_company_filter"] = "All companies"
+            st.rerun()
     if search_text.strip() and not filtered_jobs.empty:
         searchable_cols = [c for c in [title_col, desc_col, skills_col, dept_col_name] if c]
         if searchable_cols:
