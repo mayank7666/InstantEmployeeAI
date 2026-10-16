@@ -436,15 +436,32 @@ img, svg, video, iframe {
 .company-job-count{font-size:12px;color:#71809a}
 
 
-/* Four-company showcase cards based on the provided UI reference */
-.stApp .company-job-card{min-height:160px!important;padding:14px 8px!important;gap:7px!important;border-radius:17px!important}
-.stApp .company-logo-placeholder{width:46px!important;height:46px!important;border-radius:12px!important;font-size:17px!important}
-.stApp .company-job-name{font-size:14px!important;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stApp .company-job-rating{font-size:11px;color:#697995;white-space:nowrap}
-.stApp .company-job-rating:first-letter{color:#f5a623}
-.stApp .company-job-rating span{padding:0 4px;color:#c4ccda}
-.stApp .company-demo-note{font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:#8b98ad}
-@media(max-width:800px){.stApp .company-job-card{min-height:140px!important;padding:10px 5px!important}.stApp .company-job-name{font-size:12px!important}}
+/* Attractive employer showcase with polished cards and hover states */
+.market-section-heading{margin:24px 0 14px!important}
+.market-section-heading h3{font-size:23px!important;letter-spacing:-.45px}
+.stApp .company-job-card{
+ position:relative;overflow:hidden;min-height:184px!important;padding:17px 10px 14px!important;
+ gap:8px!important;border-radius:20px!important;border:1px solid #dce6f7!important;
+ background:linear-gradient(155deg,#ffffff 0%,#f8fbff 68%,#edf4ff 100%)!important;
+ box-shadow:0 7px 22px rgba(31,70,140,.07)!important;
+ transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease!important
+}
+.stApp .company-job-card:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#2563eb,#60a5fa,#a78bfa)}
+.stApp .company-logo-placeholder{
+ width:54px!important;height:54px!important;border-radius:16px!important;
+ border:1px solid #dbe7ff!important;background:linear-gradient(145deg,#fff,#eaf1ff)!important;
+ color:#255be8!important;font-size:21px!important;font-weight:850!important;
+ box-shadow:0 5px 12px rgba(37,99,235,.08)!important
+}
+.stApp .company-job-name{font-size:15px!important;font-weight:800!important;letter-spacing:-.2px;color:#172b4d!important}
+.stApp .company-job-rating{font-size:11px!important;font-weight:650;color:#64748b!important}
+.stApp .company-job-rating:first-letter{color:#f59e0b}
+.stApp .company-job-rating span{padding:0 5px;color:#c3cedd}
+.stApp .company-job-count{font-size:11px!important;font-weight:650;color:#557095!important;background:#edf4ff;border:1px solid #dce8ff;border-radius:20px;padding:5px 9px}
+.stApp .company-demo-note{font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:#8b98ad}
+.stApp [data-testid="stButton"] button:has(+ .company-job-card){border-radius:11px!important}
+.stApp .company-job-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(31,70,140,.12)!important;border-color:#b9d0ff!important}
+@media(max-width:800px){.stApp .company-job-card{min-height:160px!important;padding:13px 6px!important;border-radius:15px!important}.stApp .company-job-name{font-size:12px!important}.stApp .company-logo-placeholder{width:43px!important;height:43px!important}}
 
 /* Company discovery cards matching the compact marketplace reference */
 .company-job-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;min-height:150px;padding:16px 12px;background:#fff;border:1px solid #dce5f2;border-radius:18px;box-shadow:0 4px 16px #1b315008}
