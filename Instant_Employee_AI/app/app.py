@@ -1606,6 +1606,36 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     border-radius:50%!important;background-repeat:no-repeat!important;background-position:center!important;background-size:32px 32px!important;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='32' height='32' fill='%23e9d6c7'/%3E%3Cpath d='M1 32c1-8 6-12 15-12s14 4 15 12' fill='%234a6a8d'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23f1c9ad'/%3E%3Cpath d='M9 12c0-7 3-10 8-9 5 1 7 5 6 10l-2-4c-4 1-7-1-9-3l-3 6Z' fill='%234a342e'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23e2e6ef'/%3E%3C/svg%3E")!important;
 }
+
+/* Notification must sit outside any visible box: target the button by its Streamlit key */
+.stApp .st-key-top_nav_alerts,
+.stApp .st-key-top_nav_alerts [data-testid="stButton"],
+.stApp .st-key-top_nav_alerts [data-testid="stButton"] > div{
+    width:42px!important;min-width:42px!important;max-width:42px!important;
+    margin:0!important;padding:0!important;border:0!important;background:transparent!important;
+    box-shadow:none!important;overflow:visible!important;
+}
+.stApp .st-key-top_nav_alerts [data-testid="stButton"] button,
+.stApp .st-key-top_nav_alerts [data-testid="stButton"] button:hover,
+.stApp .st-key-top_nav_alerts [data-testid="stButton"] button:focus,
+.stApp .st-key-top_nav_alerts [data-testid="stButton"] button:active{
+    position:relative!important;display:block!important;width:42px!important;min-width:42px!important;max-width:42px!important;
+    height:48px!important;min-height:48px!important;padding:0!important;margin:0!important;
+    border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;
+    box-shadow:none!important;color:transparent!important;-webkit-text-fill-color:transparent!important;
+    font-size:0!important;outline:none!important;
+}
+.stApp .st-key-top_nav_alerts [data-testid="stButton"] button::before{
+    content:""!important;position:absolute!important;left:6px!important;top:7px!important;width:30px!important;height:34px!important;
+    background:transparent!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='34' viewBox='0 0 30 34' fill='none'%3E%3Cpath d='M15 4.5c-5.1 0-8.1 3.9-8.1 9.1v4.1c0 1.9-.7 3.3-2 4.7L3 24.5c-.8 1-.2 2.1 1 2.1h22c1.2 0 1.8-1.1 1-2.1l-1.9-2.1c-1.3-1.4-2-2.8-2-4.7v-4.1c0-5.2-3-9.1-8.1-9.1Z' stroke='%23717FA6' stroke-width='1.45' stroke-linejoin='round'/%3E%3Cpath d='M11.5 29c.6 1.8 1.8 2.7 3.5 2.7s2.9-.9 3.5-2.7' stroke='%23717FA6' stroke-width='1.45' stroke-linecap='round'/%3E%3Cpath d='M13 3.2c.2-1 1-1.7 2-1.7s1.8.7 2 1.7' stroke='%23717FA6' stroke-width='1.45' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.stApp .st-key-top_nav_alerts [data-testid="stButton"] button::after{
+    content:"4"!important;position:absolute!important;right:-1px!important;top:0!important;width:19px!important;height:19px!important;
+    border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    background:#f04452!important;color:#fff!important;-webkit-text-fill-color:#fff!important;
+    font:700 11px/1 Arial,sans-serif!important;border:2px solid #fff!important;box-sizing:border-box!important;
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
