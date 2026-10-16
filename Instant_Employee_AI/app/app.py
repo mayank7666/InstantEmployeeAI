@@ -419,6 +419,20 @@ img, svg, video, iframe {
 
 
 
+
+/* Three-column job marketplace cards, compact by design */
+.stApp .job-tile{padding:14px!important;margin:0 0 8px!important;border-radius:15px!important;background:#fff!important;border:1px solid #dce6f5!important;min-height:285px!important;display:flex;flex-direction:column}
+.stApp .job-tile .job-tile-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.stApp .job-tile .job-tile-logo{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid #e1e9f6;border-radius:10px;background:#f7faff;color:#2454f5;font-size:17px;font-weight:900}
+.stApp .job-tile .job-mode-pill{font-size:10px;padding:4px 8px}
+.stApp .job-tile .job-tile-department{font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:800;color:#087cc0;margin-bottom:5px}
+.stApp .job-tile .job-tile-title{font-size:17px!important;line-height:1.25!important;color:#17233b!important;margin:0 0 8px!important;min-height:42px}
+.stApp .job-tile .job-tile-description{font-size:12px!important;line-height:1.45!important;color:#52637e!important;margin:0 0 12px!important;min-height:52px}
+.stApp .job-tile .job-tile-skills{font-size:11px;line-height:1.4;color:#52637e;border-top:1px solid #edf1f7;padding-top:9px;min-height:55px}
+.stApp .job-tile .job-tile-skills b{color:#344a69}
+.stApp .job-tile .job-tile-budget{margin-top:auto;padding-top:9px;font-size:12px;font-weight:750;color:#263f65}
+@media(max-width:850px){.stApp .job-tile{min-height:0!important}.stApp .job-tile .job-tile-title,.stApp .job-tile .job-tile-description,.stApp .job-tile .job-tile-skills{min-height:0!important}}
+
 /* Marketplace-style compact job tiles */
 .stApp .jobcard-compact{padding:12px 15px!important;margin:6px 0 4px!important;border-radius:12px!important;min-height:0!important}
 .stApp .jobcard-compact .jobcard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -738,26 +752,41 @@ if view == "home":
             "or check back after new jobs are posted."
         )
     else:
-        for row_index, job in filtered_jobs.iterrows():
-            title = str(job.get(title_col, "Open role")) if title_col else "Open role"
-            department = str(job.get(dept_col_name, "Technology")) if dept_col_name else "Technology"
-            description = str(job.get(desc_col, "")) if desc_col else ""
-            skills = str(job.get(skills_col, "Skills listed in job description")) if skills_col else "Skills listed in job description"
-            mode = str(job.get(work_mode_col, "Not specified")) if work_mode_col else "Not specified"
-            low_col = next((c for c in jobs.columns if str(c).strip().lower() in {"minimum budget", "min budget", "minimum_budget"}), None)
-            high_col = next((c for c in jobs.columns if str(c).strip().lower() in {"maximum budget", "max budget", "maximum_budget"}), None)
-            low = str(job.get(low_col, "")) if low_col else ""
-            high = str(job.get(high_col, "")) if high_col else ""
-            budget = f"₹{low or '—'} – ₹{high or '—'}" if low or high else "Budget discussed during hiring"
-            st.markdown(f"""<div class='jobcard jobcard-compact'><div class='jobcard-top'><div><div class='kicker'>{html.escape(department)}</div><h3 style='margin:5px 0 4px'>{html.escape(title)}</h3></div><span class='job-mode-pill'>{html.escape(mode)}</span></div><p class='job-description'>{html.escape(description[:150] + ('…' if len(description)>150 else '') or 'Open this role to view the complete job description.')}</p><div class='job-meta'><span><b>Skills:</b> {html.escape(skills[:110])}</span><span><b>Budget:</b> {html.escape(budget)}</span></div></div>""", unsafe_allow_html=True)
-            view_col, apply_col = st.columns([1, 1])
-            with view_col:
-                if st.button("View job details  →", key=f"view_job_{row_index}", use_container_width=True):
+        # Marketplace grid: compact job tiles, similar to the small cards in the reference.
+        job_grid = st.columns(3, gap="medium")
+        for display_index, (row_index, job) in enumerate(filtered_jobs.iterrows()):
+            card_col = job_grid[display_index % 3]
+            with card_col:
+                title = str(job.get(title_col, "Open role")) if title_col else "Open role"
+                department = str(job.get(dept_col_name, "Technology")) if dept_col_name else "Technology"
+                description = str(job.get(desc_col, "")) if desc_col else ""
+                skills = str(job.get(skills_col, "Skills listed in job description")) if skills_col else "Skills listed in job description"
+                mode = str(job.get(work_mode_col, "Not specified")) if work_mode_col else "Not specified"
+                low_col = next((c for c in jobs.columns if str(c).strip().lower() in {"minimum budget", "min budget", "minimum_budget"}), None)
+                high_col = next((c for c in jobs.columns if str(c).strip().lower() in {"maximum budget", "max budget", "maximum_budget"}), None)
+                low = str(job.get(low_col, "")) if low_col else ""
+                high = str(job.get(high_col, "")) if high_col else ""
+                budget = f"₹{low or '—'} – ₹{high or '—'}" if low or high else "Budget discussed"
+                short_description = description[:105] + ("…" if len(description) > 105 else "")
+                short_skills = skills[:75] + ("…" if len(skills) > 75 else "")
+                st.markdown(f"""
+                <div class="jobcard job-tile">
+                  <div class="job-tile-head">
+                    <div class="job-tile-logo">✦</div>
+                    <span class="job-mode-pill">{html.escape(mode)}</span>
+                  </div>
+                  <div class="job-tile-department">{html.escape(department)}</div>
+                  <h3 class="job-tile-title">{html.escape(title)}</h3>
+                  <p class="job-tile-description">{html.escape(short_description or "Open this role to view the complete job description.")}</p>
+                  <div class="job-tile-skills"><b>Skills</b><br>{html.escape(short_skills)}</div>
+                  <div class="job-tile-budget">{html.escape(budget)}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("View details", key=f"view_job_{row_index}", use_container_width=True):
                     st.session_state.selected_job_index = row_index
                     st.session_state.view = "job_details"
                     st.rerun()
-            with apply_col:
-                if st.button("Apply now  →", key=f"apply_job_card_{row_index}", type="primary", use_container_width=True):
+                if st.button("Apply now", key=f"apply_job_card_{row_index}", type="primary", use_container_width=True):
                     st.session_state.apply_job_index = row_index
                     st.session_state.pop("application_submitted", None)
                     if st.session_state.get("candidate_logged_in"):
