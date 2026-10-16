@@ -418,6 +418,17 @@ img, svg, video, iframe {
 }
 
 
+
+/* Marketplace-style compact job tiles */
+.stApp .jobcard-compact{padding:12px 15px!important;margin:6px 0 4px!important;border-radius:12px!important;min-height:0!important}
+.stApp .jobcard-compact .jobcard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.stApp .jobcard-compact .kicker{font-size:9px!important;letter-spacing:1.1px!important;margin-bottom:2px}
+.stApp .jobcard-compact h3{font-size:17px!important;line-height:1.2!important;margin:3px 0!important}
+.stApp .jobcard-compact .job-description{font-size:12px!important;line-height:1.35!important;margin:5px 0 7px!important}
+.stApp .jobcard-compact .job-meta{display:flex;flex-wrap:wrap;gap:5px 18px;font-size:11px;line-height:1.35;color:#526987}
+.stApp .jobcard-compact .job-meta b{color:#344a69}
+.stApp .jobcard-compact .job-mode-pill{white-space:nowrap;border:1px solid #c9d9ff;border-radius:20px;padding:4px 9px;background:#e4edff;color:#2456a6;font-size:10px;font-weight:700}
+
 /* Compact public job cards: strong height reduction so more jobs fit per screen */
 .stApp .jobcard{
     padding:10px 14px!important;
@@ -738,7 +749,7 @@ if view == "home":
             low = str(job.get(low_col, "")) if low_col else ""
             high = str(job.get(high_col, "")) if high_col else ""
             budget = f"₹{low or '—'} – ₹{high or '—'}" if low or high else "Budget discussed during hiring"
-            st.markdown(f"""<div class='jobcard'><div style='display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap'><div><div class='kicker'>{html.escape(department)}</div><h3 style='margin:7px 0'>{html.escape(title)}</h3></div><span style='height:fit-content;border:1px solid #c9d9ff;border-radius:20px;padding:5px 10px;background:#e4edff;color:#2456a6;font-size:12px;font-weight:600'>{html.escape(mode)}</span></div><p>{html.escape(description[:240] + ('…' if len(description)>240 else '') or 'Open this role to view the complete job description.')}</p><p><b>Required skills:</b> {html.escape(skills[:180])}</p><p><b>Budget:</b> {html.escape(budget)}</p></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class='jobcard jobcard-compact'><div class='jobcard-top'><div><div class='kicker'>{html.escape(department)}</div><h3 style='margin:5px 0 4px'>{html.escape(title)}</h3></div><span class='job-mode-pill'>{html.escape(mode)}</span></div><p class='job-description'>{html.escape(description[:150] + ('…' if len(description)>150 else '') or 'Open this role to view the complete job description.')}</p><div class='job-meta'><span><b>Skills:</b> {html.escape(skills[:110])}</span><span><b>Budget:</b> {html.escape(budget)}</span></div></div>""", unsafe_allow_html=True)
             view_col, apply_col = st.columns([1, 1])
             with view_col:
                 if st.button("View job details  →", key=f"view_job_{row_index}", use_container_width=True):
