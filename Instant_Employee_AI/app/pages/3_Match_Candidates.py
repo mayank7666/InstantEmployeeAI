@@ -364,6 +364,14 @@ img, svg, video, iframe {
     .candidate-auth-feature { min-height: 0 !important; }
     [data-testid="stMetric"] { padding: 12px !important; }
 }
+
+/* Blueprint-aligned candidate matching workspace */
+[data-testid="stAppViewContainer"]{background:linear-gradient(135deg,#f8faff,#eef4ff)!important}
+.matching-hero{border-radius:22px!important;border-color:#d8e5f8!important;background:radial-gradient(circle at 92% 10%,#dbeaff 0,transparent 30%),linear-gradient(115deg,#fff,#edf4ff)!important}
+[data-testid="stMetric"]{background:#fff!important;border:1px solid #dce6f5!important;border-radius:15px!important;padding:16px!important;box-shadow:0 5px 16px #203d7008!important}
+[data-testid="stExpander"]{border:1px solid #dce6f5!important;border-radius:12px!important;background:#fff!important}
+[data-testid="stButton"] button{border-radius:10px!important;font-weight:700!important}
+
 </style>
     """,
     unsafe_allow_html=True,
