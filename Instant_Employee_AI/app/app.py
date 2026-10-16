@@ -846,7 +846,7 @@ with view_all_col:
         st.rerun()
 
 if st.session_state.get("home_show_all_jobs", False):
-    if not jobs.empty:
+        if not jobs.empty:
             recommended_source = jobs.head(3)
             recommended_cols = st.columns(3, gap="small")
             for rec_index, (_, rec_job) in enumerate(recommended_source.iterrows()):
