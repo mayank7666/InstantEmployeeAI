@@ -694,7 +694,7 @@ if view == "home":
             st.session_state["home_show_all_jobs"] = True
             st.rerun()
     if not jobs.empty:
-        recommended_source = jobs if st.session_state.get("home_show_all_jobs", False) else jobs.head(3)
+        recommended_source = jobs.head(3)
         recommended_cols = st.columns(3, gap="small")
         for rec_index, (_, rec_job) in enumerate(recommended_source.iterrows()):
             rec_title_col = next((col for col in jobs.columns if str(col).strip().lower() in {"job title", "title", "job_title"}), None)
