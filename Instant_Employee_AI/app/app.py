@@ -420,6 +420,10 @@ img, svg, video, iframe {
 
 
 
+/* Hide Streamlit's sidebar completely; use the public navigation instead. */
+[data-testid="stSidebar"],[data-testid="stSidebarCollapsedControl"]{display:none!important}
+[data-testid="stAppViewContainer"]{margin-left:0!important}
+
 /* Candidate portal footer inspired by the provided Naukri reference */
 .candidate-site-footer{
     margin-top:56px;padding:42px 0 24px;border-top:1px solid #e2e8f3;
@@ -729,32 +733,10 @@ def get_match_score(job_text, resume_text):
 jobs = load_jobs()
 if "view" not in st.session_state:
     st.session_state.view = "home"
+if st.query_params.get("view") == "employee":
+    st.session_state.view = "employee"
 
-with st.sidebar:
-    st.markdown("<div style='font-size:23px;font-weight:900;padding:8px 0'>✦ Instant Employee</div><div style='color:#aab8cf;font-size:12px'>AI Talent Platform</div>", unsafe_allow_html=True)
-    st.divider()
-    st.caption("CANDIDATE")
-    if st.button("⌂  Home", use_container_width=True):
-        st.session_state.view = "home"; st.rerun()
-    if st.session_state.get("candidate_logged_in"):
-        if st.button("▦  My Profile", use_container_width=True):
-            st.session_state.view = "candidate_dashboard"; st.rerun()
-        if st.button("✓  Applied Jobs", use_container_width=True):
-            st.session_state.view = "applied_jobs"; st.rerun()
-    else:
-        if st.button("👤  Candidate Login / Signup", use_container_width=True):
-            st.session_state.view = "candidate_auth"; st.rerun()
-    st.divider()
-    st.caption("COMPANY ACCESS")
-    if st.button("▣  Employee Login", use_container_width=True):
-        st.session_state.view = "employee"; st.rerun()
-    if st.session_state.get("candidate_logged_in"):
-        st.caption("Signed in: " + st.session_state.get("candidate_name", "Candidate"))
-        if st.button("Log out", use_container_width=True):
-            for key in ["candidate_logged_in","candidate_name","candidate_email","candidate_api_token","resume_text","resume_filename","match_results"]:
-                st.session_state.pop(key, None)
-            st.session_state.view = "home"; st.rerun()
-
+# Sidebar navigation removed: candidate navigation is now in the top bar and footer.
 view = st.session_state.view
 
 if view == "home":
@@ -950,7 +932,7 @@ if view == "home":
         <div class="candidate-footer-links">
           <a href="#about">About us</a>
           <a href="#careers">Careers</a>
-          <a href="#employer-home">Employer home</a>
+          <a href="?view=employee">Employee Login</a>
           <a href="#sitemap">Sitemap</a>
           <a href="#credits">Credits</a>
         </div>
