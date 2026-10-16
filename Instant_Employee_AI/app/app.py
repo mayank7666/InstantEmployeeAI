@@ -456,17 +456,18 @@ img, svg, video, iframe {
     box-shadow:0 2px 12px rgba(27,45,84,.035)!important;overflow:visible!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="stHorizontalBlock"]{
-    display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-start!important;gap:clamp(2px,.25vw,4px)!important;
-    width:100%!important;overflow:visible!important;
+    display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:center!important;gap:clamp(3px,.35vw,7px)!important;
+    width:100%!important;max-width:1415px!important;margin:0 auto!important;overflow:visible!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="column"]{min-width:0!important;flex-shrink:1!important;padding:0!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(1){flex:1.15 1 0!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(2){flex:.43 1 0!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(3){flex:.58 1 0!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(4){flex:.68 1 0!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(5){flex:.85 1 0!important;max-width:260px!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){flex:.20 1 0!important;max-width:44px!important}
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){flex:.32 1 0!important;max-width:64px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(1){flex:1.75 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(2){flex:.72 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(3){flex:.92 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(4){flex:1.02 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(5){flex:1.95 1 0!important;max-width:285px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){flex:1.65 1 0!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){flex:.34 1 0!important;max-width:46px!important}
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8){flex:.72 1 0!important;max-width:110px!important}
 .candidate-nav-brand{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#2458ed;font-size:22px;font-weight:850;letter-spacing:-.7px;min-height:42px}
 .candidate-nav-mark{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border-radius:50%;background:#2f5df5;color:#fff;font-size:19px;flex-shrink:0}
 .candidate-nav-blue{color:#2458ed}.candidate-nav-orange{color:#f05a28;margin-left:3px}
@@ -477,16 +478,16 @@ img, svg, video, iframe {
     padding:0 4px!important;white-space:nowrap!important;box-shadow:none!important;font-size:clamp(11px,.85vw,14px)!important
 }
 /* Notification bell + compact profile pill styled like the supplied reference */
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6) [data-testid="stButton"] button{
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button{
     position:relative!important;width:44px!important;height:44px!important;min-height:44px!important;
     border:0!important;border-radius:50%!important;background:transparent!important;
     color:#6f7fa6!important;font-family:Arial,sans-serif!important;font-size:0!important;padding:0!important;
 }
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6) [data-testid="stButton"] button::before{
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7) [data-testid="stButton"] button::before{
     content:"🔔";font-size:23px!important;line-height:1!important;color:#7180a6!important;
     filter:grayscale(1)!important;
 }
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6) [data-testid="stButton"] button::after{
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button::after{
     content:"4";position:absolute;right:-1px;top:-3px;width:19px;height:19px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
     font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
@@ -502,7 +503,7 @@ img, svg, video, iframe {
     display:flex;align-items:center;justify-content:center;background:#f04452;color:#fff;
     font:700 11px/1 Arial,sans-serif;border:2px solid #fff;box-sizing:border-box;
 }
-.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7) [data-testid="stButton"] button:hover{
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(8) [data-testid="stButton"] button:hover{
     border-color:#e3e7ef!important;background:#fff!important;color:#7180a6!important;
 }
 .stApp .st-key-candidate_top_nav [data-testid="stButton"] button:hover{
@@ -785,8 +786,8 @@ view = st.session_state.view
 if view == "home":
     # Campus-style compact header inspired by the user's reference screenshot.
     with st.container(key="candidate_top_nav"):
-        nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_alerts, nav_profile = st.columns(
-            [1.4, 0.58, 0.78, 0.92, 1.18, 0.24, 0.38], gap="small", vertical_alignment="center", wrap=False
+        nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_spacer, nav_alerts, nav_profile = st.columns(
+            [1.75, 0.72, 0.92, 1.02, 1.95, 1.65, 0.34, 0.72], gap="small", vertical_alignment="center", wrap=False
         )
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
