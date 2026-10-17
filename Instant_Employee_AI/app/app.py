@@ -94,13 +94,22 @@ def set_candidate_session(token):
 
 # Load the saved candidate photo for the header avatar when logged in.
 header_profile_picture = ""
-if st.session_state.get("candidate_logged_in") and st.session_state.get("candidate_api_token"):
+_header_token = st.session_state.get("candidate_api_token")
+if _header_token:
     try:
         _header_profile, _header_profile_error = api_request(
-            "GET", "/profiles/me", token=st.session_state.get("candidate_api_token")
+            "GET", "/profiles/me", token=_header_token
         )
         if not _header_profile_error and isinstance(_header_profile, dict):
-            header_profile_picture = (_header_profile.get("picture_data") or "").strip()
+            # Support the direct profile response and common wrapped response shapes.
+            _header_profile_data = _header_profile.get("profile") or _header_profile.get("data") or _header_profile
+            if isinstance(_header_profile_data, dict):
+                header_profile_picture = (
+                    _header_profile_data.get("picture_data")
+                    or _header_profile_data.get("profile_picture")
+                    or _header_profile_data.get("photo_data")
+                    or ""
+                ).strip()
     except Exception:
         header_profile_picture = ""
 
