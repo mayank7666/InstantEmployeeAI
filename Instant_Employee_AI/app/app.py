@@ -868,8 +868,8 @@ with st.container(key="global_back_navigation"):
 if view == "home":
     # Campus-style compact header inspired by the user's reference screenshot.
     with st.container(key="candidate_top_nav"):
-        nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_spacer, nav_actions = st.columns(
-            [1.65, 0.68, 0.86, 0.95, 1.70, 0.02, 1.35], gap="small", vertical_alignment="center", wrap=False
+        nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search = st.columns(
+            [1.65, 0.68, 0.86, 0.95, 1.70], gap="small", vertical_alignment="center", wrap=False
         )
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
@@ -886,35 +886,7 @@ if view == "home":
                 st.session_state.view = "all_jobs"; st.rerun()
         with nav_search:
             st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed")
-        with nav_actions:
-            with st.container(key="candidate_nav_actions"):
-                nav_bell_col, nav_profile_col = st.columns([0.34, 1.00], gap="small", vertical_alignment="center", wrap=False)
-                with nav_bell_col:
-                    if st.button("♧", key="top_nav_alerts", help="View applied jobs", use_container_width=True):
-                        st.session_state.view = "applied_jobs" if st.session_state.get("candidate_logged_in") else "candidate_auth"
-                        st.rerun()
-                with nav_profile_col:
-                    with st.container(key="profile_pill_shell"):
-                        menu_icon_col, avatar_icon_col = st.columns([0.82, 1.0], gap="small", vertical_alignment="center", wrap=False)
-                        with menu_icon_col:
-                            if st.button("☰", key="top_nav_profile", help="Open candidate profile or login", use_container_width=True):
-                                st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
-                                st.rerun()
-                        with avatar_icon_col:
-                            _avatar_src = header_profile_picture.strip()
-                            if _avatar_src and not _avatar_src.startswith("data:image/"):
-                                _avatar_src = "data:image/jpeg;base64," + _avatar_src
-                            _avatar_src = html.escape(_avatar_src, quote=True)
-                            if _avatar_src:
-                                st.markdown(
-                                    "<div class='header-candidate-avatar'><img src='" + _avatar_src + "' alt='Candidate profile photo' /><span>2</span></div>",
-                                    unsafe_allow_html=True,
-                                )
-                            else:
-                                st.markdown(
-                                    "<div class='header-candidate-avatar header-candidate-avatar-empty'><span class='avatar-fallback'>♟</span><b>2</b></div>",
-                                    unsafe_allow_html=True,
-                                )
+
 
     st.markdown("""
     <div class="landing-hero">
@@ -2172,6 +2144,16 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
  .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"]{width:100%!important;overflow-x:auto!important;justify-content:flex-start!important}
  .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{flex-shrink:0!important}
 }
+
+/* Remove notification, menu and avatar from the header as requested */
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{
+    min-width:0!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1){flex:1.65 1 0!important;width:auto!important;max-width:none!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2){flex:.68 1 0!important;width:auto!important;max-width:none!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3){flex:.86 1 0!important;width:auto!important;max-width:none!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(4){flex:.95 1 0!important;width:auto!important;max-width:none!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(5){flex:1.70 1 0!important;width:auto!important;max-width:360px!important}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
