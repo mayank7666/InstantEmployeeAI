@@ -745,6 +745,8 @@ img, svg, video, iframe {
 @media(max-width:800px){.landing-hero{grid-template-columns:1fr;padding:22px}.landing-visual{min-height:0}.landing-hero h1{font-size:34px}.landing-nav-note{display:none}}
 
 </style>
+""", unsafe_allow_html=True)
+
 if header_profile_picture:
     _header_photo_url = header_profile_picture
     if not _header_photo_url.startswith("data:image/"):
@@ -758,9 +760,6 @@ if header_profile_picture:
         "box-shadow:0 0 0 1px #dce4ff!important;}</style>",
         unsafe_allow_html=True,
     )
-
-
-""", unsafe_allow_html=True)
 
 def load_jobs():
     """Prefer live database jobs and keep only CSV jobs not yet migrated."""
