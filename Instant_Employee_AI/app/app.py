@@ -2176,6 +2176,36 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
  .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(6){flex:0 0 82px!important;width:82px!important;max-width:82px!important}
  .stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button{font-size:11px!important;padding:0 6px!important}
 }
+
+/* Polished My Profile button: compact, clear and consistent with the campus header */
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button,
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button:hover,
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button:focus{
+    display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;
+    width:100%!important;min-width:94px!important;height:38px!important;min-height:38px!important;
+    padding:0 13px!important;border:1px solid #d7e2ff!important;border-radius:22px!important;
+    background:linear-gradient(180deg,#ffffff 0%,#f2f6ff 100%)!important;
+    color:#2458ed!important;-webkit-text-fill-color:#2458ed!important;
+    font-family:Inter,Arial,sans-serif!important;font-size:12px!important;font-weight:700!important;
+    letter-spacing:.1px!important;white-space:nowrap!important;
+    box-shadow:0 3px 10px rgba(36,88,237,.09)!important;transition:all .15s ease!important;
+}
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button::before{
+    content:"♙"!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    color:#2458ed!important;-webkit-text-fill-color:#2458ed!important;font-size:15px!important;line-height:1!important;
+}
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button:hover{
+    background:#eaf0ff!important;border-color:#b8cbff!important;
+    box-shadow:0 5px 14px rgba(36,88,237,.15)!important;transform:translateY(-1px)!important;
+}
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button:focus{
+    outline:2px solid #c8d7ff!important;outline-offset:2px!important;
+}
+@media(max-width:780px){
+ .stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button{
+    min-width:88px!important;height:34px!important;min-height:34px!important;padding:0 8px!important;font-size:11px!important;
+ }
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
