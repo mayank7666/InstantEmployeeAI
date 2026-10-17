@@ -886,10 +886,10 @@ if view == "candidate_auth":
             st.text_input("Search jobs", placeholder="Search jobs here", key="auth_header_search", label_visibility="collapsed")
         with auth_login:
             if st.button("Login", key="auth_nav_login", use_container_width=True):
-                st.session_state.candidate_auth_mode = "login"; st.rerun()
+                st.session_state.candidate_auth_mode = "login"; st.session_state.candidate_auth_mode_selector = "Login"; st.rerun()
         with auth_register:
             if st.button("Register", key="auth_nav_register", use_container_width=True):
-                st.session_state.candidate_auth_mode = "register"; st.rerun()
+                st.session_state.candidate_auth_mode = "register"; st.session_state.candidate_auth_mode_selector = "Register"; st.rerun()
         with auth_employers:
             if st.button("For employers  ⌄", key="auth_nav_employers", use_container_width=True):
                 st.session_state.view = "employee"; st.rerun()
@@ -1257,7 +1257,7 @@ elif view == "candidate_auth":
         with form_col:
             st.markdown(
                 "<div class='candidate-auth-heading'><div class='candidate-auth-icon'>♙</div><div>"
-                "<h3>Welcome back!</h3><p>Login to your candidate account to explore job opportunities and manage your profile.</p></div></div>",
+                "<h3>Login</h3></div></div>",
                 unsafe_allow_html=True,
             )
             with st.form("candidate_login"):
@@ -2354,6 +2354,13 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
  .naukri-login-benefits{padding:28px 20px!important;min-height:390px!important}
  .stApp [data-testid="stForm"]{padding:22px 20px!important}
 }
+
+/* Keep the login landing close to the reference: clean header and no extra hero/tabs */
+.stApp .hero.candidate-auth-hero{display:none!important}
+.stApp [data-testid="stSegmentedControl"], .stApp .st-key-candidate_auth_mode_selector{display:none!important}
+.stApp .st-key-auth_landing_nav{margin-bottom:28px!important}
+.stApp .st-key-candidate_auth_mode_selector{height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
+.stApp .st-key-candidate_auth_mode_selector *{display:none!important}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
