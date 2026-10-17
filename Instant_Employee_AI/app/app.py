@@ -858,24 +858,19 @@ BACK_TARGETS = {
     "candidate": "home",
     "employee": "home",
 }
-if view != "home":
-    with st.container(key="global_back_navigation"):
-        back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
-        with back_col:
-            if st.button("← Back", key="global_page_back", help="Go to the previous section", use_container_width=True):
-                st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
-                st.rerun()
+with st.container(key="global_back_navigation"):
+    back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
+    with back_col:
+        if st.button("←", key="global_page_back", help="Back to the previous section", use_container_width=True):
+            st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
+            st.rerun()
 
 if view == "home":
-    # Campus-style compact header with the back arrow at the far left.
+    # Campus-style compact header; back control stays outside the header above it.
     with st.container(key="candidate_top_nav"):
-        nav_back, nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_profile_link = st.columns(
-            [0.30, 1.65, 0.68, 0.86, 0.95, 1.55, 0.58], gap="small", vertical_alignment="center", wrap=False
+        nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_profile_link = st.columns(
+            [1.65, 0.68, 0.86, 0.95, 1.55, 0.58], gap="small", vertical_alignment="center", wrap=False
         )
-        with nav_back:
-            if st.button("←", key="header_page_back", help="Back to previous section", use_container_width=True):
-                st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
-                st.rerun()
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
         with nav_prepare:
@@ -2232,6 +2227,29 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(5){flex:.95 1 0!important;width:auto!important;max-width:none!important}
 .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(6){flex:1.55 1 0!important;width:auto!important;max-width:360px!important}
 .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(7){flex:.58 1 0!important;width:auto!important;max-width:100px!important}
+
+/* Back button sits above and outside the header, with a light unobtrusive style */
+.stApp .st-key-global_back_navigation{
+    width:100%!important;margin:0 0 4px!important;padding:0 0 0 10px!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+}
+.stApp .st-key-global_back_navigation [data-testid="stHorizontalBlock"]{
+    display:flex!important;align-items:center!important;gap:0!important;width:100%!important;
+}
+.stApp .st-key-global_back_navigation [data-testid="column"]:first-child{
+    flex:0 0 38px!important;width:38px!important;min-width:38px!important;max-width:38px!important;
+}
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button,
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button:hover,
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button:focus{
+    width:30px!important;min-width:30px!important;height:30px!important;min-height:30px!important;
+    padding:0!important;border:1px solid #e8edf6!important;border-radius:9px!important;
+    background:#f7f9fd!important;color:#8a98b2!important;-webkit-text-fill-color:#8a98b2!important;
+    font-size:18px!important;font-weight:400!important;box-shadow:none!important;outline:none!important;
+}
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button:hover{
+    background:#eef3fc!important;border-color:#dce5f5!important;color:#61749a!important;-webkit-text-fill-color:#61749a!important;
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
