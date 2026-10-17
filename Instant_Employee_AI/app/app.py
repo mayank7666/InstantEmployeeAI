@@ -2081,6 +2081,35 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     display:flex!important;align-items:center!important;justify-content:center!important;border-radius:50%!important;
     background:#f04452!important;color:#fff!important;font:700 10px/1 Arial,sans-serif!important;border:2px solid #f2f6ff!important;box-sizing:border-box!important;
 }
+
+/* Compact dimensions matching the supplied Naukri-style reference */
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell{
+    width:108px!important;min-width:108px!important;max-width:108px!important;
+    height:50px!important;min-height:50px!important;max-height:50px!important;
+    padding:0 3px!important;border-radius:26px!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell [data-testid="stHorizontalBlock"]{
+    width:98px!important;min-width:98px!important;max-width:98px!important;gap:2px!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell [data-testid="column"]:first-child{
+    flex:0 0 36px!important;width:36px!important;max-width:36px!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell [data-testid="column"]:nth-child(2){
+    flex:0 0 36px!important;width:36px!important;max-width:36px!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell .header-candidate-avatar,
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell .header-candidate-avatar img,
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell .header-candidate-avatar-empty .avatar-fallback{
+    width:28px!important;min-width:28px!important;max-width:28px!important;
+    height:28px!important;min-height:28px!important;max-height:28px!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell .header-candidate-avatar span,
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell .header-candidate-avatar b{
+    width:18px!important;height:18px!important;right:-3px!important;top:-4px!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell [class*="st-key-top_nav_profile"] button{
+    width:36px!important;min-width:36px!important;max-width:36px!important;height:40px!important;min-height:40px!important;
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
