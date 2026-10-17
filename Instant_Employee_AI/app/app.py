@@ -868,8 +868,8 @@ with st.container(key="global_back_navigation"):
 if view == "home":
     # Campus-style compact header inspired by the user's reference screenshot.
     with st.container(key="candidate_top_nav"):
-        nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search = st.columns(
-            [1.65, 0.68, 0.86, 0.95, 1.70], gap="small", vertical_alignment="center", wrap=False
+        nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_profile_link = st.columns(
+            [1.65, 0.68, 0.86, 0.95, 1.55, 0.58], gap="small", vertical_alignment="center", wrap=False
         )
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
@@ -886,6 +886,10 @@ if view == "home":
                 st.session_state.view = "all_jobs"; st.rerun()
         with nav_search:
             st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed")
+        with nav_profile_link:
+            if st.button("My Profile", key="top_nav_my_profile", help="Open your candidate profile", use_container_width=True):
+                st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
+                st.rerun()
 
 
     st.markdown("""
@@ -2154,6 +2158,24 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3){flex:.86 1 0!important;width:auto!important;max-width:none!important}
 .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(4){flex:.95 1 0!important;width:auto!important;max-width:none!important}
 .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(5){flex:1.70 1 0!important;width:auto!important;max-width:360px!important}
+
+/* Compact My Profile shortcut in the top navigation */
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(5){flex:1.55 1 0!important;width:auto!important;max-width:360px!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(6){flex:.58 1 0!important;width:auto!important;max-width:100px!important}
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"]{width:100%!important}
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button{
+    width:100%!important;min-width:70px!important;height:34px!important;min-height:34px!important;
+    padding:0 10px!important;border:1px solid #dce5ff!important;border-radius:18px!important;
+    background:#f3f6ff!important;color:#2458ed!important;font-size:12px!important;font-weight:650!important;
+    white-space:nowrap!important;box-shadow:none!important;
+}
+.stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button:hover{
+    background:#e8efff!important;border-color:#b8cbff!important;color:#1745bd!important;
+}
+@media(max-width:780px){
+ .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(6){flex:0 0 82px!important;width:82px!important;max-width:82px!important}
+ .stApp .st-key-candidate_top_nav [class*="st-key-top_nav_my_profile"] button{font-size:11px!important;padding:0 6px!important}
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
