@@ -2250,6 +2250,35 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 .stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button:hover{
     background:#eef3fc!important;border-color:#dce5f5!important;color:#61749a!important;-webkit-text-fill-color:#61749a!important;
 }
+
+/* Final back-button polish: pale colors and no blinking/pulsing animation */
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button,
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button:hover,
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button:focus,
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button:active{
+    background:#fbfcff!important;
+    border:1px solid #edf1f8!important;
+    color:#a7b2c6!important;
+    -webkit-text-fill-color:#a7b2c6!important;
+    box-shadow:none!important;
+    outline:none!important;
+    transform:none!important;
+    animation:none!important;
+    transition:none!important;
+}
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button::before,
+.stApp .st-key-global_back_navigation [class*="st-key-global_page_back"] button::after{
+    animation:none!important;transition:none!important;box-shadow:none!important;
+}
+.stApp .st-key-global_back_navigation,
+.stApp .st-key-global_back_navigation *{
+    animation:none!important;
+    transition:none!important;
+}
+@media (prefers-reduced-motion: reduce){
+ .stApp .st-key-global_back_navigation,
+ .stApp .st-key-global_back_navigation *{animation:none!important;transition:none!important}
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
