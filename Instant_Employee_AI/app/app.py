@@ -1888,6 +1888,39 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='32' height='32' fill='%23e9d6c7'/%3E%3Cpath d='M1 32c1-8 6-12 15-12s14 4 15 12' fill='%234a6a8d'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23f1c9ad'/%3E%3Cpath d='M9 12c0-7 3-10 8-9 5 1 7 5 6 10l-2-4c-4 1-7-1-9-3l-3 6Z' fill='%234a342e'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23e2e6ef'/%3E%3C/svg%3E")!important;
     background-repeat:no-repeat!important;background-position:center!important;background-size:32px 32px!important;
 }
+
+/* Header alignment fix: keep bell and compact profile pill on the same header row */
+.stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(7){
+    display:flex!important;align-items:center!important;justify-content:flex-end!important;
+    min-width:0!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions{
+    display:flex!important;align-items:center!important;justify-content:flex-end!important;
+    width:170px!important;min-width:170px!important;max-width:170px!important;
+    height:53px!important;margin:0 0 0 auto!important;padding:0!important;
+    border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions [data-testid="stHorizontalBlock"]{
+    display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-end!important;
+    gap:8px!important;width:170px!important;min-width:170px!important;max-width:170px!important;margin:0!important;padding:0!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions [data-testid="column"]{min-width:0!important;flex-shrink:0!important;padding:0!important;margin:0!important}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions [data-testid="column"]:first-child{flex:0 0 42px!important;width:42px!important;max-width:42px!important}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions [data-testid="column"]:nth-child(2){flex:0 0 108px!important;width:108px!important;max-width:108px!important}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    box-sizing:border-box!important;width:108px!important;min-width:108px!important;max-width:108px!important;
+    height:53px!important;min-height:53px!important;margin:0!important;padding:0!important;
+    border:1px solid #dce4ff!important;border-radius:29px!important;background:#f2f6ff!important;
+    box-shadow:none!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell [data-testid="stButton"] button,
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell [data-testid="stButton"] button:hover,
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions .st-key-profile_pill_shell [data-testid="stButton"] button:focus{
+    width:106px!important;min-width:106px!important;max-width:106px!important;height:51px!important;min-height:51px!important;
+    margin:0!important;padding:0!important;border:0!important;border-radius:27px!important;background:transparent!important;
+    box-shadow:none!important;
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
