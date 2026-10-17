@@ -883,9 +883,26 @@ if view == "home":
                         st.rerun()
                 with nav_profile_col:
                     with st.container(key="profile_pill_shell"):
-                        if st.button("☰  👤", key="top_nav_profile", help="Open candidate profile or login", use_container_width=True):
-                            st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
-                            st.rerun()
+                        menu_icon_col, avatar_icon_col = st.columns([0.82, 1.0], gap="small", vertical_alignment="center", wrap=False)
+                        with menu_icon_col:
+                            if st.button("☰", key="top_nav_profile", help="Open candidate profile or login", use_container_width=True):
+                                st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
+                                st.rerun()
+                        with avatar_icon_col:
+                            _avatar_src = header_profile_picture.strip()
+                            if _avatar_src and not _avatar_src.startswith("data:image/"):
+                                _avatar_src = "data:image/jpeg;base64," + _avatar_src
+                            _avatar_src = html.escape(_avatar_src, quote=True)
+                            if _avatar_src:
+                                st.markdown(
+                                    "<div class='header-candidate-avatar'><img src='" + _avatar_src + "' alt='Candidate profile photo' /><span>2</span></div>",
+                                    unsafe_allow_html=True,
+                                )
+                            else:
+                                st.markdown(
+                                    "<div class='header-candidate-avatar header-candidate-avatar-empty'><span class='avatar-fallback'>♟</span><b>2</b></div>",
+                                    unsafe_allow_html=True,
+                                )
 
     st.markdown("""
     <div class="landing-hero">
@@ -2018,6 +2035,51 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 }
 .stApp .st-key-global_back_navigation [data-testid="stButton"] button:hover{
     background:#edf3ff!important;border-color:#9db9fb!important;color:#1745bd!important;
+}
+
+/* Render the candidate's actual saved image as an HTML image, separate from the menu button */
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:108px!important;min-width:108px!important;max-width:108px!important;height:53px!important;min-height:53px!important;
+    padding:0 4px!important;margin:0!important;border:1px solid #dce4ff!important;border-radius:29px!important;
+    background:#f2f6ff!important;box-sizing:border-box!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [data-testid="stHorizontalBlock"]{
+    display:flex!important;align-items:center!important;justify-content:center!important;flex-flow:row nowrap!important;
+    width:98px!important;min-width:98px!important;max-width:98px!important;gap:4px!important;margin:0!important;padding:0!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [data-testid="column"]{min-width:0!important;padding:0!important;flex-shrink:0!important}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [data-testid="column"]:first-child{flex:0 0 38px!important;width:38px!important;max-width:38px!important}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [data-testid="column"]:nth-child(2){flex:0 0 42px!important;width:42px!important;max-width:42px!important}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [class*="st-key-top_nav_profile"] button,
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [class*="st-key-top_nav_profile"] button:hover,
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [class*="st-key-top_nav_profile"] button:focus{
+    position:relative!important;width:38px!important;min-width:38px!important;max-width:38px!important;height:42px!important;min-height:42px!important;
+    padding:0!important;margin:0!important;border:0!important;border-radius:20px!important;background:transparent!important;box-shadow:none!important;
+    color:transparent!important;-webkit-text-fill-color:transparent!important;font-size:0!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [class*="st-key-top_nav_profile"] button::before{
+    content:"☰"!important;position:absolute!important;inset:0!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    font:normal 22px/1 Arial,sans-serif!important;color:#8b9abc!important;-webkit-text-fill-color:#8b9abc!important;background:none!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell [class*="st-key-top_nav_profile"] button::after{content:none!important;display:none!important;background:none!important}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell .header-candidate-avatar{
+    position:relative!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;
+    margin:0 auto!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell .header-candidate-avatar img,
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell .header-candidate-avatar-empty .avatar-fallback{
+    display:flex!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;
+    border-radius:50%!important;object-fit:cover!important;border:1px solid #e2e6ef!important;box-sizing:border-box!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell .header-candidate-avatar-empty .avatar-fallback{
+    align-items:center!important;justify-content:center!important;background:#e9efff!important;color:#53689b!important;font-size:18px!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell .header-candidate-avatar span,
+.stApp .st-key-candidate_top_nav .st-key-profile_pill_shell .header-candidate-avatar b{
+    position:absolute!important;right:-3px!important;top:-4px!important;width:18px!important;height:18px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;border-radius:50%!important;
+    background:#f04452!important;color:#fff!important;font:700 10px/1 Arial,sans-serif!important;border:2px solid #f2f6ff!important;box-sizing:border-box!important;
 }
 </style>
         """, unsafe_allow_html=True)
