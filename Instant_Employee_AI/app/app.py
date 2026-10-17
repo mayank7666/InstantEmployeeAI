@@ -830,17 +830,16 @@ if view == "home":
         with nav_search:
             st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed")
         with nav_actions:
-            with st.container(key="candidate_nav_actions"):
-                nav_bell_col, nav_profile_col = st.columns([0.28, 1.00], gap="small", vertical_alignment="center", wrap=False)
+            with st.container(key="profile_pill_shell"):
+                nav_bell_col, nav_profile_col = st.columns([0.62, 1.00], gap="small", vertical_alignment="center", wrap=False)
                 with nav_bell_col:
                     if st.button("♧", key="top_nav_alerts", help="View applied jobs", use_container_width=True):
                         st.session_state.view = "applied_jobs" if st.session_state.get("candidate_logged_in") else "candidate_auth"
                         st.rerun()
                 with nav_profile_col:
-                    with st.container(key="profile_pill_shell"):
-                        if st.button("☰  👤", key="top_nav_profile", help="Open candidate profile or login", use_container_width=True):
-                            st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
-                            st.rerun()
+                    if st.button("☰  👤", key="top_nav_profile", help="Open candidate profile or login", use_container_width=True):
+                        st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
+                        st.rerun()
 
     st.markdown("""
     <div class="landing-hero">
@@ -1725,6 +1724,50 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     content:"2"!important;position:absolute!important;right:8px!important;top:9px!important;width:32px!important;height:32px!important;
     border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;
     background:#f04452!important;color:#fff!important;font:700 11px/1 Arial,sans-serif!important;border:2px solid #fff!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='32' height='32' fill='%23e9d6c7'/%3E%3Cpath d='M1 32c1-8 6-12 15-12s14 4 15 12' fill='%234a6a8d'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23f1c9ad'/%3E%3Cpath d='M9 12c0-7 3-10 8-9 5 1 7 5 6 10l-2-4c-4 1-7-1-9-3l-3 6Z' fill='%234a342e'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23e2e6ef'/%3E%3C/svg%3E")!important;
+    background-repeat:no-repeat!important;background-position:center!important;background-size:32px 32px!important;
+}
+
+/* One shared Profile Navigation Container: notification + hamburger + avatar */
+.stApp .st-key-profile_pill_shell{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:176px!important;min-width:176px!important;max-width:176px!important;height:53px!important;min-height:53px!important;
+    box-sizing:border-box!important;padding:0 5px!important;margin:0!important;
+    border:1px solid #dce4ff!important;border-radius:29px!important;background:#f2f6ff!important;overflow:visible!important;
+}
+.stApp .st-key-profile_pill_shell [data-testid="stHorizontalBlock"]{
+    display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:center!important;
+    gap:4px!important;width:100%!important;margin:0!important;padding:0!important;
+}
+.stApp .st-key-profile_pill_shell [data-testid="column"]{min-width:0!important;padding:0!important;flex-shrink:0!important}
+.stApp .st-key-profile_pill_shell [data-testid="column"]:first-child{flex:0 0 40px!important;width:40px!important;max-width:40px!important}
+.stApp .st-key-profile_pill_shell [data-testid="column"]:nth-child(2){flex:0 0 118px!important;width:118px!important;max-width:118px!important}
+.stApp .st-key-profile_pill_shell [data-testid="stButton"]{width:100%!important;margin:0!important;padding:0!important}
+.stApp .st-key-profile_pill_shell [data-testid="stButton"] button,
+.stApp .st-key-profile_pill_shell [data-testid="stButton"] button:hover,
+.stApp .st-key-profile_pill_shell [data-testid="stButton"] button:focus{
+    position:relative!important;display:block!important;width:100%!important;min-width:0!important;height:48px!important;min-height:48px!important;
+    padding:0!important;margin:0!important;border:0!important;border-radius:24px!important;background:transparent!important;
+    box-shadow:none!important;color:transparent!important;-webkit-text-fill-color:transparent!important;font-size:0!important;outline:none!important;
+}
+.stApp .st-key-profile_pill_shell [class*="st-key-top_nav_alerts"] button::before{
+    content:"♧"!important;position:absolute!important;left:4px!important;top:6px!important;width:30px!important;height:34px!important;
+    font:normal 28px/34px Arial,sans-serif!important;color:#7180a6!important;-webkit-text-fill-color:#7180a6!important;
+    text-align:center!important;background:none!important;
+}
+.stApp .st-key-profile_pill_shell [class*="st-key-top_nav_alerts"] button::after{
+    content:"4"!important;position:absolute!important;right:0!important;top:0!important;width:19px!important;height:19px!important;
+    border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    background:#f04452!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font:700 11px/1 Arial,sans-serif!important;border:2px solid #f2f6ff!important;
+}
+.stApp .st-key-profile_pill_shell [class*="st-key-top_nav_profile"] button::before{
+    content:"☰"!important;position:absolute!important;left:9px!important;top:11px!important;
+    font:normal 22px/26px Arial,sans-serif!important;color:#8b9abc!important;-webkit-text-fill-color:#8b9abc!important;background:none!important;
+}
+.stApp .st-key-profile_pill_shell [class*="st-key-top_nav_profile"] button::after{
+    content:"2"!important;position:absolute!important;right:5px!important;top:7px!important;width:32px!important;height:32px!important;
+    border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    background:#f04452!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font:700 11px/1 Arial,sans-serif!important;border:2px solid #f2f6ff!important;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='32' height='32' fill='%23e9d6c7'/%3E%3Cpath d='M1 32c1-8 6-12 15-12s14 4 15 12' fill='%234a6a8d'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23f1c9ad'/%3E%3Cpath d='M9 12c0-7 3-10 8-9 5 1 7 5 6 10l-2-4c-4 1-7-1-9-3l-3 6Z' fill='%234a342e'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23e2e6ef'/%3E%3C/svg%3E")!important;
     background-repeat:no-repeat!important;background-position:center!important;background-size:32px 32px!important;
 }
