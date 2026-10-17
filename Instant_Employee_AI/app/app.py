@@ -2368,7 +2368,7 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
             with st.container(key="profile_avatar"):
                 profile_picture = st.file_uploader(
                     "Upload/change profile photo", type=["jpg", "jpeg", "png"],
-                    key="candidate_profile_picture", label_visibility="collapsed",
+                    key="candidate_profile_picture_upload", label_visibility="collapsed",
                     help="Click the camera icon to select a JPG/PNG photo (max 2 MB).",
                 )
                 if profile_picture is not None:
