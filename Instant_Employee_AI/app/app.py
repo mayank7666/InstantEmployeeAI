@@ -93,7 +93,7 @@ def set_candidate_session(token):
     return None
 
 # Load the saved candidate photo for the header avatar when logged in.
-header_profile_picture = ""
+header_profile_picture = (st.session_state.get("candidate_profile_picture") or "").strip()
 _header_token = st.session_state.get("candidate_api_token")
 if _header_token:
     try:
@@ -108,8 +108,11 @@ if _header_token:
                     _header_profile_data.get("picture_data")
                     or _header_profile_data.get("profile_picture")
                     or _header_profile_data.get("photo_data")
+                    or header_profile_picture
                     or ""
                 ).strip()
+                if header_profile_picture:
+                    st.session_state.candidate_profile_picture = header_profile_picture
     except Exception:
         header_profile_picture = ""
 
@@ -2250,6 +2253,9 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
                         st.error("The profile could not be saved: " + save_error)
                     else:
                         st.session_state.candidate_name = updated_profile.get("full_name", profile_name.strip())
+                        st.session_state.candidate_profile_picture = (
+                            updated_profile.get("picture_data") or picture_data or ""
+                        )
                         st.session_state.profile_saved_message = "Profile saved to the database successfully."
                         st.rerun()
 
