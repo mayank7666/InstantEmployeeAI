@@ -1229,17 +1229,8 @@ elif view == "job_details":
             st.rerun()
 
 elif view == "candidate_auth":
-    st.markdown(
-        "<div class='hero candidate-auth-hero'><div class='kicker'>INSTANT EMPLOYEE · CAREER PORTAL</div>"
-        "<h1>Candidate <span>account</span></h1>"
-        "<p>Sign in to manage your profile, save your resume and discover opportunities matched to your skills.</p></div>",
-        unsafe_allow_html=True,
-    )
-    auth_mode = st.segmented_control(
-        "Choose account action", options=["Login", "Register"],
-        default="Register" if st.session_state.get("candidate_auth_mode") == "register" else "Login",
-        key="candidate_auth_mode_selector", width="stretch",
-    )
+    # Keep the login/register view compact like the supplied reference page.
+    auth_mode = "Register" if st.session_state.get("candidate_auth_mode") == "register" else "Login"
     if auth_mode == "Login":
         feature_col, form_col = st.columns([1.12, 0.88], gap="small")
         with feature_col:
@@ -2361,6 +2352,73 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 .stApp .st-key-auth_landing_nav{margin-bottom:28px!important}
 .stApp .st-key-candidate_auth_mode_selector{height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
 .stApp .st-key-candidate_auth_mode_selector *{display:none!important}
+
+/* Refine candidate login screen to match the supplied Naukri login reference */
+.stApp .stAppViewContainer .main .block-container{
+    max-width:1100px!important;padding-top:18px!important;padding-bottom:36px!important;
+}
+.stApp .stAppViewContainer .main{background:#fafafa!important}
+.stApp .st-key-auth_landing_nav{
+    margin:0 -12px 0!important;padding:8px 0!important;min-height:66px!important;
+    background:#fff!important;border-bottom:1px solid #f0f1f4!important;box-shadow:none!important;
+}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{
+    width:min(1210px,calc(100% - 32px))!important;max-width:1210px!important;
+    gap:clamp(4px,.65vw,10px)!important;flex-flow:row nowrap!important;justify-content:space-between!important;
+}
+.stApp .st-key-auth_landing_nav [data-testid="column"]{flex-shrink:1!important;min-width:0!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(1){flex:0 0 205px!important;width:205px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2){flex:0 0 54px!important;width:54px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(3){flex:0 0 82px!important;width:82px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(4){flex:0 0 72px!important;width:72px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(5){flex:1 1 230px!important;width:230px!important;max-width:260px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(6){flex:0 0 78px!important;width:78px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(7){flex:0 0 88px!important;width:88px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(8){flex:0 0 128px!important;width:128px!important}
+.auth-brand{font-size:26px!important;letter-spacing:-.7px!important}
+.auth-brand-mark{width:40px!important;height:40px!important;font-size:19px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stButton"] button{font-size:14px!important;min-height:40px!important}
+.stApp .st-key-auth_landing_nav [class*="st-key-auth_nav_login"] button{border-radius:24px!important;border:1px solid #3164ff!important;color:#2458ed!important}
+.stApp .st-key-auth_landing_nav [class*="st-key-auth_nav_register"] button{border-radius:24px!important;background:#e9340b!important;color:#fff!important}
+.stApp .st-key-auth_landing_nav [class*="st-key-auth_nav_employers"] button{font-size:13px!important}
+.stApp .st-key-candidate_auth_mode_selector,.stApp [data-testid="stSegmentedControl"]{display:none!important;height:0!important;margin:0!important;padding:0!important}
+.stApp .naukri-login-benefits{
+    min-height:515px!important;padding:64px 44px 30px!important;border:1px solid #eef2f6!important;
+    border-radius:2px!important;background:#fff!important;box-shadow:0 9px 20px rgba(33,105,153,.16)!important;
+}
+.stApp .naukri-login-benefits h3{font-size:21px!important;margin-bottom:24px!important}
+.stApp .naukri-login-benefits .benefit-row{font-size:14px!important;line-height:1.4!important;margin-bottom:20px!important}
+.stApp .naukri-login-benefits .benefit-illustration{right:12px!important;bottom:18px!important;width:220px!important;min-height:115px!important;justify-content:center!important;text-align:center!important;background:radial-gradient(ellipse at center,#e9f7ff 0%,#fff 72%)!important;border-radius:60% 40% 50% 45%!important;padding:10px!important}
+.stApp .st-key-auth_benefits_register button{width:210px!important;min-height:42px!important;border-radius:2px!important;background:#fff!important;border:1px solid #4c8fe8!important;color:#4c8fe8!important}
+.stApp .candidate-auth-heading{padding:0 0 2px!important;margin:0 0 16px!important}
+.stApp .candidate-auth-heading .candidate-auth-icon{display:none!important}
+.stApp .candidate-auth-heading h3{font-size:22px!important;font-weight:650!important;color:#10294d!important;margin:0 0 8px!important}
+.stApp [data-testid="stForm"]{
+    min-height:460px!important;box-sizing:border-box!important;padding:32px 42px!important;
+    border:1px solid #f0f2f5!important;border-radius:2px!important;background:#fff!important;
+    box-shadow:0 9px 20px rgba(33,105,153,.16)!important;
+}
+.stApp [data-testid="stForm"] input{
+    min-height:44px!important;border:1px solid #ddd!important;border-radius:0!important;
+    background:#fff!important;box-shadow:none!important;padding:0 12px!important;
+}
+.stApp [data-testid="stForm"] label{font-size:12px!important;font-weight:600!important;color:#10294d!important}
+.stApp [data-testid="stForm"] button[kind="primaryFormSubmit"]{
+    min-height:40px!important;border-radius:0!important;background:#4b91e5!important;border:0!important;color:#fff!important;
+}
+.stApp .candidate-auth-note{display:none!important}
+@media(max-width:1050px){
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{width:calc(100% - 16px)!important;gap:3px!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(1){flex-basis:165px!important;width:165px!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(5){flex-basis:170px!important;width:170px!important}
+ .auth-brand{font-size:20px!important}
+}
+@media(max-width:760px){
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{overflow-x:auto!important;justify-content:flex-start!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]{flex-shrink:0!important}
+ .stApp .naukri-login-benefits{min-height:340px!important;padding:28px 22px!important}
+ .stApp [data-testid="stForm"]{padding:24px 20px!important;min-height:0!important}
+}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
