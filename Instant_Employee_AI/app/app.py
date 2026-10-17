@@ -858,19 +858,24 @@ BACK_TARGETS = {
     "candidate": "home",
     "employee": "home",
 }
-with st.container(key="global_back_navigation"):
-    back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
-    with back_col:
-        if st.button("← Back", key="global_page_back", help="Go to the previous section", use_container_width=True):
-            st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
-            st.rerun()
+if view != "home":
+    with st.container(key="global_back_navigation"):
+        back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
+        with back_col:
+            if st.button("← Back", key="global_page_back", help="Go to the previous section", use_container_width=True):
+                st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
+                st.rerun()
 
 if view == "home":
-    # Campus-style compact header inspired by the user's reference screenshot.
+    # Campus-style compact header with the back arrow at the far left.
     with st.container(key="candidate_top_nav"):
-        nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_profile_link = st.columns(
-            [1.65, 0.68, 0.86, 0.95, 1.55, 0.58], gap="small", vertical_alignment="center", wrap=False
+        nav_back, nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_profile_link = st.columns(
+            [0.30, 1.65, 0.68, 0.86, 0.95, 1.55, 0.58], gap="small", vertical_alignment="center", wrap=False
         )
+        with nav_back:
+            if st.button("←", key="header_page_back", help="Back to previous section", use_container_width=True):
+                st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
+                st.rerun()
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
         with nav_prepare:
@@ -2206,6 +2211,27 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     min-width:88px!important;height:34px!important;min-height:34px!important;padding:0 8px!important;font-size:11px!important;
  }
 }
+
+/* Place the compact back arrow at the far-left of the home header */
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child{
+    flex:0 0 38px!important;width:38px!important;min-width:38px!important;max-width:38px!important;
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+}
+.stApp .st-key-candidate_top_nav [class*="st-key-header_page_back"] button{
+    width:30px!important;min-width:30px!important;height:30px!important;min-height:30px!important;
+    padding:0!important;border:1px solid #e1e8f7!important;border-radius:10px!important;
+    background:#f5f7fc!important;color:#51617f!important;font-size:18px!important;font-weight:500!important;
+    box-shadow:none!important;
+}
+.stApp .st-key-candidate_top_nav [class*="st-key-header_page_back"] button:hover{
+    background:#eaf0ff!important;border-color:#cbd9ff!important;color:#2458ed!important;
+}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2){flex:1.65 1 0!important;width:auto!important;max-width:none!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3){flex:.68 1 0!important;width:auto!important;max-width:none!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(4){flex:.86 1 0!important;width:auto!important;max-width:none!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(5){flex:.95 1 0!important;width:auto!important;max-width:none!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(6){flex:1.55 1 0!important;width:auto!important;max-width:360px!important}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(7){flex:.58 1 0!important;width:auto!important;max-width:100px!important}
 </style>
         """, unsafe_allow_html=True)
         avatar_col, avatar_info_col = st.columns([1, 5], vertical_alignment="center")
