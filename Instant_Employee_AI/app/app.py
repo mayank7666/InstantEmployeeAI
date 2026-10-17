@@ -834,6 +834,25 @@ if st.query_params.get("view") == "employee":
 # Sidebar navigation removed: candidate navigation is now in the top bar and footer.
 view = st.session_state.view
 
+# Persistent in-app back navigation: keep users inside Instant Employee AI.
+BACK_TARGETS = {
+    "home": "home",
+    "all_jobs": "home",
+    "job_details": "all_jobs",
+    "candidate_auth": "home",
+    "candidate_dashboard": "home",
+    "applied_jobs": "candidate_dashboard",
+    "apply_resume": "all_jobs",
+    "candidate": "home",
+    "employee": "home",
+}
+with st.container(key="global_back_navigation"):
+    back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
+    with back_col:
+        if st.button("← Back", key="global_page_back", help="Go to the previous section", use_container_width=True):
+            st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
+            st.rerun()
+
 if view == "home":
     # Campus-style compact header inspired by the user's reference screenshot.
     with st.container(key="candidate_top_nav"):
@@ -1979,6 +1998,26 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 }
 .stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2){
     flex:0 0 108px!important;width:108px!important;min-width:108px!important;max-width:108px!important;
+}
+
+/* Small persistent in-app back button, visible at the top of every app view */
+.stApp .st-key-global_back_navigation{
+    width:100%!important;margin:0 0 6px!important;padding:0!important;background:transparent!important;
+}
+.stApp .st-key-global_back_navigation [data-testid="stHorizontalBlock"]{
+    display:flex!important;align-items:center!important;gap:8px!important;
+}
+.stApp .st-key-global_back_navigation [data-testid="column"]:first-child{
+    flex:0 0 92px!important;width:92px!important;max-width:92px!important;min-width:92px!important;
+}
+.stApp .st-key-global_back_navigation [data-testid="stButton"] button{
+    width:92px!important;min-width:92px!important;height:30px!important;min-height:30px!important;
+    padding:3px 10px!important;border:1px solid #cbd9f4!important;border-radius:16px!important;
+    background:#fff!important;color:#2458ed!important;font-size:12px!important;font-weight:650!important;
+    box-shadow:0 2px 6px rgba(35,73,150,.07)!important;
+}
+.stApp .st-key-global_back_navigation [data-testid="stButton"] button:hover{
+    background:#edf3ff!important;border-color:#9db9fb!important;color:#1745bd!important;
 }
 </style>
         """, unsafe_allow_html=True)
