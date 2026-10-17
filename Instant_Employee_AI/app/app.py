@@ -812,7 +812,7 @@ if view == "home":
     # Campus-style compact header inspired by the user's reference screenshot.
     with st.container(key="candidate_top_nav"):
         nav_logo, nav_prepare, nav_participate, nav_opportunities, nav_search, nav_spacer, nav_actions = st.columns(
-            [1.75, 0.72, 0.92, 1.02, 1.95, 0.02, 1.10], gap="small", vertical_alignment="center", wrap=False
+            [1.65, 0.68, 0.86, 0.95, 1.70, 0.02, 1.35], gap="small", vertical_alignment="center", wrap=False
         )
         with nav_logo:
             st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
@@ -1920,6 +1920,39 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
     width:106px!important;min-width:106px!important;max-width:106px!important;height:51px!important;min-height:51px!important;
     margin:0!important;padding:0!important;border:0!important;border-radius:27px!important;background:transparent!important;
     box-shadow:none!important;
+}
+
+/* Force the whole top navigation row to stay on one line and reserve space for actions */
+.stApp .st-key-candidate_top_nav{
+    width:100%!important;max-width:100%!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"]{
+    display:flex!important;flex-flow:row nowrap!important;align-items:center!important;
+    justify-content:space-between!important;gap:clamp(4px,.45vw,8px)!important;
+    width:100%!important;max-width:100%!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{
+    min-width:0!important;flex-shrink:1!important;padding:0!important;margin:0!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(7){
+    flex:0 0 190px!important;width:190px!important;min-width:190px!important;max-width:190px!important;
+    display:flex!important;align-items:center!important;justify-content:flex-end!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions{
+    width:170px!important;min-width:170px!important;max-width:170px!important;
+    height:53px!important;min-height:53px!important;display:block!important;flex:0 0 170px!important;
+    margin:0!important;padding:0!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions > div[data-testid="stHorizontalBlock"]{
+    display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-start!important;
+    gap:8px!important;width:170px!important;min-width:170px!important;max-width:170px!important;
+    height:53px!important;margin:0!important;padding:0!important;overflow:visible!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child{
+    flex:0 0 42px!important;width:42px!important;min-width:42px!important;max-width:42px!important;
+}
+.stApp .st-key-candidate_top_nav .st-key-candidate_nav_actions > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2){
+    flex:0 0 108px!important;width:108px!important;min-width:108px!important;max-width:108px!important;
 }
 </style>
         """, unsafe_allow_html=True)
