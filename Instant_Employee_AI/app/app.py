@@ -92,6 +92,18 @@ def set_candidate_session(token):
     st.session_state.candidate_email = me.get("email", "").lower()
     return None
 
+# Load the saved candidate photo for the header avatar when logged in.
+header_profile_picture = ""
+if st.session_state.get("candidate_logged_in") and st.session_state.get("candidate_api_token"):
+    try:
+        _header_profile, _header_profile_error = api_request(
+            "GET", "/profiles/me", token=st.session_state.get("candidate_api_token")
+        )
+        if not _header_profile_error and isinstance(_header_profile, dict):
+            header_profile_picture = (_header_profile.get("picture_data") or "").strip()
+    except Exception:
+        header_profile_picture = ""
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -733,6 +745,21 @@ img, svg, video, iframe {
 @media(max-width:800px){.landing-hero{grid-template-columns:1fr;padding:22px}.landing-visual{min-height:0}.landing-hero h1{font-size:34px}.landing-nav-note{display:none}}
 
 </style>
+if header_profile_picture:
+    _header_photo_url = header_profile_picture
+    if not _header_photo_url.startswith("data:image/"):
+        _header_photo_url = "data:image/jpeg;base64," + _header_photo_url
+    _header_photo_url = _header_photo_url.replace("\\", "\\\\").replace("'", "\\'")
+    st.markdown(
+        "<style>.stApp .st-key-candidate_nav_actions .st-key-profile_pill_shell [class*='st-key-top_nav_profile'] button::after{"
+        "content:''!important;background-image:url('" + _header_photo_url + "')!important;"
+        "background-size:cover!important;background-position:center!important;"
+        "border-radius:50%!important;border:2px solid #fff!important;"
+        "box-shadow:0 0 0 1px #dce4ff!important;}</style>",
+        unsafe_allow_html=True,
+    )
+
+
 """, unsafe_allow_html=True)
 
 def load_jobs():
