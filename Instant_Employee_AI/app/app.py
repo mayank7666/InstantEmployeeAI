@@ -1281,7 +1281,7 @@ elif view == "candidate_auth":
                     if error:
                         st.error(error)
                     else:
-                        st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"
+                        st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "home"
                         st.rerun()
     else:
         form_col, feature_col = st.columns([1.05, 0.95], gap="large")
