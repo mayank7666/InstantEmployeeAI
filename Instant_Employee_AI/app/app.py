@@ -839,7 +839,7 @@ def get_match_score(job_text, resume_text):
 
 jobs = load_jobs()
 if "view" not in st.session_state:
-    st.session_state.view = "home"
+    st.session_state.view = "candidate_auth"
 if st.query_params.get("view") == "employee":
     st.session_state.view = "employee"
 
@@ -858,12 +858,41 @@ BACK_TARGETS = {
     "candidate": "home",
     "employee": "home",
 }
-with st.container(key="global_back_navigation"):
-    back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
-    with back_col:
-        if st.button("←", key="global_page_back", help="Back to the previous section", use_container_width=True):
-            st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
-            st.rerun()
+if view not in ("home", "candidate_auth"):
+    with st.container(key="global_back_navigation"):
+        back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
+        with back_col:
+            if st.button("←", key="global_page_back", help="Back to the previous section", use_container_width=True):
+                st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
+                st.rerun()
+
+if view == "candidate_auth":
+    with st.container(key="auth_landing_nav"):
+        auth_logo, auth_jobs, auth_companies, auth_services, auth_search, auth_login, auth_register, auth_employers = st.columns(
+            [1.45, .45, .72, .62, 1.25, .48, .55, .85], gap="small", vertical_alignment="center", wrap=False
+        )
+        with auth_logo:
+            st.markdown("<div class='auth-brand'><span class='auth-brand-mark'>◀</span><span><b>Instant</b> Employee</span></div>", unsafe_allow_html=True)
+        with auth_jobs:
+            if st.button("Jobs", key="auth_nav_jobs", use_container_width=True):
+                st.session_state.view = "all_jobs"; st.rerun()
+        with auth_companies:
+            if st.button("Companies", key="auth_nav_companies", use_container_width=True):
+                st.session_state.view = "all_jobs"; st.rerun()
+        with auth_services:
+            if st.button("Services", key="auth_nav_services", use_container_width=True):
+                st.session_state.view = "all_jobs"; st.rerun()
+        with auth_search:
+            st.text_input("Search jobs", placeholder="Search jobs here", key="auth_header_search", label_visibility="collapsed")
+        with auth_login:
+            if st.button("Login", key="auth_nav_login", use_container_width=True):
+                st.session_state.candidate_auth_mode = "login"; st.rerun()
+        with auth_register:
+            if st.button("Register", key="auth_nav_register", use_container_width=True):
+                st.session_state.candidate_auth_mode = "register"; st.rerun()
+        with auth_employers:
+            if st.button("For employers  ⌄", key="auth_nav_employers", use_container_width=True):
+                st.session_state.view = "employee"; st.rerun()
 
 if view == "home":
     # Campus-style compact header; back control stays outside the header above it.
@@ -1212,7 +1241,19 @@ elif view == "candidate_auth":
         key="candidate_auth_mode_selector", width="stretch",
     )
     if auth_mode == "Login":
-        form_col, feature_col = st.columns([1.05, 0.95], gap="large")
+        feature_col, form_col = st.columns([1.12, 0.88], gap="small")
+        with feature_col:
+            st.markdown(
+                "<div class='naukri-login-benefits'><h3>New to Instant Employee?</h3>"
+                "<div class='benefit-row'><span>✓</span>One click apply using your candidate profile.</div>"
+                "<div class='benefit-row'><span>✓</span>Get relevant job recommendations.</div>"
+                "<div class='benefit-row'><span>✓</span>Showcase your profile to top companies.</div>"
+                "<div class='benefit-row'><span>✓</span>Track application status in one place.</div>"
+                "<div class='benefit-illustration'>✦ <b>Build your career with verified opportunities</b></div></div>",
+                unsafe_allow_html=True,
+            )
+            if st.button("Register for Free", key="auth_benefits_register", use_container_width=False):
+                st.session_state.candidate_auth_mode = "register"; st.rerun()
         with form_col:
             st.markdown(
                 "<div class='candidate-auth-heading'><div class='candidate-auth-icon'>♙</div><div>"
@@ -1224,17 +1265,6 @@ elif view == "candidate_auth":
                 password = st.text_input("Password", type="password", key="candidate_login_password", placeholder="Enter your password")
                 submit = st.form_submit_button("Login to Dashboard  →", type="primary", use_container_width=True)
             st.markdown("<div class='candidate-auth-note'>♢  Your candidate account keeps your profile and applications in one place.</div>", unsafe_allow_html=True)
-        with feature_col:
-            st.markdown(
-                "<div class='candidate-auth-feature'><div class='kicker'>YOUR NEXT MOVE STARTS HERE</div>"
-                "<h2>Find your <span>next opportunity.</span></h2>"
-                "<p>Create your profile, showcase your skills, and discover job opportunities that fit your experience.</p>"
-                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-blue'>⌕</span><div><b>Browse jobs</b><small>Explore roles and review job details.</small></div></div>"
-                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-green'>▤</span><div><b>Build your profile</b><small>Keep your resume and skills in one place.</small></div></div>"
-                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✦</span><div><b>Get matched</b><small>Review AI-assisted job match estimates.</small></div></div>"
-                "<div class='candidate-feature-foot'>✦  Take the next step in your career</div></div>",
-                unsafe_allow_html=True,
-            )
         if submit:
             if not email.strip() or not password:
                 st.error("Enter your email and password.")
@@ -2278,6 +2308,51 @@ div.st-key-candidate_top_nav div[data-testid="column"]:nth-child(8) div[data-tes
 @media (prefers-reduced-motion: reduce){
  .stApp .st-key-global_back_navigation,
  .stApp .st-key-global_back_navigation *{animation:none!important;transition:none!important}
+}
+
+/* Naukri-inspired login landing page and top navigation */
+.stApp .st-key-auth_landing_nav{
+    background:#fff!important;border-bottom:1px solid #edf0f5!important;
+    padding:10px 0!important;margin:-10px -12px 28px!important;box-shadow:0 2px 10px #1b2d5406!important;
+}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{
+    width:min(1240px,calc(100% - 36px))!important;margin:0 auto!important;
+    display:flex!important;align-items:center!important;gap:clamp(5px,.8vw,14px)!important;flex-flow:row nowrap!important;
+}
+.stApp .st-key-auth_landing_nav [data-testid="column"]{min-width:0!important;padding:0!important}
+.auth-brand{display:flex;align-items:center;gap:9px;white-space:nowrap;color:#f04b25;font-size:23px;font-weight:800;letter-spacing:-.6px}
+.auth-brand b{color:#2458ed}.auth-brand-mark{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#2f5df5;color:#fff;font-size:17px}
+.stApp .st-key-auth_landing_nav [data-testid="stButton"] button{min-height:38px!important;padding:0 7px!important;background:transparent!important;border:1px solid transparent!important;border-radius:20px!important;color:#293b5d!important;font-size:13px!important;white-space:nowrap!important;box-shadow:none!important}
+.stApp .st-key-auth_landing_nav [class*="st-key-auth_nav_login"] button{border:1px solid #3164ff!important;color:#2458ed!important;border-radius:22px!important;padding:0 14px!important}
+.stApp .st-key-auth_landing_nav [class*="st-key-auth_nav_register"] button{background:#ed3c10!important;color:#fff!important;border-color:#ed3c10!important;border-radius:22px!important;padding:0 14px!important}
+.stApp .st-key-auth_landing_nav [data-testid="stTextInput"] input{height:44px!important;min-height:44px!important;border-radius:24px!important;background:#fff!important;border:1px solid #e0e6f0!important;padding:0 16px!important;box-shadow:0 4px 14px #182b4b0a!important}
+.stApp .main .block-container{max-width:1240px!important;padding-top:0!important}
+.stApp{background:#fafafa!important}
+.stApp .st-key-global_back_navigation{display:none!important}
+.stApp .st-key-auth_landing_nav + div{margin-top:0!important}
+.stApp .st-key-auth_benefits_register button{border:1px solid #4c8fe8!important;color:#4c8fe8!important;background:#fff!important;border-radius:2px!important;width:210px!important}
+.naukri-login-benefits{
+    min-height:455px!important;box-sizing:border-box!important;padding:62px 44px 35px!important;
+    background:#fff!important;border:1px solid #eef2f6!important;border-radius:2px!important;
+    box-shadow:0 10px 22px rgba(30,91,140,.13)!important;color:#10294d!important;
+    position:relative!important;overflow:hidden!important;
+}
+.naukri-login-benefits h3{font-size:21px!important;font-weight:650!important;margin:0 0 24px!important;color:#152b4d!important}
+.naukri-login-benefits .benefit-row{display:flex;align-items:center;gap:13px;margin:0 0 20px;font-size:14px;color:#142a4a;white-space:normal}
+.naukri-login-benefits .benefit-row span{color:#4388f6;font-size:21px;font-weight:400}
+.naukri-login-benefits .benefit-illustration{position:absolute;right:20px;bottom:20px;max-width:230px;color:#8aa8c9;font-size:13px;display:flex;align-items:center;gap:8px}
+.stApp .st-key-candidate_auth_mode_selector{margin:0 0 12px!important}
+.stApp [data-testid="stForm"]{border-radius:2px!important;background:#fff!important;box-shadow:0 10px 22px rgba(30,91,140,.13)!important;border:1px solid #eef2f6!important;padding:32px 42px!important}
+.stApp .candidate-auth-heading{margin:0 0 22px!important}
+.stApp .candidate-auth-heading h3{font-size:22px!important;color:#10294d!important}
+.stApp [data-testid="stForm"] input{border-radius:0!important;min-height:44px!important;border:1px solid #ddd!important}
+.stApp [data-testid="stForm"] label{font-size:12px!important;color:#10294d!important}
+@media(max-width:900px){
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{width:calc(100% - 20px)!important;gap:4px!important}
+ .auth-brand{font-size:16px}.auth-brand-mark{width:28px;height:28px}
+ .stApp .st-key-auth_landing_nav [data-testid="stButton"] button{font-size:10px!important;padding:0 3px!important}
+ .naukri-login-benefits{padding:28px 20px!important;min-height:390px!important}
+ .stApp [data-testid="stForm"]{padding:22px 20px!important}
 }
 </style>
         """, unsafe_allow_html=True)
