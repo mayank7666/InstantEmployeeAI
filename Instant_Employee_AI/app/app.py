@@ -912,6 +912,96 @@ img, svg, video, iframe {
  padding:0 18px!important;height:52px!important;min-height:52px!important;
  border-radius:13px!important;background:#fff!important;background-color:#fff!important;
 }
+
+/* =========================================================
+   Responsive layout pass: desktop, tablet and mobile
+   Visual-only CSS; keep Streamlit pages and backend behavior intact.
+   ========================================================= */
+html,body,[data-testid="stAppViewContainer"],[data-testid="stMain"],.stApp{
+ width:100%!important;max-width:100%!important;overflow-x:hidden!important;
+}
+.stApp .stAppViewContainer .main .block-container,
+[data-testid="stMainBlockContainer"]{
+ width:100%!important;max-width:1440px!important;
+ padding-left:clamp(12px,2.8vw,40px)!important;
+ padding-right:clamp(12px,2.8vw,40px)!important;
+ box-sizing:border-box!important;
+}
+[data-testid="stHorizontalBlock"]{min-width:0!important;max-width:100%!important}
+[data-testid="column"]{min-width:0!important;box-sizing:border-box!important}
+[data-testid="stMarkdownContainer"],[data-testid="stMarkdownContainer"] *{overflow-wrap:anywhere}
+img,svg,video,canvas{max-width:100%;height:auto}
+[data-testid="stDataFrame"],[data-testid="stTable"],[data-testid="stDataEditor"]{max-width:100%!important;overflow-x:auto!important}
+input,textarea,select,button{max-width:100%}
+.stApp .st-key-auth_landing_nav{max-width:100%!important;box-sizing:border-box!important}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{max-width:100%!important;box-sizing:border-box!important}
+@media (max-width: 1100px){
+ .stApp .stAppViewContainer .main .block-container,[data-testid="stMainBlockContainer"]{
+  padding-left:20px!important;padding-right:20px!important;
+ }
+ .naukri-login-benefits{padding:30px 26px!important}
+ .stApp [data-testid="stForm"]{padding:26px!important}
+}
+@media (max-width: 760px){
+ .stApp .stAppViewContainer .main .block-container,[data-testid="stMainBlockContainer"]{
+  padding:16px 12px 28px!important;
+ }
+ /* Header wraps instead of pushing the viewport wider than the phone */
+ .stApp .st-key-auth_landing_nav{margin:0 0 20px!important;padding:10px!important;border-radius:14px!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{
+  width:100%!important;max-width:100%!important;padding:0!important;
+  display:flex!important;flex-flow:row wrap!important;gap:8px!important;justify-content:flex-start!important;
+ }
+ .stApp .st-key-auth_landing_nav [data-testid="column"]{
+  flex:1 1 calc(33.333% - 8px)!important;width:auto!important;max-width:none!important;min-width:0!important;
+ }
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(1){
+  flex:1 1 100%!important;width:100%!important;order:0!important;
+ }
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(5){
+  flex:1 1 100%!important;width:100%!important;max-width:100%!important;order:1!important;
+ }
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2){order:2!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(3){order:3!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(4){order:4!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(6){order:5!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(7){order:6!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(8){flex:1 1 100%!important;width:100%!important;order:7!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stButton"] button{width:100%!important;min-height:42px!important;padding:7px 8px!important;font-size:12px!important;white-space:normal!important}
+ .stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div{width:100%!important}
+ .stApp .st-key-auth_landing_nav .st-key-auth_header_search input{font-size:14px!important}
+ /* Stack the login benefits and form cleanly */
+ .stApp [data-testid="stHorizontalBlock"]:has(.naukri-login-benefits){flex-direction:column!important;gap:18px!important}
+ .stApp [data-testid="stHorizontalBlock"]:has(.naukri-login-benefits)>[data-testid="column"]{width:100%!important;max-width:100%!important;flex:1 1 100%!important}
+ .naukri-login-benefits{min-height:0!important;padding:26px 22px!important;border-radius:18px!important}
+ .naukri-login-benefits .benefit-row{font-size:14px!important;margin-bottom:13px!important}
+ .naukri-login-benefits .benefit-illustration{position:static!important;margin-top:18px!important}
+ .stApp [data-testid="stForm"]{padding:22px 18px!important;border-radius:18px!important}
+ .stApp .candidate-auth-heading h3{font-size:23px!important}
+ .stApp .candidate-auth-icon{width:48px!important;height:48px!important;border-radius:14px!important;font-size:24px!important}
+ /* Prevent wide dashboard grids and forms from overflowing */
+ .metrics,.grid,.filters,.profilegrid,.formgrid{grid-template-columns:minmax(0,1fr)!important}
+ .candidate{grid-template-columns:44px minmax(0,1fr)!important;gap:10px!important}
+ .candidate .actions,.candidate .score{grid-column:2!important;justify-self:start!important}
+ .jobrow{grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}
+ .jobrow .count:last-child{display:none!important}
+ .toolbar{flex-wrap:wrap!important}
+ .toolbar>*{min-width:0!important;max-width:100%!important}
+ [data-testid="stMetric"]{padding:12px!important}
+ h1{font-size:clamp(26px,7vw,36px)!important;overflow-wrap:anywhere}
+ h2{font-size:clamp(22px,6vw,30px)!important}
+ h3{font-size:clamp(18px,5vw,24px)!important}
+}
+@media (max-width: 420px){
+ .stApp .stAppViewContainer .main .block-container,[data-testid="stMainBlockContainer"]{padding-left:9px!important;padding-right:9px!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{gap:6px!important}
+ .stApp .st-key-auth_landing_nav [data-testid="column"]{flex-basis:calc(50% - 6px)!important}
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(1),
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(5),
+ .stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(8){flex-basis:100%!important}
+ .naukri-login-benefits{padding:22px 16px!important}
+ .stApp [data-testid="stForm"]{padding:18px 14px!important}
+}
 </style>
 """, unsafe_allow_html=True)
 
