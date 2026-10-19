@@ -892,6 +892,26 @@ img, svg, video, iframe {
 .stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:focus-within{
  border-color:#cbd8ef!important;box-shadow:0 0 0 2px rgba(59,102,238,.06)!important;
 }
+
+/* Ensure Streamlit BaseWeb input wrappers stay white, not dark */
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="input"],
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="base-input"],
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] input{
+ background:#fff!important;background-color:#fff!important;
+ color:#26344f!important;-webkit-text-fill-color:#26344f!important;
+ border:0!important;box-shadow:none!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="input"]{
+ border-radius:13px!important;min-height:52px!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div{
+ padding:0!important;background:#fff!important;border:1px solid #cbd8ef!important;
+ border-radius:14px!important;overflow:hidden!important;box-shadow:none!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input{
+ padding:0 18px!important;height:52px!important;min-height:52px!important;
+ border-radius:13px!important;background:#fff!important;background-color:#fff!important;
+}
 </style>
 """, unsafe_allow_html=True)
 
