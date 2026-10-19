@@ -831,6 +831,23 @@ img, svg, video, iframe {
  .stApp .st-key-auth_landing_nav .st-key-auth_header_search input{padding-left:34px!important;font-size:11px!important}
  .stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:before{left:9px}
 }
+
+/* Match the user's reference search field: bold dark rim, white pill, no icon */
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div{
+ min-height:52px!important;padding:3px!important;border:4px solid #292b35!important;
+ border-radius:17px!important;background:#292b35!important;box-shadow:none!important;
+ transition:border-color .18s ease!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:before{content:none!important;display:none!important}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input{
+ min-height:42px!important;height:42px!important;padding:0 18px!important;
+ border:0!important;border-radius:13px!important;background:#fff!important;
+ box-shadow:none!important;color:#26344f!important;font-size:14px!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input::placeholder{color:#71809c!important;opacity:1!important}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:focus-within{
+ border-color:#3b66ee!important;box-shadow:0 0 0 2px rgba(59,102,238,.12)!important;
+}
 </style>
 """, unsafe_allow_html=True)
 
