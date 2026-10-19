@@ -865,6 +865,33 @@ img, svg, video, iframe {
 .stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:focus-within{
  border-color:#8daaf1!important;box-shadow:0 0 0 2px rgba(59,102,238,.08)!important;
 }
+
+/* Final fix: search box must match the white Services button */
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"],
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div{
+ background:transparent!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div{
+ min-height:54px!important;height:54px!important;padding:0!important;
+ border:1px solid #cbd8ef!important;border-radius:14px!important;
+ background:#ffffff!important;box-shadow:none!important;overflow:hidden!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input:focus,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input:hover{
+ min-height:52px!important;height:52px!important;padding:0 18px!important;
+ border:0!important;border-radius:13px!important;
+ background:#ffffff!important;background-color:#ffffff!important;
+ color:#26344f!important;-webkit-text-fill-color:#26344f!important;
+ box-shadow:none!important;outline:none!important;font-size:14px!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input::placeholder{
+ color:#71809c!important;-webkit-text-fill-color:#71809c!important;opacity:1!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:focus-within{
+ border-color:#cbd8ef!important;box-shadow:0 0 0 2px rgba(59,102,238,.06)!important;
+}
 </style>
 """, unsafe_allow_html=True)
 
