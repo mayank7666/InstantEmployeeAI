@@ -804,6 +804,33 @@ img, svg, video, iframe {
  .naukri-login-benefits{min-height:0!important;padding:28px 24px!important;border-radius:20px!important}
  .stApp [data-testid="stForm"]{padding:24px 22px!important;border-radius:20px!important}
 }
+
+/* Attractive job search field in candidate navigation */
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search{
+ position:relative!important;margin:0!important;padding:0!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]{margin:0!important}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div{
+ min-height:48px!important;border:1px solid #d6e2f7!important;border-radius:14px!important;
+ background:linear-gradient(135deg,#fff,#f7faff)!important;
+ box-shadow:0 5px 15px rgba(35,82,170,.07)!important;
+ transition:border-color .18s ease,box-shadow .18s ease!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:focus-within{
+ border-color:#6c95ff!important;box-shadow:0 0 0 4px rgba(58,108,245,.12),0 8px 20px rgba(35,82,170,.10)!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input{
+ min-height:46px!important;border:0!important;box-shadow:none!important;background:transparent!important;
+ padding:0 14px 0 40px!important;color:#172b4d!important;font-size:13px!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input::placeholder{color:#8797b1!important;opacity:1!important}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:before{
+ content:"⌕";position:absolute;z-index:2;left:13px;top:7px;color:#4776e8;font-size:25px;line-height:30px;font-weight:700;pointer-events:none;
+}
+@media(max-width:900px){
+ .stApp .st-key-auth_landing_nav .st-key-auth_header_search input{padding-left:34px!important;font-size:11px!important}
+ .stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:before{left:9px}
+}
 </style>
 """, unsafe_allow_html=True)
 
