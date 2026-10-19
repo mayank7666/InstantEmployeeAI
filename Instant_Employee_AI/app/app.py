@@ -848,6 +848,23 @@ img, svg, video, iframe {
 .stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:focus-within{
  border-color:#3b66ee!important;box-shadow:0 0 0 2px rgba(59,102,238,.12)!important;
 }
+
+/* Align search input with the same rounded outline style as Services nav button */
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div{
+ min-height:54px!important;height:54px!important;padding:0!important;
+ border:1px solid #cbd8ef!important;border-radius:14px!important;
+ background:#fff!important;box-shadow:none!important;overflow:hidden!important;
+ transition:border-color .18s ease,box-shadow .18s ease!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:before{content:none!important;display:none!important}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input{
+ min-height:52px!important;height:52px!important;padding:0 18px!important;
+ border:0!important;border-radius:13px!important;background:transparent!important;
+ box-shadow:none!important;color:#26344f!important;font-size:14px!important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"]>div:focus-within{
+ border-color:#8daaf1!important;box-shadow:0 0 0 2px rgba(59,102,238,.08)!important;
+}
 </style>
 """, unsafe_allow_html=True)
 
