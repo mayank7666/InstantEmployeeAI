@@ -756,6 +756,54 @@ img, svg, video, iframe {
 .section-kicker{font-size:11px;font-weight:850;letter-spacing:1.2px;color:#2863c7}
 @media(max-width:800px){.landing-hero{grid-template-columns:1fr;padding:22px}.landing-visual{min-height:0}.landing-hero h1{font-size:34px}.landing-nav-note{display:none}}
 
+
+/* Premium candidate login refresh — visual-only; auth flow unchanged */
+.stApp .stAppViewContainer .main{background:linear-gradient(135deg,#f4f7ff 0%,#edf3ff 52%,#f8faff 100%)!important}
+.stApp .stAppViewContainer .main .block-container{max-width:1320px!important;padding-top:28px!important;padding-bottom:48px!important}
+.stApp .stAppViewContainer .main .block-container:has(.naukri-login-benefits){position:relative}
+.stApp .st-key-auth_landing_nav{
+ margin:0 -12px 30px!important;padding:12px 0!important;min-height:76px!important;
+ background:rgba(255,255,255,.88)!important;border:1px solid #e1e9fb!important;
+ border-radius:18px!important;box-shadow:0 8px 28px rgba(35,72,145,.07)!important;
+}
+.stApp .st-key-auth_landing_nav [data-testid="stHorizontalBlock"]{padding:0 18px!important}
+.auth-brand{font-size:23px!important;font-weight:850!important;letter-spacing:-.7px!important;color:#142b55!important}
+.auth-brand-mark{border-radius:10px!important;box-shadow:0 5px 14px rgba(37,91,230,.25)!important}
+.naukri-login-benefits{
+ min-height:420px!important;padding:42px 38px 36px!important;
+ background:radial-gradient(circle at 100% 0%,rgba(203,220,255,.75),transparent 35%),linear-gradient(145deg,#fff 0%,#f5f8ff 100%)!important;
+ border:1px solid #dce7fc!important;border-radius:24px!important;
+ box-shadow:0 18px 48px rgba(32,70,140,.10)!important;color:#10294d!important;
+}
+.naukri-login-benefits h3{font-size:clamp(23px,2.2vw,30px)!important;font-weight:800!important;letter-spacing:-.8px!important;line-height:1.2!important;margin:0 0 26px!important;color:#142b55!important}
+.naukri-login-benefits .benefit-row{display:flex;align-items:center;gap:12px;margin:0 0 18px!important;font-size:15px!important;line-height:1.55!important;color:#405574!important}
+.naukri-login-benefits .benefit-row span{display:inline-grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:50%;background:#e1edff;color:#2160ee!important;font-size:15px!important;font-weight:800!important}
+.naukri-login-benefits .benefit-illustration{position:static!important;max-width:none!important;margin-top:28px;padding:15px 16px;border:1px solid #dce7ff;border-radius:14px;background:linear-gradient(110deg,#edf4ff,#fff);color:#33527f!important;font-size:13px!important;line-height:1.5}
+.stApp [data-testid="stForm"]{
+ border:1px solid #dce6fb!important;border-radius:24px!important;padding:30px 32px!important;
+ background:rgba(255,255,255,.94)!important;box-shadow:0 18px 48px rgba(32,70,140,.11)!important;
+}
+.stApp .candidate-auth-heading{display:flex!important;align-items:center!important;gap:15px!important;margin:0 0 22px!important}
+.stApp .candidate-auth-heading h3{font-size:27px!important;font-weight:800!important;letter-spacing:-.7px!important;color:#142b55!important}
+.stApp .candidate-auth-icon{width:58px!important;height:58px!important;border-radius:18px!important;box-shadow:0 8px 18px rgba(49,103,228,.12)!important}
+.stApp [data-testid="stForm"] label{font-size:13px!important;font-weight:700!important;color:#334765!important}
+.stApp [data-testid="stForm"] input{border-radius:12px!important;min-height:48px!important;border:1px solid #d4deef!important;background:#fbfcff!important}
+.stApp [data-testid="stForm"] input:focus{border-color:#3b72f6!important;box-shadow:0 0 0 3px rgba(59,114,246,.12)!important}
+.stApp [data-testid="stForm"] button,.stApp [data-testid="stFormSubmitButton"] button{
+ min-height:49px!important;border-radius:12px!important;font-weight:750!important;
+ background:linear-gradient(100deg,#2158ed,#397bff)!important;border:1px solid #2b66f4!important;
+ box-shadow:0 8px 18px rgba(37,96,235,.22)!important;transition:transform .18s ease,box-shadow .18s ease!important;
+}
+.stApp [data-testid="stForm"] button:hover,.stApp [data-testid="stFormSubmitButton"] button:hover{transform:translateY(-1px)!important;box-shadow:0 11px 22px rgba(37,96,235,.28)!important}
+.stApp .candidate-auth-note{margin-top:16px!important;padding:15px 17px!important;border-radius:14px!important;background:linear-gradient(110deg,#eaf2ff,#f6f9ff)!important;border:1px solid #d7e5ff!important;color:#4c6388!important}
+.stApp .st-key-auth_benefits_register button{border:1px solid #c9d8f8!important;color:#245be8!important;background:#fff!important;border-radius:11px!important;font-weight:750!important;padding:10px 17px!important;transition:all .18s ease!important}
+.stApp .st-key-auth_benefits_register button:hover{background:#edf3ff!important;border-color:#8eafff!important}
+@media(max-width:900px){
+ .stApp .stAppViewContainer .main .block-container{padding:18px 16px 32px!important}
+ .stApp .st-key-auth_landing_nav{border-radius:14px!important;margin-bottom:22px!important}
+ .naukri-login-benefits{min-height:0!important;padding:28px 24px!important;border-radius:20px!important}
+ .stApp [data-testid="stForm"]{padding:24px 22px!important;border-radius:20px!important}
+}
 </style>
 """, unsafe_allow_html=True)
 
