@@ -569,13 +569,23 @@ if selected_job_id is not None:
     if not selected_apps:
         st.info("There are no applications for this job yet.")
     else:
-        st.dataframe(pd.DataFrame([{
+        applications_table = pd.DataFrame([{
+            "Application ID": row.get("id"),
             "Candidate": row.get("candidate_name") or "Name not provided",
             "Email": row.get("candidate_email", ""),
             "Applied On": str(row.get("applied_at", ""))[:19].replace("T", " "),
             "Resume File": row.get("resume_filename", ""),
             "Status": row.get("status", "Applied"),
-        } for row in selected_apps]), use_container_width=True, hide_index=True)
+        } for row in selected_apps])
+        st.dataframe(applications_table, use_container_width=True, hide_index=True)
+        st.download_button(
+            "Download Applications CSV",
+            data=applications_table.to_csv(index=False).encode("utf-8-sig"),
+            file_name=f"job_{selected_job_id}_applications.csv",
+            mime="text/csv",
+            key=f"download_applications_{selected_job_id}",
+            use_container_width=True,
+        )
 
         st.markdown("### Candidate resumes")
         for row in selected_apps:
@@ -595,7 +605,8 @@ if selected_job_id is not None:
                         )
                 st.caption(row.get("resume_filename") or "No saved resume filename")
             with right_resume:
-                if row.get("resume_filename") and st.button("Load resume", key=f"load_resume_{row.get('id')}"):
+                application_status = str(row.get("status") or "Applied")
+                if row.get("resume_filename") and st.button("Load resume", key=f"load_resume_{row.get('id')}", use_container_width=True):
                     resume_payload, resume_error = api_request(
                         "GET", f"/applications/{row.get('id')}/resume", token=token
                     )
@@ -603,6 +614,19 @@ if selected_job_id is not None:
                         st.error("Resume unavailable: " + resume_error)
                     else:
                         st.session_state[f"resume_download_{row.get('id')}"] = resume_payload
+                if application_status != "Shortlisted" and application_status not in {"Rejected", "Selected"}:
+                    if st.button("✓ Shortlist", key=f"quick_shortlist_{row.get('id')}", use_container_width=True):
+                        _, shortlist_error = api_request(
+                            "PATCH",
+                            f"/applications/{row.get('id')}/status",
+                            token=token,
+                            params={"new_status": "Shortlisted"},
+                        )
+                        if shortlist_error:
+                            st.error("Candidate could not be shortlisted: " + shortlist_error)
+                        else:
+                            st.success(f"{candidate_label} shortlisted.")
+                            st.rerun()
             resume_payload = st.session_state.get(f"resume_download_{row.get('id')}")
             if resume_payload and resume_payload.get("resume_data"):
                 try:
