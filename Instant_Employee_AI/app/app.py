@@ -1022,9 +1022,11 @@ if header_profile_picture:
 def load_jobs():
     """Prefer live database jobs and keep only CSV jobs not yet migrated."""
     columns = ["Job ID", "Job Title", "Department", "Description", "Required Skills",
-               "Minimum Budget", "Maximum Budget", "Work Mode", "Timezone", "Posted On", "Company Name"]
+               "Minimum Budget", "Maximum Budget", "Work Mode", "Timezone", "Posted On", "Company Name", "_Source"]
     try:
         legacy = pd.read_csv(JOBS_FILE).fillna("") if JOBS_FILE.exists() else pd.DataFrame(columns=columns)
+        # Keep the origin internally so numeric CSV IDs are never mistaken for database IDs.
+        legacy["_Source"] = "csv"
         if "Status" in legacy.columns:
             legacy = legacy[legacy["Status"].astype(str).str.lower().isin(["active", "open", "published", ""])]
     except Exception:
@@ -1050,6 +1052,7 @@ def load_jobs():
             "Timezone": str(job.get("timezone") or "Asia/Kolkata"),
             "Posted On": str(job.get("created_at") or "")[:10],
             "Company Name": str(job.get("company_name") or "Company"),
+            "_Source": "database",
         })
     if not legacy.empty:
         title_col = next((x for x in legacy.columns if str(x).strip().lower() in {"job title", "title", "job_title"}), None)
@@ -1613,7 +1616,8 @@ elif view == "apply_resume":
                     job_id_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job id", "job_id", "id"}), None)
                     job_record_id = str(selected_job.get(job_id_col, selected_index)) if job_id_col else str(selected_index)
                     company_name = str(selected_job.get(company_col, "Company not specified")) if company_col else "Company not specified"
-                    if job_record_id.isdigit():
+                    job_source = str(selected_job.get("_Source", "")).strip().lower()
+                    if job_source == "database" or (not job_source and job_record_id.isdigit()):
                         application_data, application_error = api_request(
                             "POST", f"/jobs/{int(job_record_id)}/apply",
                             token=st.session_state.get("candidate_api_token"), json={}
