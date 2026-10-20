@@ -720,7 +720,25 @@ def test_candidate_must_upload_readable_resume_before_applying():
 
 def test_application_resume_is_downloadable_only_by_owning_company():
     owner_headers = signup("company", unique_email("resume-owner"))
-    other_company_headers = signup("company", unique_email("resume-other-company"))
+    # Create a genuinely separate company tenant; signup("company") creates
+    # employee accounts under the same primary admin, so those accounts share
+    # organization access by design and are not a valid cross-company test.
+    other_email = unique_email("resume-other-independent-company")
+    with SessionLocal() as db:
+        other_company = User(
+            email=other_email,
+            password_hash=hash_password("TestPassword123!"),
+            role="company",
+            company_id=None,
+        )
+        db.add(other_company)
+        db.commit()
+    other_login = client.post("/auth/login", data={
+        "username": other_email, "password": "TestPassword123!"
+    })
+    assert other_login.status_code == 200, other_login.text
+    other_company_headers = {"Authorization": f"Bearer {other_login.json()['access_token']}"}
+
     candidate_headers = signup("talent", unique_email("resume-access-candidate"))
     save_test_resume(candidate_headers, "private-candidate-resume.pdf")
 
