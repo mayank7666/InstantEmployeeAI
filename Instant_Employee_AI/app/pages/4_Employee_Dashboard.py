@@ -340,7 +340,13 @@ if not st.session_state.get("company_logged_in"):
         "<p>Sign in to manage jobs, review applications and discover the right talent with AI-powered matching.</p></div>",
         unsafe_allow_html=True,
     )
-    login_tab, setup_tab = st.tabs(["🏢  Company / Employee Login", "⚙️  Initial Admin Setup"])
+    register_first = st.query_params.get("auth") == "register"
+    tab_labels = ["⚙️  Initial Admin Setup", "🏢  Company / Employee Login"] if register_first else ["🏢  Company / Employee Login", "⚙️  Initial Admin Setup"]
+    first_tab, second_tab = st.tabs(tab_labels)
+    if register_first:
+        setup_tab, login_tab = first_tab, second_tab
+    else:
+        login_tab, setup_tab = first_tab, second_tab
     with login_tab:
         form_col, feature_col = st.columns([1.05, 0.95], gap="large")
         with form_col:
