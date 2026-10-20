@@ -715,3 +715,47 @@ def test_candidate_must_upload_readable_resume_before_applying():
     )
     assert saved["resume_filename"] == "verified-resume.pdf"
     assert "FastAPI" in saved["resume_text"]
+
+
+
+def test_application_resume_is_downloadable_only_by_owning_company():
+    owner_headers = signup("company", unique_email("resume-owner"))
+    other_company_headers = signup("company", unique_email("resume-other-company"))
+    candidate_headers = signup("talent", unique_email("resume-access-candidate"))
+    save_test_resume(candidate_headers, "private-candidate-resume.pdf")
+
+    job_response = client.post("/jobs", headers=owner_headers, json={
+        "title": "Private Resume Access Engineer",
+        "department": "Engineering",
+        "description": "Build and maintain Python API services securely.",
+        "required_skills": "Python, FastAPI",
+        "min_budget": 10000,
+        "max_budget": 20000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert job_response.status_code == 201, job_response.text
+    job_id = job_response.json()["id"]
+
+    application_response = client.post(
+        f"/jobs/{job_id}/apply",
+        headers=candidate_headers,
+        json={"resume_filename": "private-candidate-resume.pdf"},
+    )
+    assert application_response.status_code == 201, application_response.text
+    application_id = application_response.json()["id"]
+
+    owner_download = client.get(
+        f"/applications/{application_id}/resume",
+        headers=owner_headers,
+    )
+    assert owner_download.status_code == 200, owner_download.text
+    assert owner_download.json()["filename"] == "private-candidate-resume.pdf"
+    assert owner_download.json()["content_type"] == "application/pdf"
+    assert owner_download.json()["resume_data"] == "dGVzdC1wZGY="
+
+    other_download = client.get(
+        f"/applications/{application_id}/resume",
+        headers=other_company_headers,
+    )
+    assert other_download.status_code == 404
