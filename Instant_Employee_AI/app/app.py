@@ -1598,7 +1598,7 @@ elif view == "apply_resume":
             saved_resume = (saved_profile or {}).get("resume_filename", "")
             if saved_profile_error:
                 st.error("Could not check your saved profile resume: " + saved_profile_error)
-            elif not (saved_profile or {}).get("resume_text"):
+            elif not ((saved_profile or {}).get("resume_uploaded") or (saved_profile or {}).get("resume_text")):
                 st.warning("Upload your resume once in My Profile. After that, you can apply to jobs without uploading it again.")
                 if st.button("Open My Profile to Upload Resume", type="primary", use_container_width=True):
                     st.session_state.view = "candidate_dashboard"
