@@ -2857,6 +2857,46 @@ elif view == "applied_jobs":
                     st.write("**Applied on:** " + html.escape(app.get("applied_at", "Not available")))
                     st.write("**Status:** " + html.escape(app.get("status", "Applied")))
                     st.caption("Resume: " + html.escape(app.get("resume_filename", "Uploaded PDF")))
+                    application_id = app.get("id")
+                    if application_id is not None:
+                        with st.expander("Messages with company", expanded=False):
+                            message_payload, message_error = api_request(
+                                "GET", f"/applications/{int(application_id)}/messages", token=token
+                            )
+                            if message_error:
+                                st.error("Messages could not be loaded: " + message_error)
+                            else:
+                                conversation_messages = message_payload.get("messages", [])
+                                if not conversation_messages:
+                                    st.caption("No messages yet. You can message the hiring company about this application.")
+                                for message in conversation_messages:
+                                    sender = "You" if message.get("is_mine") else app.get("company_name", "Company")
+                                    st.markdown("**" + html.escape(str(sender)) + "**")
+                                    st.write(str(message.get("body", "")))
+                                    if message.get("created_at"):
+                                        st.caption(html.escape(str(message["created_at"])[:16].replace("T", " ")))
+                                with st.form(f"candidate_message_form_{int(application_id)}"):
+                                    message_body = st.text_area(
+                                        "Write a message to the company",
+                                        key=f"candidate_message_body_{int(application_id)}",
+                                        max_chars=5000,
+                                    )
+                                    send_message = st.form_submit_button("Send message", type="primary")
+                                if send_message:
+                                    if not message_body.strip():
+                                        st.warning("Write a message before sending.")
+                                    else:
+                                        _, send_error = api_request(
+                                            "POST",
+                                            f"/applications/{int(application_id)}/messages",
+                                            token=token,
+                                            json={"body": message_body},
+                                        )
+                                        if send_error:
+                                            st.error("Message could not be sent: " + send_error)
+                                        else:
+                                            st.success("Message sent.")
+                                            st.rerun()
         if st.button("← Back to My Profile"):
             st.session_state.view = "candidate_dashboard"; st.rerun()
 
