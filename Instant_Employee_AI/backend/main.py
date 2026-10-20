@@ -100,6 +100,22 @@ class ExternalApplication(Base):
     status: Mapped[str] = mapped_column(String(40), default="Applied")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     talent: Mapped["User"] = relationship()
+
+class Conversation(Base):
+    """Private conversation associated with one application."""
+    __tablename__ = "conversations"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    application_id: Mapped[int] = mapped_column(ForeignKey("applications.id"), unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class Message(Base):
+    __tablename__ = "messages"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id"), index=True)
+    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
 Base.metadata.create_all(bind=engine)
 # Lightweight migration for existing deployments.
 if "picture_data" not in {col["name"] for col in inspect(engine).get_columns("profiles")}:
@@ -174,6 +190,8 @@ class ExternalApplicationIn(BaseModel):
     job_title: str = Field(min_length=1, max_length=200)
     company_name: str = Field(default="Company not specified", max_length=200)
     resume_filename: str = Field(default="", max_length=255)
+class MessageIn(BaseModel):
+    body: str = Field(min_length=1, max_length=5000)
 def get_db():
     db = SessionLocal()
     try: yield db
@@ -610,6 +628,67 @@ def download_application_resume(application_id: int, user: User=Depends(require_
         "content_type": "application/pdf",
         "resume_data": profile.resume_data,
     }
+
+def get_accessible_application(application_id: int, user: User, db: Session) -> Application:
+    application = db.get(Application, application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    if user.role == "talent":
+        allowed = application.talent_id == user.id
+    elif user.role == "company":
+        allowed = application.job.company_id == organization_id(user)
+    else:
+        allowed = False
+    if not allowed:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return application
+
+@app.get("/applications/{application_id}/messages")
+def list_application_messages(
+    application_id: int,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    application = get_accessible_application(application_id, user, db)
+    conversation = db.query(Conversation).filter(
+        Conversation.application_id == application.id
+    ).first()
+    if not conversation:
+        return {"application_id": application.id, "messages": []}
+    rows = db.query(Message).filter(
+        Message.conversation_id == conversation.id
+    ).order_by(Message.created_at.asc(), Message.id.asc()).all()
+    return {"application_id": application.id, "messages": [{
+        "id": row.id, "sender_id": row.sender_id, "body": row.body,
+        "created_at": row.created_at.isoformat() if row.created_at else None,
+        "is_mine": row.sender_id == user.id,
+    } for row in rows]}
+
+@app.post("/applications/{application_id}/messages", status_code=201)
+def send_application_message(
+    application_id: int,
+    data: MessageIn,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    application = get_accessible_application(application_id, user, db)
+    body = data.body.strip()
+    if not body:
+        raise HTTPException(status_code=422, detail="Message cannot be blank")
+    conversation = db.query(Conversation).filter(
+        Conversation.application_id == application.id
+    ).first()
+    if not conversation:
+        conversation = Conversation(application_id=application.id)
+        db.add(conversation)
+        db.flush()
+    row = Message(conversation_id=conversation.id, sender_id=user.id, body=body)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return {"id": row.id, "application_id": application.id,
+            "sender_id": row.sender_id, "body": row.body,
+            "created_at": row.created_at.isoformat() if row.created_at else None}
 
 @app.patch("/applications/{application_id}/status")
 def update_status(application_id: int, new_status: str="Under Review", user: User=Depends(require_role("company")), db: Session=Depends(get_db)):
