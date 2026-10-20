@@ -777,3 +777,95 @@ def test_application_resume_is_downloadable_only_by_owning_company():
         headers=other_company_headers,
     )
     assert other_download.status_code == 404
+
+
+def test_application_messaging_between_candidate_and_company():
+    company_headers = signup("company", unique_email("message-company"))
+    candidate_headers = signup("talent", unique_email("message-candidate"))
+    outsider_headers = signup("talent", unique_email("message-outsider"))
+
+    job_response = client.post("/jobs", headers=company_headers, json={
+        "title": "Messaging Test Engineer",
+        "department": "Engineering",
+        "description": "Build secure APIs and communicate with customers.",
+        "required_skills": "Python, FastAPI",
+        "min_budget": 10000,
+        "max_budget": 20000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert job_response.status_code == 201, job_response.text
+    job_id = job_response.json()["id"]
+    save_test_resume(candidate_headers, "message-candidate.pdf")
+    applied = client.post(
+        f"/jobs/{job_id}/apply",
+        headers=candidate_headers,
+        json={"resume_filename": "message-candidate.pdf"},
+    )
+    assert applied.status_code == 201, applied.text
+    application_id = applied.json()["id"]
+
+    initial = client.get(
+        f"/applications/{application_id}/messages", headers=company_headers
+    )
+    assert initial.status_code == 200, initial.text
+    assert initial.json()["messages"] == []
+
+    sent_by_company = client.post(
+        f"/applications/{application_id}/messages",
+        headers=company_headers,
+        json={"body": "Hello, can you share your interview availability?"},
+    )
+    assert sent_by_company.status_code == 201, sent_by_company.text
+    sent_by_candidate = client.post(
+        f"/applications/{application_id}/messages",
+        headers=candidate_headers,
+        json={"body": "I am available tomorrow afternoon."},
+    )
+    assert sent_by_candidate.status_code == 201, sent_by_candidate.text
+
+    candidate_history = client.get(
+        f"/applications/{application_id}/messages", headers=candidate_headers
+    )
+    assert candidate_history.status_code == 200, candidate_history.text
+    messages = candidate_history.json()["messages"]
+    assert len(messages) == 2
+    assert messages[0]["body"] == "Hello, can you share your interview availability?"
+    assert messages[1]["body"] == "I am available tomorrow afternoon."
+    assert messages[0]["is_mine"] is False
+    assert messages[1]["is_mine"] is True
+
+    denied = client.get(
+        f"/applications/{application_id}/messages", headers=outsider_headers
+    )
+    assert denied.status_code == 404
+
+
+def test_application_messaging_rejects_blank_message():
+    company_headers = signup("company", unique_email("blank-message-company"))
+    candidate_headers = signup("talent", unique_email("blank-message-candidate"))
+    job_response = client.post("/jobs", headers=company_headers, json={
+        "title": "Blank Message Test",
+        "department": "Engineering",
+        "description": "Build secure backend services and tests.",
+        "required_skills": "Python",
+        "min_budget": 10000,
+        "max_budget": 20000,
+        "work_mode": "Remote",
+        "timezone": "Asia/Kolkata",
+    })
+    assert job_response.status_code == 201, job_response.text
+    job_id = job_response.json()["id"]
+    save_test_resume(candidate_headers, "blank-message-resume.pdf")
+    applied = client.post(
+        f"/jobs/{job_id}/apply",
+        headers=candidate_headers,
+        json={"resume_filename": "blank-message-resume.pdf"},
+    )
+    assert applied.status_code == 201, applied.text
+    response = client.post(
+        f"/applications/{applied.json()['id']}/messages",
+        headers=candidate_headers,
+        json={"body": "   "},
+    )
+    assert response.status_code == 422
