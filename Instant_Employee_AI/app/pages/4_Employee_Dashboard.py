@@ -627,6 +627,38 @@ if selected_job_id is not None:
                         else:
                             st.success(f"{candidate_label} shortlisted.")
                             st.rerun()
+            with st.expander(f"Messages · {candidate_label}", expanded=False):
+                conversation_id = int(row.get("id"))
+                message_payload, message_error = api_request(
+                    "GET", f"/applications/{conversation_id}/messages", token=token
+                )
+                if message_error:
+                    st.error("Messages could not be loaded: " + message_error)
+                else:
+                    conversation_messages = message_payload.get("messages", [])
+                    if not conversation_messages:
+                        st.caption("No messages yet. Start the conversation about the application or interview.")
+                    for message in conversation_messages:
+                        who = "You" if message.get("is_mine") else candidate_label
+                        st.markdown(f"**{safe(who)}** · {safe(str(message.get('created_at') or '')[:16].replace('T', ' '))}")
+                        st.write(str(message.get("body", "")))
+                    with st.form(f"send_message_{conversation_id}"):
+                        message_body = st.text_area("Write a message", key=f"message_body_{conversation_id}", max_chars=5000)
+                        send_message = st.form_submit_button("Send message", type="primary")
+                    if send_message:
+                        if not message_body.strip():
+                            st.warning("Write a message before sending.")
+                        else:
+                            _, send_error = api_request(
+                                "POST", f"/applications/{conversation_id}/messages",
+                                token=token, json={"body": message_body}
+                            )
+                            if send_error:
+                                st.error("Message could not be sent: " + send_error)
+                            else:
+                                st.success("Message sent.")
+                                st.rerun()
+
             resume_payload = st.session_state.get(f"resume_download_{row.get('id')}")
             if resume_payload and resume_payload.get("resume_data"):
                 try:
