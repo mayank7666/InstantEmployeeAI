@@ -2942,13 +2942,29 @@ elif view == "candidate":
             st.session_state.view = "home"; st.rerun()
 
 elif view == "employee":
-    st.markdown("## Company workspace")
-    st.caption("Company accounts can be securely accessed or created from the Company Dashboard.")
-    st.info("Log in to the Company Dashboard with your company email and password. Candidate accounts cannot access the company dashboard.")
-    with st.container(key="company_login_cta"):
-        if st.button("Open Company Login", type="primary", use_container_width=True):
-            st.switch_page("pages/4_Employee_Dashboard.py")
-    if st.button("← Back to home"):
+    st.markdown(
+        "<div class='hero'><div class='kicker'>COMPANY & EMPLOYEE PORTAL</div>"
+        "<h1>Welcome to <span>Instant Employee</span></h1>"
+        "<p>Choose how you want to continue. Company accounts and candidate accounts use separate access.</p></div>",
+        unsafe_allow_html=True,
+    )
+    login_col, register_col = st.columns(2, gap="large")
+    with login_col:
+        with st.container(border=True):
+            st.markdown("### 🔐 Login")
+            st.write("Already have a company or employee account? Sign in to manage jobs, applications and AI candidate matching.")
+            if st.button("Login to Dashboard →", key="employee_portal_login", type="primary", use_container_width=True):
+                st.query_params["auth"] = "login"
+                st.switch_page("pages/4_Employee_Dashboard.py")
+    with register_col:
+        with st.container(border=True):
+            st.markdown("### ✨ Register")
+            st.write("New company administrator? Open the secure registration and initial admin setup page to create your company account.")
+            if st.button("Register / Create Account →", key="employee_portal_register", use_container_width=True):
+                st.query_params["auth"] = "register"
+                st.switch_page("pages/4_Employee_Dashboard.py")
+    st.caption("Note: Initial company registration requires the private setup key configured by the API administrator.")
+    if st.button("← Back to home", key="employee_portal_back"):
         st.session_state.view = "home"; st.rerun()
 
 st.divider()
