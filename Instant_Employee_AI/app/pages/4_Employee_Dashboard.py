@@ -505,6 +505,7 @@ with left:
             with action_col:
                 if st.button("View applications", key=f"view_apps_{job_id}", use_container_width=True):
                     st.session_state["dashboard_selected_job"] = job_id
+                    st.query_params["selected_job"] = str(job_id)
                     st.rerun()
             with status_col:
                 action_label = "Close job" if job.get("is_active") else "Reopen job"
@@ -562,6 +563,13 @@ with right:
     st.markdown("<div class='panel'><h4>Application privacy</h4><p>Only database applications for jobs belonging to your account are shown here. Applications from other companies are not exposed.</p></div>", unsafe_allow_html=True)
 
 selected_job_id = st.session_state.get("dashboard_selected_job")
+if selected_job_id is None:
+    try:
+        selected_job_id = int(st.query_params.get("selected_job", ""))
+        st.session_state["dashboard_selected_job"] = selected_job_id
+    except (TypeError, ValueError):
+        selected_job_id = None
+
 if selected_job_id is not None:
     st.divider()
     st.subheader("Applications for selected job")
