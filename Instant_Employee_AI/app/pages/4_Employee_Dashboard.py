@@ -531,206 +531,207 @@ with left:
 
 
             if selected_job_id == job_id:
-                st.divider()
-                st.subheader("Applications for selected job")
-                selected_apps = [row for row in applications if row.get("job_id") == selected_job_id]
-                if not selected_apps:
-                    st.info("There are no applications for this job yet.")
-                else:
-                    applications_table = pd.DataFrame([{
-                        "Application ID": row.get("id"),
-                        "Candidate": row.get("candidate_name") or "Name not provided",
-                        "Email": row.get("candidate_email", ""),
-                        "Applied On": str(row.get("applied_at", ""))[:19].replace("T", " "),
-                        "Resume File": row.get("resume_filename", ""),
-                        "Status": row.get("status", "Applied"),
-                    } for row in selected_apps])
-                    st.dataframe(applications_table, use_container_width=True, hide_index=True)
-                    st.download_button(
-                        "Download Applications CSV",
-                        data=applications_table.to_csv(index=False).encode("utf-8-sig"),
-                        file_name=f"job_{selected_job_id}_applications.csv",
-                        mime="text/csv",
-                        key=f"download_applications_{selected_job_id}",
-                        use_container_width=True,
-                    )
+                with st.expander("⌃ Hide applications", expanded=True):
+                    st.divider()
+                    st.subheader("Applications for selected job")
+                    selected_apps = [row for row in applications if row.get("job_id") == selected_job_id]
+                    if not selected_apps:
+                        st.info("There are no applications for this job yet.")
+                    else:
+                        applications_table = pd.DataFrame([{
+                            "Application ID": row.get("id"),
+                            "Candidate": row.get("candidate_name") or "Name not provided",
+                            "Email": row.get("candidate_email", ""),
+                            "Applied On": str(row.get("applied_at", ""))[:19].replace("T", " "),
+                            "Resume File": row.get("resume_filename", ""),
+                            "Status": row.get("status", "Applied"),
+                        } for row in selected_apps])
+                        st.dataframe(applications_table, use_container_width=True, hide_index=True)
+                        st.download_button(
+                            "Download Applications CSV",
+                            data=applications_table.to_csv(index=False).encode("utf-8-sig"),
+                            file_name=f"job_{selected_job_id}_applications.csv",
+                            mime="text/csv",
+                            key=f"download_applications_{selected_job_id}",
+                            use_container_width=True,
+                        )
 
-                    st.markdown("### Candidate resumes")
-                    for row in selected_apps:
-                        candidate_label = row.get("candidate_name") or row.get("candidate_email") or f"Candidate {row.get('candidate_id')}"
-                        left_resume, right_resume = st.columns([3, 1])
-                        with left_resume:
-                            name_col, status_col = st.columns([3, 1.2])
-                            with name_col:
-                                st.write(candidate_label)
-                            with status_col:
-                                if str(row.get("status", "")).strip().casefold() == "shortlisted":
-                                    st.markdown(
-                                        "<span style='display:inline-block;background:#e4f6e9;color:#22643b;"
-                                        "border:1px solid #b8e2c4;border-radius:14px;padding:3px 9px;"
-                                        "font-size:12px;font-weight:700;white-space:nowrap'>✓ Shortlisted</span>",
-                                        unsafe_allow_html=True,
-                                    )
-                            st.caption(row.get("resume_filename") or "No saved resume filename")
-                        with right_resume:
-                            application_status = str(row.get("status") or "Applied")
-                            if row.get("resume_filename") and st.button("Load resume", key=f"load_resume_{row.get('id')}", use_container_width=True):
-                                resume_payload, resume_error = api_request(
-                                    "GET", f"/applications/{row.get('id')}/resume", token=token
-                                )
-                                if resume_error:
-                                    st.error("Resume unavailable: " + resume_error)
-                                else:
-                                    st.session_state[f"resume_download_{row.get('id')}"] = resume_payload
-                            if application_status != "Shortlisted" and application_status not in {"Rejected", "Selected"}:
-                                if st.button("✓ Shortlist", key=f"quick_shortlist_{row.get('id')}", use_container_width=True):
-                                    _, shortlist_error = api_request(
-                                        "PATCH",
-                                        f"/applications/{row.get('id')}/status",
-                                        token=token,
-                                        params={"new_status": "Shortlisted"},
-                                    )
-                                    if shortlist_error:
-                                        st.error("Candidate could not be shortlisted: " + shortlist_error)
-                                    else:
-                                        st.success(f"{candidate_label} shortlisted.")
-                                        st.rerun()
-                        with st.expander(f"Messages · {candidate_label}", expanded=False):
-                            conversation_id = int(row.get("id"))
-                            message_payload, message_error = api_request(
-                                "GET", f"/applications/{conversation_id}/messages", token=token
-                            )
-                            if message_error:
-                                st.error("Messages could not be loaded: " + message_error)
-                            else:
-                                conversation_messages = message_payload.get("messages", [])
-                                if not conversation_messages:
-                                    st.caption("No messages yet. Start the conversation about the application or interview.")
-                                for message in conversation_messages:
-                                    who = "You" if message.get("is_mine") else candidate_label
-                                    st.markdown(f"**{safe(who)}** · {safe(str(message.get('created_at') or '')[:16].replace('T', ' '))}")
-                                    st.write(str(message.get("body", "")))
-                                with st.form(f"send_message_{conversation_id}"):
-                                    message_body = st.text_area("Write a message", key=f"message_body_{conversation_id}", max_chars=5000)
-                                    send_message = st.form_submit_button("Send message", type="primary")
-                                if send_message:
-                                    if not message_body.strip():
-                                        st.warning("Write a message before sending.")
-                                    else:
-                                        _, send_error = api_request(
-                                            "POST", f"/applications/{conversation_id}/messages",
-                                            token=token, json={"body": message_body}
+                        st.markdown("### Candidate resumes")
+                        for row in selected_apps:
+                            candidate_label = row.get("candidate_name") or row.get("candidate_email") or f"Candidate {row.get('candidate_id')}"
+                            left_resume, right_resume = st.columns([3, 1])
+                            with left_resume:
+                                name_col, status_col = st.columns([3, 1.2])
+                                with name_col:
+                                    st.write(candidate_label)
+                                with status_col:
+                                    if str(row.get("status", "")).strip().casefold() == "shortlisted":
+                                        st.markdown(
+                                            "<span style='display:inline-block;background:#e4f6e9;color:#22643b;"
+                                            "border:1px solid #b8e2c4;border-radius:14px;padding:3px 9px;"
+                                            "font-size:12px;font-weight:700;white-space:nowrap'>✓ Shortlisted</span>",
+                                            unsafe_allow_html=True,
                                         )
-                                        if send_error:
-                                            st.error("Message could not be sent: " + send_error)
+                                st.caption(row.get("resume_filename") or "No saved resume filename")
+                            with right_resume:
+                                application_status = str(row.get("status") or "Applied")
+                                if row.get("resume_filename") and st.button("Load resume", key=f"load_resume_{row.get('id')}", use_container_width=True):
+                                    resume_payload, resume_error = api_request(
+                                        "GET", f"/applications/{row.get('id')}/resume", token=token
+                                    )
+                                    if resume_error:
+                                        st.error("Resume unavailable: " + resume_error)
+                                    else:
+                                        st.session_state[f"resume_download_{row.get('id')}"] = resume_payload
+                                if application_status != "Shortlisted" and application_status not in {"Rejected", "Selected"}:
+                                    if st.button("✓ Shortlist", key=f"quick_shortlist_{row.get('id')}", use_container_width=True):
+                                        _, shortlist_error = api_request(
+                                            "PATCH",
+                                            f"/applications/{row.get('id')}/status",
+                                            token=token,
+                                            params={"new_status": "Shortlisted"},
+                                        )
+                                        if shortlist_error:
+                                            st.error("Candidate could not be shortlisted: " + shortlist_error)
                                         else:
-                                            st.success("Message sent.")
+                                            st.success(f"{candidate_label} shortlisted.")
                                             st.rerun()
-
-                        resume_payload = st.session_state.get(f"resume_download_{row.get('id')}")
-                        if resume_payload and resume_payload.get("resume_data"):
-                            try:
-                                resume_bytes = base64.b64decode(resume_payload["resume_data"])
-                                st.download_button(
-                                    f"Download {resume_payload.get('filename', 'resume.pdf')}",
-                                    data=resume_bytes,
-                                    file_name=resume_payload.get("filename", "candidate_resume.pdf"),
-                                    mime="application/pdf",
-                                    key=f"download_resume_{row.get('id')}",
+                            with st.expander(f"Messages · {candidate_label}", expanded=False):
+                                conversation_id = int(row.get("id"))
+                                message_payload, message_error = api_request(
+                                    "GET", f"/applications/{conversation_id}/messages", token=token
                                 )
-                            except Exception:
-                                st.warning("This saved resume could not be decoded.")
+                                if message_error:
+                                    st.error("Messages could not be loaded: " + message_error)
+                                else:
+                                    conversation_messages = message_payload.get("messages", [])
+                                    if not conversation_messages:
+                                        st.caption("No messages yet. Start the conversation about the application or interview.")
+                                    for message in conversation_messages:
+                                        who = "You" if message.get("is_mine") else candidate_label
+                                        st.markdown(f"**{safe(who)}** · {safe(str(message.get('created_at') or '')[:16].replace('T', ' '))}")
+                                        st.write(str(message.get("body", "")))
+                                    with st.form(f"send_message_{conversation_id}"):
+                                        message_body = st.text_area("Write a message", key=f"message_body_{conversation_id}", max_chars=5000)
+                                        send_message = st.form_submit_button("Send message", type="primary")
+                                    if send_message:
+                                        if not message_body.strip():
+                                            st.warning("Write a message before sending.")
+                                        else:
+                                            _, send_error = api_request(
+                                                "POST", f"/applications/{conversation_id}/messages",
+                                                token=token, json={"body": message_body}
+                                            )
+                                            if send_error:
+                                                st.error("Message could not be sent: " + send_error)
+                                            else:
+                                                st.success("Message sent.")
+                                                st.rerun()
 
-                    st.markdown("### 🤖 Automatic AI Candidate Ranking")
-                    matchable_apps = [row for row in selected_apps if str(row.get("resume_text") or "").strip()]
-                    job_description = next((str(row.get("job_description") or "") for row in selected_apps if row.get("job_description")), "")
-                    if not matchable_apps:
-                        st.info("Applicants will appear in AI ranking automatically after they save a readable PDF resume to their profile and apply.")
-                    elif not job_description.strip():
-                        st.warning("Job description is not available, so candidate matching cannot run for this job yet.")
-                    else:
-                        resumes = {}
-                        applicant_lookup = {}
-                        for row in matchable_apps:
-                            email = str(row.get("candidate_email") or "")
-                            label = str(row.get("candidate_name") or email or f"Candidate {row.get('candidate_id')}")
-                            unique_label = f"{label} ({email})" if email else label
-                            resumes[unique_label] = str(row.get("resume_text") or "")
-                            applicant_lookup[unique_label] = row
-                        try:
-                            ranked = match_candidates(job_description, resumes)
-                            ranked_rows = []
-                            for rank, candidate in enumerate(ranked, start=1):
-                                row = applicant_lookup.get(candidate.get("name"), {})
-                                ranked_rows.append({
-                                    "Rank": rank,
-                                    "Candidate": candidate.get("name", "Candidate"),
-                                    "Match Score": f"{float(candidate.get('final_score', 0)):.1f}%",
-                                    "Skill Coverage": f"{float(candidate.get('skill_coverage', 0)):.1f}%",
-                                    "Experience Fit": f"{float(candidate.get('experience_fit', 100)):.1f}%",
-                                    "Education Fit": f"{float(candidate.get('education_fit', 100)):.1f}%",
-                                    "Matched Skills": ", ".join(candidate.get("matched_skills") or []),
-                                    "Missing Skills": ", ".join(candidate.get("missing_skills") or []),
-                                    "Why this rank": " | ".join(candidate.get("reasons") or []),
-                                    "Application Status": row.get("status", "Applied"),
-                                    "Resume": row.get("resume_filename", ""),
-                                })
-                            if ranked_rows:
-                                st.dataframe(pd.DataFrame(ranked_rows), use_container_width=True, hide_index=True)
-                                best = ranked_rows[0]
-                                st.success(f"Best current match: {best['Candidate']} — {best['Match Score']}")
-                                st.caption("Ranking updates from all applicants currently saved for this job. Scores are decision support; review each resume before shortlisting.")
+                            resume_payload = st.session_state.get(f"resume_download_{row.get('id')}")
+                            if resume_payload and resume_payload.get("resume_data"):
+                                try:
+                                    resume_bytes = base64.b64decode(resume_payload["resume_data"])
+                                    st.download_button(
+                                        f"Download {resume_payload.get('filename', 'resume.pdf')}",
+                                        data=resume_bytes,
+                                        file_name=resume_payload.get("filename", "candidate_resume.pdf"),
+                                        mime="application/pdf",
+                                        key=f"download_resume_{row.get('id')}",
+                                    )
+                                except Exception:
+                                    st.warning("This saved resume could not be decoded.")
+
+                        st.markdown("### 🤖 Automatic AI Candidate Ranking")
+                        matchable_apps = [row for row in selected_apps if str(row.get("resume_text") or "").strip()]
+                        job_description = next((str(row.get("job_description") or "") for row in selected_apps if row.get("job_description")), "")
+                        if not matchable_apps:
+                            st.info("Applicants will appear in AI ranking automatically after they save a readable PDF resume to their profile and apply.")
+                        elif not job_description.strip():
+                            st.warning("Job description is not available, so candidate matching cannot run for this job yet.")
+                        else:
+                            resumes = {}
+                            applicant_lookup = {}
+                            for row in matchable_apps:
+                                email = str(row.get("candidate_email") or "")
+                                label = str(row.get("candidate_name") or email or f"Candidate {row.get('candidate_id')}")
+                                unique_label = f"{label} ({email})" if email else label
+                                resumes[unique_label] = str(row.get("resume_text") or "")
+                                applicant_lookup[unique_label] = row
+                            try:
+                                ranked = match_candidates(job_description, resumes)
+                                ranked_rows = []
+                                for rank, candidate in enumerate(ranked, start=1):
+                                    row = applicant_lookup.get(candidate.get("name"), {})
+                                    ranked_rows.append({
+                                        "Rank": rank,
+                                        "Candidate": candidate.get("name", "Candidate"),
+                                        "Match Score": f"{float(candidate.get('final_score', 0)):.1f}%",
+                                        "Skill Coverage": f"{float(candidate.get('skill_coverage', 0)):.1f}%",
+                                        "Experience Fit": f"{float(candidate.get('experience_fit', 100)):.1f}%",
+                                        "Education Fit": f"{float(candidate.get('education_fit', 100)):.1f}%",
+                                        "Matched Skills": ", ".join(candidate.get("matched_skills") or []),
+                                        "Missing Skills": ", ".join(candidate.get("missing_skills") or []),
+                                        "Why this rank": " | ".join(candidate.get("reasons") or []),
+                                        "Application Status": row.get("status", "Applied"),
+                                        "Resume": row.get("resume_filename", ""),
+                                    })
+                                if ranked_rows:
+                                    st.dataframe(pd.DataFrame(ranked_rows), use_container_width=True, hide_index=True)
+                                    best = ranked_rows[0]
+                                    st.success(f"Best current match: {best['Candidate']} — {best['Match Score']}")
+                                    st.caption("Ranking updates from all applicants currently saved for this job. Scores are decision support; review each resume before shortlisting.")
+                                else:
+                                    st.info("No candidate matches were returned for this job.")
+                            except Exception as error:
+                                st.warning("Automatic matching could not run: " + str(error))
+
+                        status_options = ["Applied", "Under Review", "Shortlisted", "Rejected", "Selected"]
+                        chosen = st.selectbox("Update application status", status_options, key=f"status_{selected_job_id}")
+                        candidate_options = {f"{row.get('candidate_name') or row.get('candidate_email')} · #{row.get('id')}": row for row in selected_apps}
+                        chosen_candidate = st.selectbox("Candidate", list(candidate_options), key=f"candidate_status_{selected_job_id}")
+                        if st.button("Save status", type="primary"):
+                            application = candidate_options[chosen_candidate]
+                            _, error = api_request("PATCH", f"/applications/{application['id']}/status", token=token, params={"new_status": chosen})
+                            if error:
+                                st.error(error)
                             else:
-                                st.info("No candidate matches were returned for this job.")
-                        except Exception as error:
-                            st.warning("Automatic matching could not run: " + str(error))
+                                st.success("Application status updated successfully.")
+                                st.rerun()
 
-                    status_options = ["Applied", "Under Review", "Shortlisted", "Rejected", "Selected"]
-                    chosen = st.selectbox("Update application status", status_options, key=f"status_{selected_job_id}")
-                    candidate_options = {f"{row.get('candidate_name') or row.get('candidate_email')} · #{row.get('id')}": row for row in selected_apps}
-                    chosen_candidate = st.selectbox("Candidate", list(candidate_options), key=f"candidate_status_{selected_job_id}")
-                    if st.button("Save status", type="primary"):
-                        application = candidate_options[chosen_candidate]
-                        _, error = api_request("PATCH", f"/applications/{application['id']}/status", token=token, params={"new_status": chosen})
-                        if error:
-                            st.error(error)
+                with st.expander(f"Edit details · {job.get('title', 'Job')}"):
+                    with st.form(f"edit_job_form_{job_id}"):
+                        edit_title = st.text_input("Job title", value=str(job.get("title") or ""), key=f"edit_title_{job_id}")
+                        edit_department = st.text_input("Department", value=str(job.get("department") or "Other"), key=f"edit_department_{job_id}")
+                        edit_description = st.text_area("Job description", value=str(job.get("description") or ""), key=f"edit_description_{job_id}")
+                        edit_skills = st.text_input("Required skills", value=str(job.get("required_skills") or ""), key=f"edit_skills_{job_id}")
+                        edit_min_budget = st.number_input("Minimum budget (INR)", min_value=0, value=max(0, int(job.get("min_budget") or 0)), step=1000, key=f"edit_min_{job_id}")
+                        edit_max_budget = st.number_input("Maximum budget (INR)", min_value=0, value=max(0, int(job.get("max_budget") or 0)), step=1000, key=f"edit_max_{job_id}")
+                        edit_work_mode = st.selectbox("Work mode", ["Remote", "Hybrid", "On-site"], index=["Remote", "Hybrid", "On-site"].index(job.get("work_mode")) if job.get("work_mode") in ["Remote", "Hybrid", "On-site"] else 0, key=f"edit_mode_{job_id}")
+                        edit_timezone = st.text_input("Timezone", value=str(job.get("timezone") or "Asia/Kolkata"), key=f"edit_timezone_{job_id}")
+                        save_job_changes = st.form_submit_button("Save job changes", type="primary", use_container_width=True)
+                    if save_job_changes:
+                        if len(edit_title.strip()) < 2 or len(edit_description.strip()) < 10:
+                            st.error("Enter a job title and a description of at least 10 characters.")
+                        elif edit_max_budget and edit_min_budget > edit_max_budget:
+                            st.error("Minimum budget cannot exceed maximum budget.")
                         else:
-                            st.success("Application status updated successfully.")
-                            st.rerun()
-
-            with st.expander(f"Edit details · {job.get('title', 'Job')}"):
-                with st.form(f"edit_job_form_{job_id}"):
-                    edit_title = st.text_input("Job title", value=str(job.get("title") or ""), key=f"edit_title_{job_id}")
-                    edit_department = st.text_input("Department", value=str(job.get("department") or "Other"), key=f"edit_department_{job_id}")
-                    edit_description = st.text_area("Job description", value=str(job.get("description") or ""), key=f"edit_description_{job_id}")
-                    edit_skills = st.text_input("Required skills", value=str(job.get("required_skills") or ""), key=f"edit_skills_{job_id}")
-                    edit_min_budget = st.number_input("Minimum budget (INR)", min_value=0, value=max(0, int(job.get("min_budget") or 0)), step=1000, key=f"edit_min_{job_id}")
-                    edit_max_budget = st.number_input("Maximum budget (INR)", min_value=0, value=max(0, int(job.get("max_budget") or 0)), step=1000, key=f"edit_max_{job_id}")
-                    edit_work_mode = st.selectbox("Work mode", ["Remote", "Hybrid", "On-site"], index=["Remote", "Hybrid", "On-site"].index(job.get("work_mode")) if job.get("work_mode") in ["Remote", "Hybrid", "On-site"] else 0, key=f"edit_mode_{job_id}")
-                    edit_timezone = st.text_input("Timezone", value=str(job.get("timezone") or "Asia/Kolkata"), key=f"edit_timezone_{job_id}")
-                    save_job_changes = st.form_submit_button("Save job changes", type="primary", use_container_width=True)
-                if save_job_changes:
-                    if len(edit_title.strip()) < 2 or len(edit_description.strip()) < 10:
-                        st.error("Enter a job title and a description of at least 10 characters.")
-                    elif edit_max_budget and edit_min_budget > edit_max_budget:
-                        st.error("Minimum budget cannot exceed maximum budget.")
-                    else:
-                        update_payload = {
-                            "title": edit_title.strip(),
-                            "department": edit_department.strip() or "Other",
-                            "description": edit_description.strip(),
-                            "required_skills": edit_skills.strip(),
-                            "min_budget": int(edit_min_budget),
-                            "max_budget": int(edit_max_budget),
-                            "work_mode": edit_work_mode,
-                            "timezone": edit_timezone.strip() or "Asia/Kolkata",
-                        }
-                        _, edit_error = api_request("PUT", f"/jobs/{job_id}", token=token, json=update_payload)
-                        if edit_error:
-                            st.error("Job could not be updated: " + edit_error)
-                        else:
-                            st.success("Job details updated successfully.")
-                            st.rerun()
+                            update_payload = {
+                                "title": edit_title.strip(),
+                                "department": edit_department.strip() or "Other",
+                                "description": edit_description.strip(),
+                                "required_skills": edit_skills.strip(),
+                                "min_budget": int(edit_min_budget),
+                                "max_budget": int(edit_max_budget),
+                                "work_mode": edit_work_mode,
+                                "timezone": edit_timezone.strip() or "Asia/Kolkata",
+                            }
+                            _, edit_error = api_request("PUT", f"/jobs/{job_id}", token=token, json=update_payload)
+                            if edit_error:
+                                st.error("Job could not be updated: " + edit_error)
+                            else:
+                                st.success("Job details updated successfully.")
+                                st.rerun()
 
 
 
