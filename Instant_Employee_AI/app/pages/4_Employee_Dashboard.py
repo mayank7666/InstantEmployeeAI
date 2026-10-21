@@ -497,6 +497,13 @@ with left:
     if not jobs:
         st.info("There are no database jobs for your account yet. Select Post a Job to create your first vacancy.")
     else:
+        selected_job_id = st.session_state.get("dashboard_selected_job")
+        if selected_job_id is None:
+            try:
+                selected_job_id = int(st.query_params.get("selected_job", ""))
+                st.session_state["dashboard_selected_job"] = selected_job_id
+            except (TypeError, ValueError):
+                selected_job_id = None
         for job in jobs[:8]:
             job_id = int(job.get("id"))
             status = "Active" if job.get("is_active") else "Closed"
@@ -522,50 +529,8 @@ with left:
                         st.success("Job status updated.")
                         st.rerun()
 
-            with st.expander(f"Edit details · {job.get('title', 'Job')}"):
-                with st.form(f"edit_job_form_{job_id}"):
-                    edit_title = st.text_input("Job title", value=str(job.get("title") or ""), key=f"edit_title_{job_id}")
-                    edit_department = st.text_input("Department", value=str(job.get("department") or "Other"), key=f"edit_department_{job_id}")
-                    edit_description = st.text_area("Job description", value=str(job.get("description") or ""), key=f"edit_description_{job_id}")
-                    edit_skills = st.text_input("Required skills", value=str(job.get("required_skills") or ""), key=f"edit_skills_{job_id}")
-                    edit_min_budget = st.number_input("Minimum budget (INR)", min_value=0, value=max(0, int(job.get("min_budget") or 0)), step=1000, key=f"edit_min_{job_id}")
-                    edit_max_budget = st.number_input("Maximum budget (INR)", min_value=0, value=max(0, int(job.get("max_budget") or 0)), step=1000, key=f"edit_max_{job_id}")
-                    edit_work_mode = st.selectbox("Work mode", ["Remote", "Hybrid", "On-site"], index=["Remote", "Hybrid", "On-site"].index(job.get("work_mode")) if job.get("work_mode") in ["Remote", "Hybrid", "On-site"] else 0, key=f"edit_mode_{job_id}")
-                    edit_timezone = st.text_input("Timezone", value=str(job.get("timezone") or "Asia/Kolkata"), key=f"edit_timezone_{job_id}")
-                    save_job_changes = st.form_submit_button("Save job changes", type="primary", use_container_width=True)
-                if save_job_changes:
-                    if len(edit_title.strip()) < 2 or len(edit_description.strip()) < 10:
-                        st.error("Enter a job title and a description of at least 10 characters.")
-                    elif edit_max_budget and edit_min_budget > edit_max_budget:
-                        st.error("Minimum budget cannot exceed maximum budget.")
-                    else:
-                        update_payload = {
-                            "title": edit_title.strip(),
-                            "department": edit_department.strip() or "Other",
-                            "description": edit_description.strip(),
-                            "required_skills": edit_skills.strip(),
-                            "min_budget": int(edit_min_budget),
-                            "max_budget": int(edit_max_budget),
-                            "work_mode": edit_work_mode,
-                            "timezone": edit_timezone.strip() or "Asia/Kolkata",
-                        }
-                        _, edit_error = api_request("PUT", f"/jobs/{job_id}", token=token, json=update_payload)
-                        if edit_error:
-                            st.error("Job could not be updated: " + edit_error)
-                        else:
-                            st.success("Job details updated successfully.")
-                            st.rerun()
 
-
-            selected_job_id = st.session_state.get("dashboard_selected_job")
-            if selected_job_id is None:
-                try:
-                    selected_job_id = int(st.query_params.get("selected_job", ""))
-                    st.session_state["dashboard_selected_job"] = selected_job_id
-                except (TypeError, ValueError):
-                    selected_job_id = None
-
-            if selected_job_id is not None:
+            if selected_job_id == job_id:
                 st.divider()
                 st.subheader("Applications for selected job")
                 selected_apps = [row for row in applications if row.get("job_id") == selected_job_id]
@@ -732,6 +697,43 @@ with left:
                         else:
                             st.success("Application status updated successfully.")
                             st.rerun()
+
+            with st.expander(f"Edit details · {job.get('title', 'Job')}"):
+                with st.form(f"edit_job_form_{job_id}"):
+                    edit_title = st.text_input("Job title", value=str(job.get("title") or ""), key=f"edit_title_{job_id}")
+                    edit_department = st.text_input("Department", value=str(job.get("department") or "Other"), key=f"edit_department_{job_id}")
+                    edit_description = st.text_area("Job description", value=str(job.get("description") or ""), key=f"edit_description_{job_id}")
+                    edit_skills = st.text_input("Required skills", value=str(job.get("required_skills") or ""), key=f"edit_skills_{job_id}")
+                    edit_min_budget = st.number_input("Minimum budget (INR)", min_value=0, value=max(0, int(job.get("min_budget") or 0)), step=1000, key=f"edit_min_{job_id}")
+                    edit_max_budget = st.number_input("Maximum budget (INR)", min_value=0, value=max(0, int(job.get("max_budget") or 0)), step=1000, key=f"edit_max_{job_id}")
+                    edit_work_mode = st.selectbox("Work mode", ["Remote", "Hybrid", "On-site"], index=["Remote", "Hybrid", "On-site"].index(job.get("work_mode")) if job.get("work_mode") in ["Remote", "Hybrid", "On-site"] else 0, key=f"edit_mode_{job_id}")
+                    edit_timezone = st.text_input("Timezone", value=str(job.get("timezone") or "Asia/Kolkata"), key=f"edit_timezone_{job_id}")
+                    save_job_changes = st.form_submit_button("Save job changes", type="primary", use_container_width=True)
+                if save_job_changes:
+                    if len(edit_title.strip()) < 2 or len(edit_description.strip()) < 10:
+                        st.error("Enter a job title and a description of at least 10 characters.")
+                    elif edit_max_budget and edit_min_budget > edit_max_budget:
+                        st.error("Minimum budget cannot exceed maximum budget.")
+                    else:
+                        update_payload = {
+                            "title": edit_title.strip(),
+                            "department": edit_department.strip() or "Other",
+                            "description": edit_description.strip(),
+                            "required_skills": edit_skills.strip(),
+                            "min_budget": int(edit_min_budget),
+                            "max_budget": int(edit_max_budget),
+                            "work_mode": edit_work_mode,
+                            "timezone": edit_timezone.strip() or "Asia/Kolkata",
+                        }
+                        _, edit_error = api_request("PUT", f"/jobs/{job_id}", token=token, json=update_payload)
+                        if edit_error:
+                            st.error("Job could not be updated: " + edit_error)
+                        else:
+                            st.success("Job details updated successfully.")
+                            st.rerun()
+
+
+
 with right:
     st.subheader("Quick Actions")
     st.page_link("pages/2_Job_Posting.py", label="＋  Post a Job", use_container_width=True)
