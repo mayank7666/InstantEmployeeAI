@@ -1002,6 +1002,94 @@ input,textarea,select,button{max-width:100%}
  .naukri-login-benefits{padding:22px 16px!important}
  .stApp [data-testid="stForm"]{padding:18px 14px!important}
 }
+
+/* Final responsive polish for candidate homepage and job browsing (desktop/tablet/mobile). */
+.stApp .st-key-candidate_top_nav{
+  width:100%!important;max-width:100%!important;box-sizing:border-box!important;
+  padding:10px 12px!important;border-radius:14px!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="stHorizontalBlock"]{
+  display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:clamp(5px,1vw,14px)!important;
+  width:100%!important;max-width:100%!important;
+}
+.stApp .st-key-candidate_top_nav [data-testid="column"]{
+  min-width:0!important;max-width:100%!important;flex-shrink:1!important;padding:0!important;
+}
+.stApp .st-key-candidate_top_nav button{white-space:normal!important;overflow-wrap:anywhere!important}
+.stApp .landing-hero{width:100%;box-sizing:border-box;gap:clamp(18px,3vw,42px)}
+.stApp .role-card,.stApp .feature-card,.stApp .step,.stApp .recommended-job-card,.stApp .company-job-card{
+  box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;
+}
+.stApp .recommended-job-title,.stApp .recommended-job-company,.stApp .company-job-name{
+  overflow-wrap:anywhere;white-space:normal;
+}
+.stApp [data-testid="stDataFrame"],.stApp [data-testid="stTable"],.stApp [data-testid="stDataEditor"]{
+  width:100%!important;max-width:100%!important;overflow-x:auto!important;
+}
+.stApp .st-key-company_showcase_grid [data-testid="stHorizontalBlock"]{flex-wrap:wrap!important}
+@media (max-width: 1100px){
+  .stApp .landing-hero{grid-template-columns:minmax(0,1fr)!important;padding:clamp(20px,4vw,34px)!important}
+  .stApp .landing-hero h1{font-size:clamp(30px,5vw,48px)!important;line-height:1.12!important}
+  .stApp .landing-visual{min-height:0!important}
+  .stApp .st-key-candidate_top_nav [data-testid="stHorizontalBlock"]{gap:7px!important}
+}
+@media (max-width: 760px){
+  .stApp .st-key-candidate_top_nav{padding:10px!important;margin-bottom:14px!important}
+  .stApp .st-key-candidate_top_nav [data-testid="stHorizontalBlock"]{
+    flex-flow:row wrap!important;justify-content:flex-start!important;gap:7px!important;
+  }
+  .stApp .st-key-candidate_top_nav [data-testid="column"]{
+    flex:1 1 calc(33.333% - 7px)!important;width:auto!important;max-width:none!important;
+  }
+  .stApp .st-key-candidate_top_nav [data-testid="column"]:first-child{
+    flex:1 1 100%!important;order:0!important;
+  }
+  .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(5){
+    flex:1 1 100%!important;order:1!important;
+  }
+  .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(2){order:2!important}
+  .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(3){order:3!important}
+  .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(4){order:4!important}
+  .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(6){order:5!important}
+  .stApp .st-key-candidate_top_nav button{min-height:40px!important;font-size:12px!important;padding:7px 6px!important}
+  .stApp .st-key-candidate_top_nav input{font-size:14px!important}
+  .stApp .landing-hero{padding:22px 18px!important;border-radius:20px!important}
+  .stApp .landing-hero h1{font-size:clamp(28px,8vw,40px)!important;line-height:1.12!important}
+  .stApp .landing-hero p{font-size:14px!important}
+  .stApp .landing-trust{display:flex!important;flex-wrap:wrap!important;gap:7px!important}
+  .stApp .landing-trust span{font-size:11px!important;padding:7px 9px!important}
+  .stApp .role-card{min-height:0!important;padding:20px!important}
+  .stApp [data-testid="stHorizontalBlock"]:has(.role-card),
+  .stApp [data-testid="stHorizontalBlock"]:has(.feature-card),
+  .stApp [data-testid="stHorizontalBlock"]:has(.step),
+  .stApp [data-testid="stHorizontalBlock"]:has(.recommended-job-card){
+    flex-flow:row wrap!important;gap:12px!important;
+  }
+  .stApp [data-testid="stHorizontalBlock"]:has(.role-card)>[data-testid="column"],
+  .stApp [data-testid="stHorizontalBlock"]:has(.feature-card)>[data-testid="column"],
+  .stApp [data-testid="stHorizontalBlock"]:has(.step)>[data-testid="column"],
+  .stApp [data-testid="stHorizontalBlock"]:has(.recommended-job-card)>[data-testid="column"]{
+    flex:1 1 100%!important;width:100%!important;max-width:100%!important;
+  }
+  .stApp .st-key-company_showcase_grid [data-testid="column"]{
+    flex:1 1 calc(50% - 8px)!important;width:auto!important;max-width:calc(50% - 4px)!important;
+  }
+  .stApp .recommended-job-card{min-height:0!important;padding:14px!important}
+  .stApp .recommended-job-title{white-space:normal!important;font-size:15px!important}
+  .stApp .candidate-site-footer{padding:24px 16px!important}
+  .stApp .candidate-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:22px!important}
+  .stApp .candidate-footer-brand{font-size:21px!important}
+  .stApp [data-testid="stMetric"]{min-width:0!important}
+}
+@media (max-width: 420px){
+  .stApp .st-key-candidate_top_nav [data-testid="column"]{flex-basis:calc(50% - 7px)!important}
+  .stApp .st-key-candidate_top_nav [data-testid="column"]:first-child,
+  .stApp .st-key-candidate_top_nav [data-testid="column"]:nth-child(5){flex-basis:100%!important}
+  .stApp .landing-hero{padding:18px 14px!important}
+  .stApp .landing-hero h1{font-size:28px!important}
+  .stApp .st-key-company_showcase_grid [data-testid="column"]{flex-basis:100%!important;max-width:100%!important}
+  .stApp .candidate-footer-grid{grid-template-columns:minmax(0,1fr)!important}
+}
 </style>
 """, unsafe_allow_html=True)
 
