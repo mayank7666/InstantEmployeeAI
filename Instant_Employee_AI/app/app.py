@@ -1294,7 +1294,7 @@ if view == "home":
                     st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
             with menu_col:
                 with st.container(key="mobile_menu_shell"):
-                        with st.popover("☰", help="Open navigation menu", use_container_width=True):
+                    with st.popover("☰", help="Open navigation menu", use_container_width=True):
                         st.markdown("**Instant Employee**")
                         if st.button("Prepare", key="mobile_nav_prepare", use_container_width=True):
                             st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
