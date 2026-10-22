@@ -1095,6 +1095,16 @@ if st.query_params.get("view") == "employee":
 # Sidebar navigation removed: candidate navigation is now in the top bar and footer.
 view = st.session_state.view
 
+def sync_home_search_from_header():
+    """Make the persistent header search feed the homepage job results."""
+    st.session_state["home_job_search"] = st.session_state.get("campus_header_search", "")
+    st.session_state["view"] = "home"
+
+def sync_home_search_from_auth_header():
+    """Route a search entered before login to the public job listings."""
+    st.session_state["home_job_search"] = st.session_state.get("auth_header_search", "")
+    st.session_state["view"] = "home"
+
 # Persistent in-app back navigation: keep users inside Instant Employee AI.
 BACK_TARGETS = {
     "home": "home",
@@ -1132,7 +1142,7 @@ if view == "candidate_auth":
             if st.button("Services", key="auth_nav_services", use_container_width=True):
                 st.session_state.view = "all_jobs"; st.rerun()
         with auth_search:
-            st.text_input("Search jobs", placeholder="Search jobs here", key="auth_header_search", label_visibility="collapsed")
+            st.text_input("Search jobs", placeholder="Search jobs here", key="auth_header_search", label_visibility="collapsed", on_change=sync_home_search_from_auth_header)
         with auth_login:
             if st.button("Login", key="auth_nav_login", use_container_width=True):
                 st.session_state.candidate_auth_mode = "login"; st.session_state.candidate_auth_mode_selector = "Login"; st.rerun()
@@ -1163,7 +1173,7 @@ if view == "home":
             if st.button("Opportunities", key="top_nav_opportunities", use_container_width=True):
                 st.session_state.view = "all_jobs"; st.rerun()
         with nav_search:
-            st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed")
+            st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed", on_change=sync_home_search_from_header)
         with nav_profile_link:
             if st.button("My Profile", key="top_nav_my_profile", help="Open your candidate profile", use_container_width=True):
                 st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
@@ -1212,28 +1222,43 @@ if view == "home":
 
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
-    # Job search controls remain visible on the home page.
+    # Functional homepage job search and filters.
     st.markdown("### Find your next role")
     search_col, dept_col, mode_col = st.columns([2, 1, 1])
     with search_col:
-        st.text_input("Search jobs", placeholder="Job title, skill, or keyword", key="home_job_search")
+        home_search = st.text_input("Search jobs", placeholder="Job title, skill, or keyword", key="home_job_search")
     title_col = next((c for c in jobs.columns if str(c).strip().lower() in {"job title", "title", "job_title"}), None)
     desc_col = next((c for c in jobs.columns if str(c).strip().lower() in {"description", "job description", "job_description"}), None)
     skills_col = next((c for c in jobs.columns if str(c).strip().lower() in {"required skills", "required_skills", "skills"}), None)
     dept_col_name = next((c for c in jobs.columns if str(c).strip().lower() in {"department", "category", "job category"}), None)
     work_mode_col = next((c for c in jobs.columns if str(c).strip().lower() in {"work mode", "work_mode", "mode"}), None)
-    with dept_col:
-        departments = sorted({str(x).strip() for x in jobs[dept_col_name].tolist() if str(x).strip()}) if dept_col_name and not jobs.empty else []
-        st.selectbox("Category", ["All categories"] + departments, index=0, key="home_category_filter")
-    with mode_col:
-        modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()}) if work_mode_col and not jobs.empty else []
-        st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
-    available_jobs_col, _ = st.columns([1, 2])
-    with available_jobs_col:
-        st.metric("Available jobs", len(jobs))
-
-    # Company cards always remain visible on the home page.
     company_col_name = next((col for col in jobs.columns if str(col).strip().lower() in {"company name", "company", "employer"}), None)
+    with dept_col:
+        departments = sorted({str(x).strip() for x in jobs[dept_col_name].tolist() if str(x).strip()} if dept_col_name and not jobs.empty else [])
+        selected_home_department = st.selectbox("Category", ["All categories"] + departments, index=0, key="home_category_filter")
+    with mode_col:
+        modes = sorted({str(x).strip() for x in jobs[work_mode_col].tolist() if str(x).strip()} if work_mode_col and not jobs.empty else [])
+        selected_home_mode = st.selectbox("Work mode", ["All modes"] + modes, index=0, key="home_work_mode_filter")
+
+    filtered_home_jobs = jobs.copy()
+    if home_search.strip() and not filtered_home_jobs.empty:
+        searchable_cols = [col for col in [title_col, desc_col, skills_col, dept_col_name, work_mode_col, company_col_name] if col]
+        if searchable_cols:
+            search_terms = [term.casefold() for term in home_search.split() if term]
+            searchable_text = filtered_home_jobs[searchable_cols].fillna("").astype(str).apply(lambda row: " ".join(row.values), axis=1)
+            filtered_home_jobs = filtered_home_jobs[searchable_text.apply(lambda value: all(term in value.casefold() for term in search_terms))]
+    if selected_home_department != "All categories" and dept_col_name:
+        filtered_home_jobs = filtered_home_jobs[filtered_home_jobs[dept_col_name].astype(str).str.casefold() == selected_home_department.casefold()]
+    if selected_home_mode != "All modes" and work_mode_col:
+        filtered_home_jobs = filtered_home_jobs[filtered_home_jobs[work_mode_col].astype(str).str.casefold() == selected_home_mode.casefold()]
+
+    metric_col, hint_col = st.columns([1, 3], vertical_alignment="center")
+    with metric_col:
+        st.metric("Matching jobs", len(filtered_home_jobs))
+    with hint_col:
+        st.caption("Search by role, skill or keyword, then narrow the results by category and work mode.")
+
+    # Only show real employers present in job data; avoid placeholder brands as live clients.
     employer_names = []
     if company_col_name and not jobs.empty:
         employer_names = sorted({
@@ -1241,48 +1266,42 @@ if view == "home":
             if str(value).strip() and str(value).strip().lower() not in {"company", "nan", "none"}
             and "@" not in str(value)
         })
-    st.markdown('<div class="market-section-heading"><h3>Explore jobs by top companies</h3></div>', unsafe_allow_html=True)
     if employer_names:
-        showcase = [{"name": name, "count": int((jobs[company_col_name].astype(str).str.strip() == name).sum()), "demo": False} for name in employer_names[:4]]
-    else:
-        showcase = [
-            {"name": "TCS", "count": 8, "demo": True},
-            {"name": "Infosys", "count": 6, "demo": True},
-            {"name": "Wipro", "count": 5, "demo": True},
-            {"name": "HCLTech", "count": 4, "demo": True},
-        ]
-    with st.container(key="company_showcase_grid"):
-        company_cards = st.columns(4, gap="small")
-        for company_index, company in enumerate(showcase):
-            company_name = company["name"]
-            with company_cards[company_index]:
-                brand_marks = {
-                    "TCS": '<span class="brand-mark brand-tcs">TCS</span>',
-                    "Infosys": '<span class="brand-mark brand-infosys">Infosys</span>',
-                    "Wipro": '<span class="brand-mark brand-wipro">wipro</span>',
-                    "HCLTech": '<span class="brand-mark brand-hcl">HCLTech</span>',
-                }
-                logo_html = brand_marks.get(company_name, f'<span class="brand-mark brand-generic">{html.escape(company_name[:2].upper())}</span>')
-                st.markdown(f"""
-                <div class="company-job-card">
-                  <div class="company-logo-wrap">{logo_html}</div>
-                  <div class="company-job-name">{html.escape(company_name)}</div>
-                  <div class="company-job-count">{company["count"]} open jobs</div>
-                  {('<div class="company-demo-note">Example</div>' if company.get("demo") else '')}
-                </div>
-                """, unsafe_allow_html=True)
-                if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
-                    st.session_state["all_jobs_company_filter"] = company_name if not company.get("demo") else "All companies"
-                    st.session_state.view = "all_jobs"
-                    st.rerun()
+        st.markdown('<div class="market-section-heading"><h3>Explore jobs by employer</h3></div>', unsafe_allow_html=True)
+        showcase = [{"name": name, "count": int((jobs[company_col_name].astype(str).str.strip() == name).sum())} for name in employer_names[:4]]
+        with st.container(key="company_showcase_grid"):
+            company_cards = st.columns(min(4, len(showcase)), gap="small")
+            for company_index, company in enumerate(showcase):
+                company_name = company["name"]
+                with company_cards[company_index]:
+                    brand_marks = {
+                        "TCS": '<span class="brand-mark brand-tcs">TCS</span>',
+                        "Infosys": '<span class="brand-mark brand-infosys">Infosys</span>',
+                        "Wipro": '<span class="brand-mark brand-wipro">wipro</span>',
+                        "HCLTech": '<span class="brand-mark brand-hcl">HCLTech</span>',
+                    }
+                    logo_html = brand_marks.get(company_name, f'<span class="brand-mark brand-generic">{html.escape(company_name[:2].upper())}</span>')
+                    st.markdown(f"""
+                    <div class="company-job-card">
+                      <div class="company-logo-wrap">{logo_html}</div>
+                      <div class="company-job-name">{html.escape(company_name)}</div>
+                      <div class="company-job-count">{company["count"]} open jobs</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    if st.button("View jobs  →", key=f"company_jobs_{company_index}", use_container_width=True):
+                        st.session_state["all_jobs_company_filter"] = company_name
+                        st.session_state.view = "all_jobs"
+                        st.rerun()
 
     # Show a few recent opportunities on the home page.
     st.markdown("### Recent jobs")
-    st.caption("A preview of the latest opportunities. Select View all to browse every available job.")
+    st.caption("A preview of opportunities matching your current search. Select View all to browse the full listings.")
     if jobs.empty:
         st.info("No jobs are available right now. Please check again after companies post new roles.")
+    elif filtered_home_jobs.empty:
+        st.info("No jobs match these search filters. Try a different keyword, category or work mode.")
     else:
-        recent_jobs = jobs.head(3)
+        recent_jobs = filtered_home_jobs.head(3)
         recent_cols = st.columns(3, gap="medium")
         for rec_index, (row_index, rec_job) in enumerate(recent_jobs.iterrows()):
             rec_title = str(rec_job.get(title_col, "Open role")) if title_col else "Open role"
@@ -1307,6 +1326,9 @@ if view == "home":
     view_all_col, _ = st.columns([1, 3])
     with view_all_col:
         if st.button("View all jobs  →", key="home_view_all_jobs", type="primary", use_container_width=True):
+            st.session_state["all_jobs_search"] = st.session_state.get("home_job_search", "")
+            st.session_state["all_jobs_category"] = st.session_state.get("home_category_filter", "All categories")
+            st.session_state["all_jobs_mode"] = st.session_state.get("home_work_mode_filter", "All modes")
             st.session_state.view = "all_jobs"
             st.rerun()
 
