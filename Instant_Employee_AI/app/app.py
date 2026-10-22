@@ -1092,7 +1092,7 @@ input,textarea,select,button{max-width:100%}
 }
 
 /* Mobile-only hamburger navigation. Desktop/tablet navigation remains unchanged. */
-.stApp .st-key-candidate_top_nav .st-key-menu_col [data-testid="stPopover"]{display:none!important}
+.stApp .st-key-candidate_top_nav .st-key-mobile_menu_shell [data-testid="stPopover"]{display:none!important}
 @media(max-width:760px){
   .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"]{
     display:flex!important;flex-wrap:wrap!important;gap:8px!important;overflow:visible!important;
@@ -1110,25 +1110,25 @@ input,textarea,select,button{max-width:100%}
   .stApp .st-key-candidate_top_nav > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(5){
     order:1!important;display:block!important;flex:1 1 100%!important;width:100%!important;max-width:100%!important;
   }
-  .stApp .st-key-candidate_top_nav .st-key-menu_col [data-testid="stPopover"]{display:block!important;width:42px!important}
-  .stApp .st-key-candidate_top_nav .st-key-menu_col [data-testid="stPopover"]>button{
+  .stApp .st-key-candidate_top_nav .st-key-mobile_menu_shell [data-testid="stPopover"]{display:block!important;width:42px!important}
+  .stApp .st-key-candidate_top_nav .st-key-mobile_menu_shell [data-testid="stPopover"]>button{
     width:42px!important;min-width:42px!important;height:42px!important;border-radius:11px!important;
     font-size:22px!important;line-height:1!important;padding:0!important;
     background:#edf3ff!important;border:1px solid #d4e0f7!important;color:#1d4ed8!important;
   }
-  .stApp .st-key-candidate_top_nav .st-key-menu_col [data-testid="stPopover"]>button p{font-size:0!important}
-  .stApp .st-key-candidate_top_nav .st-key-menu_col [data-testid="stPopover"]>button p:after{
+  .stApp .st-key-candidate_top_nav .st-key-mobile_menu_shell [data-testid="stPopover"]>button p{font-size:0!important}
+  .stApp .st-key-candidate_top_nav .st-key-mobile_menu_shell [data-testid="stPopover"]>button p:after{
     content:"☰";font-size:22px!important;line-height:1!important;
   }
-  .stApp .st-key-candidate_top_nav .st-key-logo_col{min-width:0!important}
-  .stApp .st-key-candidate_top_nav .st-key-logo_col .candidate-nav-brand{font-size:21px!important;white-space:nowrap!important}
-  .stApp .st-key-candidate_top_nav .st-key-logo_col [data-testid="stHorizontalBlock"]{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important}
-  .stApp .st-key-candidate_top_nav .st-key-logo_col [data-testid="column"]:first-child{flex:1 1 auto!important;width:auto!important}
-  .stApp .st-key-candidate_top_nav .st-key-logo_col [data-testid="column"]:nth-child(2){flex:0 0 42px!important;width:42px!important;max-width:42px!important}
-  .stApp .st-key-candidate_top_nav .st-key-nav_search [data-testid="stTextInput"] input{font-size:15px!important;min-height:44px!important}
+  .stApp .st-key-candidate_top_nav .st-key-mobile_logo_shell{min-width:0!important}
+  .stApp .st-key-candidate_top_nav .st-key-mobile_logo_shell .candidate-nav-brand{font-size:21px!important;white-space:nowrap!important}
+  .stApp .st-key-candidate_top_nav .st-key-mobile_logo_shell [data-testid="stHorizontalBlock"]{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important}
+  .stApp .st-key-candidate_top_nav .st-key-mobile_logo_shell [data-testid="column"]:first-child{flex:1 1 auto!important;width:auto!important}
+  .stApp .st-key-candidate_top_nav .st-key-mobile_logo_shell [data-testid="column"]:nth-child(2){flex:0 0 42px!important;width:42px!important;max-width:42px!important}
+  .stApp .st-key-candidate_top_nav .> div[data-testid="column"]:nth-child(5) [data-testid="stTextInput"] input{font-size:15px!important;min-height:44px!important}
 }
 @media(max-width:420px){
-  .stApp .st-key-candidate_top_nav .st-key-logo_col .candidate-nav-brand{font-size:19px!important}
+  .stApp .st-key-candidate_top_nav .st-key-mobile_logo_shell .candidate-nav-brand{font-size:19px!important}
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1290,18 +1290,20 @@ if view == "home":
         with nav_logo:
             logo_col, menu_col = st.columns([5, 1], gap="small", vertical_alignment="center")
             with logo_col:
-                st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
+                with st.container(key="mobile_logo_shell"):
+                    st.markdown("<div class='candidate-nav-brand'><span class='candidate-nav-mark'>✦</span><span><span class='candidate-nav-blue'>Instant</span><span class='candidate-nav-orange'> Employee</span></span></div>", unsafe_allow_html=True)
             with menu_col:
-                with st.popover("☰", help="Open navigation menu", use_container_width=True):
-                    st.markdown("**Instant Employee**")
-                    if st.button("Prepare", key="mobile_nav_prepare", use_container_width=True):
-                        st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
-                    if st.button("Participate", key="mobile_nav_participate", use_container_width=True):
-                        st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
-                    if st.button("Opportunities / Jobs", key="mobile_nav_opportunities", use_container_width=True):
-                        st.session_state.view = "all_jobs"; st.rerun()
-                    if st.button("My Profile", key="mobile_nav_profile", use_container_width=True):
-                        st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
+                with st.container(key="mobile_menu_shell"):
+                        with st.popover("☰", help="Open navigation menu", use_container_width=True):
+                        st.markdown("**Instant Employee**")
+                        if st.button("Prepare", key="mobile_nav_prepare", use_container_width=True):
+                            st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
+                        if st.button("Participate", key="mobile_nav_participate", use_container_width=True):
+                            st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
+                        if st.button("Opportunities / Jobs", key="mobile_nav_opportunities", use_container_width=True):
+                            st.session_state.view = "all_jobs"; st.rerun()
+                        if st.button("My Profile", key="mobile_nav_profile", use_container_width=True):
+                            st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
         with nav_prepare:
             if st.button("Prepare", key="top_nav_prepare", use_container_width=True):
                 st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
