@@ -1235,7 +1235,7 @@ def sync_home_search_from_auth_header():
 
 # Persistent in-app back navigation: keep users inside Instant Employee AI.
 BACK_TARGETS = {
-    "home": "home",
+    "home": "candidate_auth",
     "all_jobs": "home",
     "job_details": "all_jobs",
     "candidate_auth": "home",
@@ -1245,7 +1245,7 @@ BACK_TARGETS = {
     "candidate": "home",
     "employee": "home",
 }
-if view not in ("home", "candidate_auth"):
+if True:
     with st.container(key="global_back_navigation"):
         back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
         with back_col:
