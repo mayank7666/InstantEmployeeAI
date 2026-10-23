@@ -1817,7 +1817,11 @@ elif view == "candidate_dashboard":
     else:
         token = st.session_state.get("candidate_api_token")
         applications, applications_error = get_candidate_applications(token)
-        header_col, logout_col = st.columns([5, 1])
+        back_home_col, header_col, logout_col = st.columns([0.85, 4.15, 1])
+        with back_home_col:
+            if st.button("← Home", key="candidate_profile_back_home", help="Return to the homepage", use_container_width=True):
+                st.session_state.view = "home"
+                st.rerun()
         with header_col:
             st.markdown("## 👋 My Profile")
         with logout_col:
