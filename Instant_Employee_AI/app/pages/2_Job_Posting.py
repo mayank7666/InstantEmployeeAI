@@ -85,9 +85,47 @@ st.markdown("""
     display: none !important;
 }
 
-/* Sidebar */
+/* Match the shared light company workspace used by the Company Dashboard */
+html, body, [class*="css"] {
+    font-family: Inter, system-ui, sans-serif;
+}
+.stApp {
+    background: linear-gradient(135deg, #f8faff, #edf4ff) !important;
+    color: #17233b !important;
+}
+[data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+    background: transparent !important;
+}
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0b1930, #152b4c);
+    background: linear-gradient(180deg, #ffffff, #edf3ff) !important;
+    border-right: 1px solid #dce5f2 !important;
+}
+[data-testid="stSidebar"] * {
+    color: #17233b !important;
+}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] {
+    margin: 7px 0 !important;
+}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a {
+    background: linear-gradient(135deg, #ffffff, #f5f8ff) !important;
+    color: #243653 !important;
+    border: 1px solid #d7e2f4 !important;
+    border-radius: 12px !important;
+    padding: 12px 14px !important;
+    font-weight: 600 !important;
+}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a * {
+    color: #243653 !important;
+    -webkit-text-fill-color: #243653 !important;
+}
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a:hover,
+[data-testid="stSidebar"] div[data-testid="stPageLink"] a[aria-current="page"] {
+    background: #e8f0ff !important;
+    border-color: #b9cefa !important;
+    color: #174b9b !important;
+}
+[data-testid="stSidebar"] hr {
+    border-color: #dce5f2 !important;
 }
 
 /* Banner */
