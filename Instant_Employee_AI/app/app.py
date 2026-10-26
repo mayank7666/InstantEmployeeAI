@@ -1172,6 +1172,32 @@ input,textarea,select,button{max-width:100%}
     -webkit-appearance: none !important;
     appearance: none !important;
 }
+
+/* Hard reset for the candidate header search border, including browser/BaseWeb focus styles */
+.stApp [data-testid="stTextInput"] input,
+.stApp [data-testid="stTextInput"] input:focus,
+.stApp [data-testid="stTextInput"] input:focus-visible,
+.stApp [data-testid="stTextInput"] input:hover,
+.stApp [data-baseweb="input"],
+.stApp [data-baseweb="base-input"],
+.stApp [data-testid="stTextInput"] > div,
+.stApp [data-testid="stTextInput"] > div:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] input,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] input:focus,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] input:focus-visible,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] > div,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] > div:focus-within,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="input"],
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="base-input"] {
+  border-color: #cbd8ef !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: #fff !important;
+  background-color: #fff !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
