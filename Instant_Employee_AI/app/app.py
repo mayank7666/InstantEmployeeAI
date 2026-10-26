@@ -1153,6 +1153,25 @@ input,textarea,select,button{max-width:100%}
 @media(max-width:420px){
   .stApp .st-key-candidate_top_nav .st-key-mobile_logo_shell .candidate-nav-brand{font-size:19px!important}
 }
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] > div,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] > div:focus-within,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="input"],
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="base-input"] {
+    border: 1px solid #cbd8ef !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input:focus,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input:hover {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
