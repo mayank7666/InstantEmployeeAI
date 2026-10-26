@@ -893,6 +893,29 @@ img, svg, video, iframe {
  border-color:#cbd8ef!important;box-shadow:0 0 0 2px rgba(59,102,238,.06)!important;
 }
 
+/* Final search field cleanup: remove dark/black outline in all input states */
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] > div,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-testid="stTextInput"] > div:focus-within,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="input"],
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="base-input"] {
+    border: 1px solid #cbd8ef !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+}
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input:focus,
+.stApp .st-key-auth_landing_nav .st-key-auth_header_search input:hover {
+    border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
 /* Ensure Streamlit BaseWeb input wrappers stay white, not dark */
 .stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="input"],
 .stApp .st-key-auth_landing_nav .st-key-auth_header_search [data-baseweb="base-input"],
@@ -1245,7 +1268,7 @@ BACK_TARGETS = {
     "candidate": "home",
     "employee": "home",
 }
-if True:
+if view != "candidate_auth":
     with st.container(key="global_back_navigation"):
         back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
         with back_col:
