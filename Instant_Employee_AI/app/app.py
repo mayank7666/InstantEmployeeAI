@@ -1325,7 +1325,7 @@ if view != "candidate_auth":
 if view == "candidate_auth":
     with st.container(key="auth_landing_nav"):
         auth_logo, auth_jobs, auth_companies, auth_services, auth_search, auth_login, auth_register, auth_employers = st.columns(
-            [1.45, .45, .72, .62, 1.25, .48, .55, .85], gap="small", vertical_alignment="center", wrap=False
+            [1.35, .42, .62, .55, 1.15, .78, .95, .82], gap="small", vertical_alignment="center", wrap=False
         )
         with auth_logo:
             st.markdown("<div class='auth-brand'><span class='auth-brand-mark'>◀</span><span><b>Instant</b> Employee</span></div>", unsafe_allow_html=True)
@@ -1341,10 +1341,10 @@ if view == "candidate_auth":
         with auth_search:
             st.text_input("Search jobs", placeholder="Search jobs here", key="auth_header_search", label_visibility="collapsed", on_change=sync_home_search_from_auth_header)
         with auth_login:
-            if st.button("Login", key="auth_nav_login", use_container_width=True):
+            if st.button("Candidate Login", key="auth_nav_login", use_container_width=True):
                 st.session_state.candidate_auth_mode = "login"; st.session_state.candidate_auth_mode_selector = "Login"; st.rerun()
         with auth_register:
-            if st.button("Register", key="auth_nav_register", use_container_width=True):
+            if st.button("Candidate Register", key="auth_nav_register", use_container_width=True):
                 st.session_state.candidate_auth_mode = "register"; st.session_state.candidate_auth_mode_selector = "Register"; st.rerun()
         with auth_employers:
             if st.button("For employers  ⌄", key="auth_nav_employers", use_container_width=True):
@@ -1371,7 +1371,8 @@ if view == "home":
                             st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
                         if st.button("Opportunities / Jobs", key="mobile_nav_opportunities", use_container_width=True):
                             st.session_state.view = "all_jobs"; st.rerun()
-                        if st.button("My Profile", key="mobile_nav_profile", use_container_width=True):
+                        mobile_profile_label = "My Profile" if st.session_state.get("candidate_logged_in") else "Login"
+                        if st.button(mobile_profile_label, key="mobile_nav_profile", use_container_width=True):
                             st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"; st.rerun()
         with nav_prepare:
             if st.button("Prepare", key="top_nav_prepare", use_container_width=True):
@@ -1387,8 +1388,12 @@ if view == "home":
         with nav_search:
             st.text_input("Search jobs", placeholder="Search jobs here", key="campus_header_search", label_visibility="collapsed", on_change=sync_home_search_from_header)
         with nav_profile_link:
-            if st.button("My Profile", key="top_nav_my_profile", help="Open your candidate profile", use_container_width=True):
+            profile_button_label = "My Profile" if st.session_state.get("candidate_logged_in") else "Login"
+            profile_button_help = "Open your candidate profile" if st.session_state.get("candidate_logged_in") else "Candidate login or registration"
+            if st.button(profile_button_label, key="top_nav_my_profile", help=profile_button_help, use_container_width=True):
                 st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
+                if not st.session_state.get("candidate_logged_in"):
+                    st.session_state.candidate_auth_mode = "login"
                 st.rerun()
 
 
