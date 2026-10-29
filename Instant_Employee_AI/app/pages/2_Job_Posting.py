@@ -24,6 +24,27 @@ st.set_page_config(
     layout="wide"
 )
 
+# Persistent, softly styled Home shortcut on every company workspace page.
+with st.container(key="company_home_navigation"):
+    st.markdown("""
+    <style>
+    .st-key-company_home_navigation button {
+        background: #edf4ff !important;
+        color: #7892b8 !important;
+        border: 1px solid #dbe7fb !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+    }
+    .st-key-company_home_navigation button:hover {
+        background: #e2edff !important;
+        color: #526f9b !important;
+        border-color: #c9daf5 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    if st.button("⌂ Home", key="company_workspace_home", help="Go directly to the homepage"):
+        st.switch_page("app.py")
+
 JOB_COLUMNS = [
     "Job ID",
     "Job Title",
