@@ -1336,18 +1336,20 @@ if view == "candidate_auth_options":
     with choice_login:
         if st.button("Candidate Login", key="candidate_choice_login", type="primary", use_container_width=True):
             st.session_state.candidate_auth_mode = "login"
-            st.session_state.view = "candidate_auth"
+            st.session_state.compact_candidate_auth = True
+            st.session_state.view = "candidate_auth_simple"
             st.rerun()
     with choice_register:
         if st.button("Candidate Register", key="candidate_choice_register", use_container_width=True):
             st.session_state.candidate_auth_mode = "register"
-            st.session_state.view = "candidate_auth"
+            st.session_state.compact_candidate_auth = True
+            st.session_state.view = "candidate_auth_simple"
             st.rerun()
     if st.button("← Back to home", key="candidate_choice_back"):
         st.session_state.view = "home"
         st.rerun()
 
-elif view == "candidate_auth":
+elif view == "candidate_auth" and not st.session_state.get("compact_candidate_auth", False):
     with st.container(key="auth_landing_nav"):
         auth_logo, auth_jobs, auth_companies, auth_services, auth_search, auth_login, auth_register, auth_employers = st.columns(
             [1.35, .42, .62, .55, 1.15, .78, .95, .82], gap="small", vertical_alignment="center", wrap=False
@@ -1368,11 +1370,13 @@ elif view == "candidate_auth":
         with auth_login:
             if st.button("Candidate Login", key="auth_nav_login", use_container_width=True):
                 st.session_state.candidate_auth_mode = "login"
+                st.session_state.compact_candidate_auth = True
                 st.session_state.view = "candidate_auth_simple"
                 st.rerun()
         with auth_register:
             if st.button("Candidate Register", key="auth_nav_register", use_container_width=True):
                 st.session_state.candidate_auth_mode = "register"
+                st.session_state.compact_candidate_auth = True
                 st.session_state.view = "candidate_auth_simple"
                 st.rerun()
         with auth_employers:
