@@ -1284,7 +1284,8 @@ def get_match_score(job_text, resume_text):
 
 jobs = load_jobs()
 if "view" not in st.session_state:
-    st.session_state.view = "candidate_auth"
+    # First-time visitors should land on the public homepage, not the login screen.
+    st.session_state.view = "home"
 if st.query_params.get("view") == "employee":
     st.session_state.view = "employee"
 
