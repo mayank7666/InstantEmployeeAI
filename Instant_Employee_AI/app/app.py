@@ -1824,7 +1824,7 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
             if submit:
                 if not name.strip() or not email.strip() or not password:
                     st.error("Please fill in every field.")
-                elif not re.match(r"^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", email.strip()):
+                elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email.strip()):
                     st.error("Enter a valid email address.")
                 elif len(password) < 8:
                     st.error("Password must contain at least 8 characters.")
