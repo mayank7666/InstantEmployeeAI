@@ -1393,7 +1393,8 @@ if view == "home":
                         mobile_profile_label = "My Profile" if st.session_state.get("candidate_logged_in") else "Login"
                         if st.button(mobile_profile_label, key="mobile_nav_profile", use_container_width=True):
                             st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth_simple"
-                st.session_state.candidate_auth_mode = "login"; st.rerun()
+                            st.session_state.candidate_auth_mode = "login"
+                            st.rerun()
         with nav_prepare:
             if st.button("Prepare", key="top_nav_prepare", use_container_width=True):
                 st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
