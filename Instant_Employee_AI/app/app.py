@@ -1750,16 +1750,6 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
             "<p style='color:#64748b;margin-top:0'>"+("Create your candidate account to continue." if auth_mode == "Register" else "Login to access your profile and applications.")+"</p></div>",
             unsafe_allow_html=True,
         )
-        mode_login, mode_register = st.columns(2, gap="medium")
-        with mode_login:
-            if st.button("Candidate Login", key="simple_mode_login", type="primary" if auth_mode == "Login" else "secondary", use_container_width=True):
-                st.session_state.candidate_auth_mode = "login"
-                st.rerun()
-        with mode_register:
-            if st.button("Candidate Register", key="simple_mode_register", type="primary" if auth_mode == "Register" else "secondary", use_container_width=True):
-                st.session_state.candidate_auth_mode = "register"
-                st.rerun()
-        st.markdown("<div style='max-width:560px;margin:0 auto'>", unsafe_allow_html=True)
         form_col = st.container()
         feature_col = None
     if auth_mode == "Login":
