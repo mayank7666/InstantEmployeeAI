@@ -1756,22 +1756,46 @@ elif view == "job_details":
             st.rerun()
 
 elif view in ("candidate_auth", "candidate_auth_simple"):
-    # Simple auth route: show only the compact candidate login/register form.
+    # Candidate auth uses the same polished two-panel layout as the company portal.
     auth_mode = "Register" if st.session_state.get("candidate_auth_mode") == "register" else "Login"
-    if view in ("candidate_auth_simple", "candidate_auth"):
-        st.markdown(
-            "<div style='max-width:560px;margin:42px auto 18px;text-align:center'>"
-            "<h2 style='color:#17345f;margin-bottom:6px'>Candidate " + auth_mode + "</h2>"
-            "<p style='color:#64748b;margin-top:0'>"+("Create your candidate account to continue." if auth_mode == "Register" else "Login to access your profile and applications.")+"</p></div>",
-            unsafe_allow_html=True,
-        )
-        _, form_col, _ = st.columns([1, 1.25, 1], gap="small")
-        feature_col = None
-    if auth_mode == "Login":
-        if view in ("candidate_auth_simple", "candidate_auth"):
-            feature_col = None
-            form_col = st.container()
+    st.markdown(
+        "<div class='hero'><div class='kicker'>INSTANT EMPLOYEE · CANDIDATE WORKSPACE</div>"
+        "<h1>Welcome to <span>Instant Employee</span></h1>"
+        "<p>Sign in to manage your profile, explore opportunities and track applications.</p></div>",
+        unsafe_allow_html=True,
+    )
+    tab_login, tab_register = st.columns(2, gap="medium")
+    with tab_login:
+        if st.button("👤 Candidate Login", key="candidate_auth_tab_login", type="primary" if auth_mode == "Login" else "secondary", use_container_width=True):
+            st.session_state.candidate_auth_mode = "login"
+            st.session_state.view = "candidate_auth_simple"
+            st.rerun()
+    with tab_register:
+        if st.button("✨ Candidate Register", key="candidate_auth_tab_register", type="primary" if auth_mode == "Register" else "secondary", use_container_width=True):
+            st.session_state.candidate_auth_mode = "register"
+            st.session_state.view = "candidate_auth_simple"
+            st.rerun()
+    form_col, feature_col = st.columns([1.05, 0.95], gap="large")
+    with feature_col:
+        if auth_mode == "Login":
+            st.markdown(
+                "<div class='candidate-auth-feature'><div class='kicker'>YOUR CAREER, ONE WORKSPACE</div>"
+                "<h2>Find your next opportunity.</h2><p>Everything you need to move from a job search to your next role.</p>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-blue'>♙</span><div><b>Your profile</b><small>Keep your candidate details up to date.</small></div></div>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-green'>▤</span><div><b>Manage resume</b><small>Upload and maintain your resume.</small></div></div>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✓</span><div><b>Track applications</b><small>Follow your applications in one place.</small></div></div></div>",
+                unsafe_allow_html=True,
+            )
         else:
+            st.markdown(
+                "<div class='candidate-auth-feature'><div class='kicker'>GET STARTED</div>"
+                "<h2>Build your candidate profile.</h2><p>Create one account to organize your job search.</p>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-blue'>♙</span><div><b>Set up your profile</b><small>Share your experience and skills.</small></div></div>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-green'>▤</span><div><b>Add your resume</b><small>Keep your resume ready for applications.</small></div></div>"
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✓</span><div><b>Apply with confidence</b><small>Track your job applications in one place.</small></div></div></div>",
+                unsafe_allow_html=True,
+            )
+    if auth_mode == "Login":
             feature_col, form_col = st.columns([1.12, 0.88], gap="small")
             with feature_col:
                 st.markdown(
@@ -1815,11 +1839,6 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
                         st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "home"
                         st.rerun()
     else:
-        if view in ("candidate_auth_simple", "candidate_auth"):
-            _, form_col, _ = st.columns([1, 1.25, 1], gap="small")
-            feature_col = None
-        else:
-            form_col, feature_col = st.columns([1.05, 0.95], gap="large")
         with form_col:
             st.markdown(
                 "<div class='candidate-auth-heading'><div class='candidate-auth-icon candidate-signup-icon'>✦</div><div>"
