@@ -1292,6 +1292,14 @@ if st.query_params.get("view") == "employee":
     st.session_state.view = "employee"
     del st.query_params["view"]
 
+# Keep candidate Login and Register inside the same app route.
+# Legacy candidate_auth is normalized to the compact form; the old large
+# benefits-panel login landing page is no longer reachable.
+if st.session_state.get("view") == "candidate_auth":
+    st.session_state.view = "candidate_auth_simple"
+if st.session_state.get("compact_candidate_auth") and st.session_state.get("view") == "candidate_auth":
+    st.session_state.view = "candidate_auth_simple"
+
 # Sidebar navigation removed: candidate navigation is now in the top bar and footer.
 view = st.session_state.view
 
@@ -1750,7 +1758,7 @@ elif view == "job_details":
 elif view in ("candidate_auth", "candidate_auth_simple"):
     # Simple auth route: show only the compact candidate login/register form.
     auth_mode = "Register" if st.session_state.get("candidate_auth_mode") == "register" else "Login"
-    if view == "candidate_auth_simple":
+    if view in ("candidate_auth_simple", "candidate_auth"):
         st.markdown(
             "<div style='max-width:560px;margin:42px auto 18px;text-align:center'>"
             "<h2 style='color:#17345f;margin-bottom:6px'>Candidate " + auth_mode + "</h2>"
@@ -1760,7 +1768,7 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
         form_col = st.container()
         feature_col = None
     if auth_mode == "Login":
-        if view == "candidate_auth_simple":
+        if view in ("candidate_auth_simple", "candidate_auth"):
             feature_col = None
             form_col = st.container()
         else:
@@ -1807,7 +1815,7 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
                         st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "home"
                         st.rerun()
     else:
-        if view == "candidate_auth_simple":
+        if view in ("candidate_auth_simple", "candidate_auth"):
             form_col = st.container()
             feature_col = None
         else:
