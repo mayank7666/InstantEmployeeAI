@@ -14,6 +14,27 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.matching_engine import match_candidates
 
 st.set_page_config(page_title="Instant Employee | Company Dashboard", page_icon="✦", layout="wide")
+
+# Persistent, softly styled Home shortcut on every company workspace page.
+with st.container(key="company_home_navigation"):
+    st.markdown("""
+    <style>
+    .st-key-company_home_navigation button {
+        background: #edf4ff !important;
+        color: #7892b8 !important;
+        border: 1px solid #dbe7fb !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+    }
+    .st-key-company_home_navigation button:hover {
+        background: #e2edff !important;
+        color: #526f9b !important;
+        border-color: #c9daf5 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    if st.button("⌂ Home", key="company_workspace_home", help="Go directly to the homepage"):
+        st.switch_page("app.py")
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 JOBS_FILE = DATA / "jobs.csv"
