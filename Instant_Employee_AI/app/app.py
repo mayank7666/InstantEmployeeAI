@@ -1762,20 +1762,24 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
         st.markdown("<div style='max-width:560px;margin:0 auto'>", unsafe_allow_html=True)
         form_col = st.container()
         feature_col = None
-    elif auth_mode == "Login":
-        feature_col, form_col = st.columns([1.12, 0.88], gap="small")
-        with feature_col:
-            st.markdown(
-                "<div class='naukri-login-benefits'><h3>New to Instant Employee?</h3>"
-                "<div class='benefit-row'><span>✓</span>One click apply using your candidate profile.</div>"
-                "<div class='benefit-row'><span>✓</span>Get relevant job recommendations.</div>"
-                "<div class='benefit-row'><span>✓</span>Showcase your profile to top companies.</div>"
-                "<div class='benefit-row'><span>✓</span>Track application status in one place.</div>"
-                "<div class='benefit-illustration'>✦ <b>Build your career with verified opportunities</b></div></div>",
-                unsafe_allow_html=True,
-            )
-            if st.button("Register for Free", key="auth_benefits_register", use_container_width=False):
-                st.session_state.candidate_auth_mode = "register"; st.rerun()
+    if auth_mode == "Login":
+        if view == "candidate_auth_simple":
+            feature_col = None
+            form_col = st.container()
+        else:
+            feature_col, form_col = st.columns([1.12, 0.88], gap="small")
+            with feature_col:
+                st.markdown(
+                    "<div class='naukri-login-benefits'><h3>New to Instant Employee?</h3>"
+                    "<div class='benefit-row'><span>✓</span>One click apply using your candidate profile.</div>"
+                    "<div class='benefit-row'><span>✓</span>Get relevant job recommendations.</div>"
+                    "<div class='benefit-row'><span>✓</span>Showcase your profile to top companies.</div>"
+                    "<div class='benefit-row'><span>✓</span>Track application status in one place.</div>"
+                    "<div class='benefit-illustration'>✦ <b>Build your career with verified opportunities</b></div></div>",
+                    unsafe_allow_html=True,
+                )
+                if st.button("Register for Free", key="auth_benefits_register", use_container_width=False):
+                    st.session_state.candidate_auth_mode = "register"; st.rerun()
         with form_col:
             st.markdown(
                 "<div class='candidate-auth-heading'><div class='candidate-auth-icon'>♙</div><div>"
