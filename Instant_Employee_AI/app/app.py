@@ -1765,7 +1765,7 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
             "<p style='color:#64748b;margin-top:0'>"+("Create your candidate account to continue." if auth_mode == "Register" else "Login to access your profile and applications.")+"</p></div>",
             unsafe_allow_html=True,
         )
-        form_col = st.container()
+        _, form_col, _ = st.columns([1, 1.25, 1], gap="small")
         feature_col = None
     if auth_mode == "Login":
         if view in ("candidate_auth_simple", "candidate_auth"):
@@ -1816,7 +1816,7 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
                         st.rerun()
     else:
         if view in ("candidate_auth_simple", "candidate_auth"):
-            form_col = st.container()
+            _, form_col, _ = st.columns([1, 1.25, 1], gap="small")
             feature_col = None
         else:
             form_col, feature_col = st.columns([1.05, 0.95], gap="large")
