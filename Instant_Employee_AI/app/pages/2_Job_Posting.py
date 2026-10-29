@@ -43,6 +43,9 @@ with st.container(key="company_home_navigation"):
     </style>
     """, unsafe_allow_html=True)
     if st.button("⌂ Home", key="company_workspace_home", help="Go directly to the homepage"):
+        # Reset the shared app route before returning; otherwise the entrypoint
+        # can retain view="employee" and immediately send the user back here.
+        st.session_state.view = "home"
         st.switch_page("app.py")
 
 JOB_COLUMNS = [
