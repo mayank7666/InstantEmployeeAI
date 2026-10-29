@@ -1364,7 +1364,8 @@ elif view == "candidate_auth":
             st.text_input("Search jobs", placeholder="Search jobs here", key="auth_header_search", label_visibility="collapsed", on_change=sync_home_search_from_auth_header)
         with auth_login:
             if st.button("Candidate Login", key="auth_nav_login", use_container_width=True):
-                st.session_state.candidate_auth_mode = "login"; st.session_state.candidate_auth_mode_selector = "Login"; st.rerun()
+                st.session_state.view = "candidate_auth_options"
+                st.rerun()
         with auth_register:
             if st.button("Candidate Register", key="auth_nav_register", use_container_width=True):
                 st.session_state.candidate_auth_mode = "register"; st.session_state.candidate_auth_mode_selector = "Register"; st.rerun()
