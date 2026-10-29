@@ -1756,7 +1756,7 @@ elif view == "job_details":
             st.rerun()
 
 elif view in ("candidate_auth", "candidate_auth_simple"):
-    # Candidate auth uses the same polished two-panel layout as the company portal.
+    # Candidate sign-in and registration use the same two-column portal layout.
     auth_mode = "Register" if st.session_state.get("candidate_auth_mode") == "register" else "Login"
     st.markdown(
         "<div class='hero'><div class='kicker'>INSTANT EMPLOYEE · CANDIDATE WORKSPACE</div>"
@@ -1764,18 +1764,88 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
         "<p>Sign in to manage your profile, explore opportunities and track applications.</p></div>",
         unsafe_allow_html=True,
     )
-    tab_login, tab_register = st.columns(2, gap="medium")
-    with tab_login:
+
+    candidate_login_tab, candidate_register_tab = st.columns(2, gap="small")
+    with candidate_login_tab:
         if st.button("👤 Candidate Login", key="candidate_auth_tab_login", type="primary" if auth_mode == "Login" else "secondary", use_container_width=True):
             st.session_state.candidate_auth_mode = "login"
             st.session_state.view = "candidate_auth_simple"
             st.rerun()
-    with tab_register:
+    with candidate_register_tab:
         if st.button("✨ Candidate Register", key="candidate_auth_tab_register", type="primary" if auth_mode == "Register" else "secondary", use_container_width=True):
             st.session_state.candidate_auth_mode = "register"
             st.session_state.view = "candidate_auth_simple"
             st.rerun()
+
     form_col, feature_col = st.columns([1.05, 0.95], gap="large")
+    with form_col:
+        if auth_mode == "Login":
+            st.markdown(
+                "<div class='candidate-auth-heading'><div class='candidate-auth-icon'>♙</div><div>"
+                "<h3>Candidate Login</h3><p>Access your candidate profile.</p></div></div>",
+                unsafe_allow_html=True,
+            )
+            with st.form("candidate_login"):
+                email = st.text_input("Email address", key="candidate_login_email", placeholder="Enter your email address")
+                password = st.text_input("Password", type="password", key="candidate_login_password", placeholder="Enter your password")
+                submit = st.form_submit_button("Login to Dashboard  →", type="primary", use_container_width=True)
+            st.markdown("<div class='candidate-auth-note'>♢ Your profile and applications stay together in one place.</div>", unsafe_allow_html=True)
+            if submit:
+                if not email.strip() or not password:
+                    st.error("Enter your email and password.")
+                else:
+                    token_data, error = api_request(
+                        "POST", "/auth/login",
+                        data={"username": email.strip().lower(), "password": password},
+                        headers={"Content-Type": "application/x-www-form-urlencoded"},
+                    )
+                    if error:
+                        st.error(error)
+                    else:
+                        error = set_candidate_session(token_data["access_token"])
+                        if error:
+                            st.error(error)
+                        else:
+                            st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "home"
+                            st.rerun()
+        else:
+            st.markdown(
+                "<div class='candidate-auth-heading'><div class='candidate-auth-icon candidate-signup-icon'>✦</div><div>"
+                "<h3>Candidate Register</h3><p>Create your candidate account.</p></div></div>",
+                unsafe_allow_html=True,
+            )
+            with st.form("candidate_signup"):
+                name = st.text_input("Full name", key="candidate_signup_name", placeholder="Enter your full name")
+                email = st.text_input("Email address", key="candidate_signup_email", placeholder="Enter your email address")
+                password = st.text_input("Create password", type="password", key="candidate_signup_password", placeholder="At least 8 characters")
+                confirm = st.text_input("Confirm password", type="password", key="candidate_signup_confirm", placeholder="Re-enter your password")
+                submit = st.form_submit_button("Create Candidate Account  →", type="primary", use_container_width=True)
+            st.markdown("<div class='candidate-auth-note'>♢ Use a strong password and keep your account details private.</div>", unsafe_allow_html=True)
+            if submit:
+                if not name.strip() or not email.strip() or not password:
+                    st.error("Please fill in every field.")
+                elif not re.match(r"^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", email.strip()):
+                    st.error("Enter a valid email address.")
+                elif len(password) < 8:
+                    st.error("Password must contain at least 8 characters.")
+                elif password != confirm:
+                    st.error("Passwords do not match.")
+                else:
+                    token_data, error = api_request(
+                        "POST", "/auth/signup",
+                        json={"email": email.strip().lower(), "password": password, "role": "talent", "full_name": name.strip()},
+                    )
+                    if error:
+                        st.error(error)
+                    else:
+                        error = set_candidate_session(token_data["access_token"])
+                        if error:
+                            st.error(error)
+                        else:
+                            st.success("Candidate account created successfully.")
+                            st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"
+                            st.rerun()
+
     with feature_col:
         if auth_mode == "Login":
             st.markdown(
@@ -1783,7 +1853,8 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
                 "<h2>Find your next opportunity.</h2><p>Everything you need to move from a job search to your next role.</p>"
                 "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-blue'>♙</span><div><b>Your profile</b><small>Keep your candidate details up to date.</small></div></div>"
                 "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-green'>▤</span><div><b>Manage resume</b><small>Upload and maintain your resume.</small></div></div>"
-                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✓</span><div><b>Track applications</b><small>Follow your applications in one place.</small></div></div></div>",
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✓</span><div><b>Track applications</b><small>Follow your applications in one place.</small></div></div>"
+                "<div class='candidate-feature-foot'>✦ Your job search, organized</div></div>",
                 unsafe_allow_html=True,
             )
         else:
@@ -1792,105 +1863,13 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
                 "<h2>Build your candidate profile.</h2><p>Create one account to organize your job search.</p>"
                 "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-blue'>♙</span><div><b>Set up your profile</b><small>Share your experience and skills.</small></div></div>"
                 "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-green'>▤</span><div><b>Add your resume</b><small>Keep your resume ready for applications.</small></div></div>"
-                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✓</span><div><b>Apply with confidence</b><small>Track your job applications in one place.</small></div></div></div>",
+                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✓</span><div><b>Apply with confidence</b><small>Track your job applications in one place.</small></div></div>"
+                "<div class='candidate-feature-foot'>✦ One account for your job search</div></div>",
                 unsafe_allow_html=True,
             )
-    if auth_mode == "Login":
-            feature_col, form_col = st.columns([1.12, 0.88], gap="small")
-            with feature_col:
-                st.markdown(
-                    "<div class='naukri-login-benefits'><h3>New to Instant Employee?</h3>"
-                    "<div class='benefit-row'><span>✓</span>One click apply using your candidate profile.</div>"
-                    "<div class='benefit-row'><span>✓</span>Get relevant job recommendations.</div>"
-                    "<div class='benefit-row'><span>✓</span>Showcase your profile to top companies.</div>"
-                    "<div class='benefit-row'><span>✓</span>Track application status in one place.</div>"
-                    "<div class='benefit-illustration'>✦ <b>Build your career with verified opportunities</b></div></div>",
-                    unsafe_allow_html=True,
-                )
-                if st.button("Register for Free", key="auth_benefits_register", use_container_width=False):
-                    st.session_state.candidate_auth_mode = "register"; st.rerun()
-        with form_col:
-            st.markdown(
-                "<div class='candidate-auth-heading'><div class='candidate-auth-icon'>♙</div><div>"
-                "<h3>Login</h3></div></div>",
-                unsafe_allow_html=True,
-            )
-            with st.form("candidate_login"):
-                email = st.text_input("Email address", key="candidate_login_email", placeholder="Enter your email address")
-                password = st.text_input("Password", type="password", key="candidate_login_password", placeholder="Enter your password")
-                submit = st.form_submit_button("Login to Dashboard  →", type="primary", use_container_width=True)
-            st.markdown("<div class='candidate-auth-note'>♢  Your candidate account keeps your profile and applications in one place.</div>", unsafe_allow_html=True)
-        if submit:
-            if not email.strip() or not password:
-                st.error("Enter your email and password.")
-            else:
-                token_data, error = api_request(
-                    "POST", "/auth/login",
-                    data={"username": email.strip().lower(), "password": password},
-                    headers={"Content-Type": "application/x-www-form-urlencoded"},
-                )
-                if error:
-                    st.error(error)
-                else:
-                    error = set_candidate_session(token_data["access_token"])
-                    if error:
-                        st.error(error)
-                    else:
-                        st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "home"
-                        st.rerun()
-    else:
-        with form_col:
-            st.markdown(
-                "<div class='candidate-auth-heading'><div class='candidate-auth-icon candidate-signup-icon'>✦</div><div>"
-                "<h3>Create your account</h3><p>Set up your candidate profile to start exploring opportunities.</p></div></div>",
-                unsafe_allow_html=True,
-            )
-            with st.form("candidate_signup"):
-                name = st.text_input("Full name", key="candidate_signup_name", placeholder="Enter your full name")
-                email = st.text_input("Email address", key="candidate_signup_email", placeholder="Enter your email address")
-                password = st.text_input("Create password", type="password", key="candidate_signup_password", placeholder="At least 8 characters")
-                confirm = st.text_input("Confirm password", type="password", key="candidate_signup_confirm", placeholder="Re-enter your password")
-                submit = st.form_submit_button("✦  Create candidate account", type="primary", use_container_width=True)
-            st.markdown("<div class='candidate-auth-note'>♢  Use a strong password and keep your account details private.</div>", unsafe_allow_html=True)
-        if feature_col is not None:
-            with feature_col:
-                st.markdown(
-                    "<div class='candidate-auth-feature'><div class='kicker'>A PROFILE THAT WORKS FOR YOU</div>"
-                "<h2>Showcase your <span>potential.</span></h2>"
-                "<p>A simple candidate workspace designed to keep your job search organized.</p>"
-                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-blue'>♙</span><div><b>Your profile</b><small>Keep your candidate details up to date.</small></div></div>"
-                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-green'>▤</span><div><b>Your resume</b><small>Upload and manage your resume from My Profile.</small></div></div>"
-                "<div class='candidate-feature-row'><span class='candidate-feature-icon cfi-amber'>✓</span><div><b>Your applications</b><small>Keep track of the roles you apply for.</small></div></div>"
-                "<div class='candidate-feature-foot'>✦  One account for your job search</div></div>",
-                unsafe_allow_html=True,
-            )
-        if submit:
-            if not name.strip() or not email.strip() or not password:
-                st.error("Please fill in every field.")
-            elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email.strip()):
-                st.error("Enter a valid email address.")
-            elif len(password) < 8:
-                st.error("Password must contain at least 8 characters.")
-            elif password != confirm:
-                st.error("Passwords do not match.")
-            else:
-                token_data, error = api_request(
-                    "POST", "/auth/signup",
-                    json={"email": email.strip().lower(), "password": password, "role": "talent", "full_name": name.strip()},
-                )
-                if error:
-                    st.error(error)
-                else:
-                    error = set_candidate_session(token_data["access_token"])
-                    if error:
-                        st.error(error)
-                    else:
-                        st.success("Candidate account created successfully.")
-                        st.session_state.view = "apply_resume" if st.session_state.get("apply_job_index") is not None else "candidate_dashboard"
-                        st.rerun()
     if st.button("← Back to home", key="candidate_auth_back_home"):
-        st.session_state.view = "home"; st.rerun()
-
+        st.session_state.view = "home"
+        st.rerun()
 
 elif view == "apply_resume":
     if not st.session_state.get("candidate_logged_in"):
