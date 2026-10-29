@@ -1333,30 +1333,8 @@ if view != "candidate_auth":
                 st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
                 st.rerun()
 
-if view == "candidate_auth_options":
-    st.markdown(
-        "<div style='max-width:760px;margin:70px auto 18px;padding:30px;border:1px solid #dce6fb;border-radius:22px;background:rgba(255,255,255,.92);text-align:center'>"
-        "<h2 style='color:#17345f;margin:0 0 8px'>Candidate Account</h2>"
-        "<p style='color:#637795;margin:0'>Choose an option to continue.</p></div>",
-        unsafe_allow_html=True,
-    )
-    choice_login, choice_register = st.columns(2, gap="medium")
-    with choice_login:
-        if st.button("Candidate Login", key="candidate_choice_login", type="primary", use_container_width=True):
-            st.session_state.candidate_auth_mode = "login"
-            st.session_state.compact_candidate_auth = True
-            st.session_state.view = "candidate_auth_simple"
-            st.rerun()
-    with choice_register:
-        if st.button("Candidate Register", key="candidate_choice_register", use_container_width=True):
-            st.session_state.candidate_auth_mode = "register"
-            st.session_state.compact_candidate_auth = True
-            st.session_state.view = "candidate_auth_simple"
-            st.rerun()
-    if st.button("← Back to home", key="candidate_choice_back"):
-        st.session_state.view = "home"
-        st.rerun()
-
+if False:
+    pass
 elif view == "candidate_auth" and not st.session_state.get("compact_candidate_auth", False):
     with st.container(key="auth_landing_nav"):
         auth_logo, auth_jobs, auth_companies, auth_services, auth_search, auth_login, auth_register, auth_employers = st.columns(
@@ -1414,7 +1392,8 @@ if view == "home":
                             st.session_state.view = "all_jobs"; st.rerun()
                         mobile_profile_label = "My Profile" if st.session_state.get("candidate_logged_in") else "Login"
                         if st.button(mobile_profile_label, key="mobile_nav_profile", use_container_width=True):
-                            st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth_options"; st.rerun()
+                            st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth_simple"
+                st.session_state.candidate_auth_mode = "login"; st.rerun()
         with nav_prepare:
             if st.button("Prepare", key="top_nav_prepare", use_container_width=True):
                 st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth"
@@ -1432,7 +1411,8 @@ if view == "home":
             profile_button_label = "My Profile" if st.session_state.get("candidate_logged_in") else "Login"
             profile_button_help = "Open your candidate profile" if st.session_state.get("candidate_logged_in") else "Candidate login or registration"
             if st.button(profile_button_label, key="top_nav_my_profile", help=profile_button_help, use_container_width=True):
-                st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth_options"
+                st.session_state.view = "candidate_dashboard" if st.session_state.get("candidate_logged_in") else "candidate_auth_simple"
+                st.session_state.candidate_auth_mode = "login"
                 st.rerun()
 
 
