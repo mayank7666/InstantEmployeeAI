@@ -1452,32 +1452,6 @@ if view == "home":
     </div>
     """, unsafe_allow_html=True)
 
-    role_company, role_talent = st.columns(2, gap="large")
-    with role_company:
-        st.markdown('<div class="role-card"><div class="role-icon">▦</div><h3>For Companies</h3><p>Post roles, review applications, discover candidates and manage your hiring workflow from one workspace.</p></div>', unsafe_allow_html=True)
-        if st.button("Company Dashboard  →", key="landing_company_login", type="primary", use_container_width=True):
-            st.session_state.view = "employee"
-            st.rerun()
-    with role_talent:
-        st.markdown('<div class="role-card talent"><div class="role-icon">♙</div><h3>For Talent</h3><p>Create your profile, upload your resume, find suitable jobs and track your applications.</p></div>', unsafe_allow_html=True)
-        if st.button("Find Jobs  →", key="landing_find_jobs", use_container_width=True):
-            st.session_state.view = "candidate_auth" if not st.session_state.get("candidate_logged_in") else "candidate_dashboard"
-            st.rerun()
-
-    st.markdown("### Everything you need to hire and grow")
-    feature_columns = st.columns(4, gap="medium")
-    landing_features = [
-        ("✦", "AI-assisted matching", "Find relevant jobs and candidates using skills and role details."),
-        ("▤", "Simple job posting", "Create roles with requirements, budgets and work modes."),
-        ("☏", "Clear workflows", "Keep profiles, applications and hiring progress organized."),
-        ("♧", "Built for trust", "Separate company and talent access with authenticated workflows."),
-    ]
-    for feature_col, (symbol, title, description) in zip(feature_columns, landing_features):
-        with feature_col:
-            st.markdown(f'<div class="feature-card"><div style="font-size:23px;color:#1764ff">{symbol}</div><b>{title}</b><small>{description}</small></div>', unsafe_allow_html=True)
-
-    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-
     # Functional homepage job search and filters.
     st.markdown("### Find your next role")
     search_col, dept_col, mode_col = st.columns([2, 1, 1])
@@ -1587,6 +1561,32 @@ if view == "home":
             st.session_state["all_jobs_mode"] = st.session_state.get("home_work_mode_filter", "All modes")
             st.session_state.view = "all_jobs"
             st.rerun()
+
+    role_company, role_talent = st.columns(2, gap="large")
+    with role_company:
+        st.markdown('<div class="role-card"><div class="role-icon">▦</div><h3>For Companies</h3><p>Post roles, review applications, discover candidates and manage your hiring workflow from one workspace.</p></div>', unsafe_allow_html=True)
+        if st.button("Company Dashboard  →", key="landing_company_login", type="primary", use_container_width=True):
+            st.session_state.view = "employee"
+            st.rerun()
+    with role_talent:
+        st.markdown('<div class="role-card talent"><div class="role-icon">♙</div><h3>For Talent</h3><p>Create your profile, upload your resume, find suitable jobs and track your applications.</p></div>', unsafe_allow_html=True)
+        if st.button("Find Jobs  →", key="landing_find_jobs", use_container_width=True):
+            st.session_state.view = "candidate_auth" if not st.session_state.get("candidate_logged_in") else "candidate_dashboard"
+            st.rerun()
+
+    st.markdown("### Everything you need to hire and grow")
+    feature_columns = st.columns(4, gap="medium")
+    landing_features = [
+        ("✦", "AI-assisted matching", "Find relevant jobs and candidates using skills and role details."),
+        ("▤", "Simple job posting", "Create roles with requirements, budgets and work modes."),
+        ("☏", "Clear workflows", "Keep profiles, applications and hiring progress organized."),
+        ("♧", "Built for trust", "Separate company and talent access with authenticated workflows."),
+    ]
+    for feature_col, (symbol, title, description) in zip(feature_columns, landing_features):
+        with feature_col:
+            st.markdown(f'<div class="feature-card"><div style="font-size:23px;color:#1764ff">{symbol}</div><b>{title}</b><small>{description}</small></div>', unsafe_allow_html=True)
+
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
     st.markdown("### How it works")
     columns = st.columns(4)
