@@ -1856,8 +1856,7 @@ elif view in ("candidate_auth", "candidate_auth_simple"):
                         st.rerun()
     if st.button("← Back to home", key="candidate_auth_back_home"):
         st.session_state.view = "home"; st.rerun()
-    if view == "candidate_auth_simple":
-        st.markdown("</div>", unsafe_allow_html=True)
+
 
 elif view == "apply_resume":
     if not st.session_state.get("candidate_logged_in"):
