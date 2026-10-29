@@ -1325,9 +1325,29 @@ BACK_TARGETS = {
     "candidate": "home",
     "employee": "home",
 }
-if view != "candidate_auth":
-    with st.container(key="global_back_navigation"):
-        back_col, _back_spacer = st.columns([0.16, 4.84], gap="small")
+with st.container(key="global_back_navigation"):
+    st.markdown("""
+    <style>
+    .st-key-global_back_navigation button {
+        background: #edf4ff !important;
+        color: #7892b8 !important;
+        border: 1px solid #dbe7fb !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+    }
+    .st-key-global_back_navigation button:hover {
+        background: #e2edff !important;
+        color: #526f9b !important;
+        border-color: #c9daf5 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    home_col, back_col, _back_spacer = st.columns([0.52, 0.20, 4.28], gap="small")
+    with home_col:
+        if st.button("⌂ Home", key="global_home_navigation", help="Go directly to the homepage", use_container_width=True):
+            st.session_state.view = "home"
+            st.rerun()
+    if view != "candidate_auth":
         with back_col:
             if st.button("←", key="global_page_back", help="Back to the previous section", use_container_width=True):
                 st.session_state.view = BACK_TARGETS.get(st.session_state.get("view", "home"), "home")
