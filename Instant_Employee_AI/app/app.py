@@ -1287,7 +1287,10 @@ if "view" not in st.session_state:
     # First-time visitors should land on the public homepage, not the login screen.
     st.session_state.view = "home"
 if st.query_params.get("view") == "employee":
+    # Consume the URL route once; leaving it in the URL would force the employee
+    # page on every rerun and override candidate login/register navigation.
     st.session_state.view = "employee"
+    del st.query_params["view"]
 
 # Sidebar navigation removed: candidate navigation is now in the top bar and footer.
 view = st.session_state.view
